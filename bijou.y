@@ -35,14 +35,15 @@ import (
 %token <node> KW_RECORD
 %token <node> KW_FUNCTION
 
+%token	'{' '}'
+%token	'(' ')'
+%token	'[' ']'
+
 %token	"'"
 %token	'"'
 %token	','
 %token	':'
-
-%token	'(' ')'
-%token	'[' ']'
-%token	'{' '}'
+%token	'#'
 
 %right	'='
 
@@ -53,7 +54,6 @@ import (
 %type <node> program
 
 %type <node> expr
-%type <node> paren_expr
 
 %type <node> arithmetic_expr
 
@@ -75,6 +75,7 @@ import (
 
 %type <node> function_expr
 %type <node> lambda_expr
+%type <node> lambda_expr1
 %type <node> function_signature
 %type <node> function_body
 
@@ -82,10 +83,6 @@ import (
 
 %type <node> stmt
 %type <node> stmt_list
-
-%type <node> __wsp__
-%type <node> __expr__
-%type <node> __ident__
 
 %start start
 
@@ -105,10 +102,6 @@ start: /* Initial rule */
 program: /* Entire program (top) */
 	stmt_list
 
-__wsp__: /* Nothing or some EOLs */
-	/* empty */ { $$ = nil }
-|	__wsp__ EOL { $$ = nil }
-
 expr: /* Abribtrary expressions */
 	arithmetic_expr
 |	assign_expr
@@ -119,21 +112,12 @@ expr: /* Abribtrary expressions */
 |	lambda_expr
 |	function_expr
 |	application_expr
-|	paren_expr { fmt.Println("PAREN") }
 |	IDENT
 |	SYMBOL
 |	STRING
 |	INTEGER
 |	FLOAT
-
-paren_expr: /* ( expr ) */
-	'(' __expr__ ')' { $$ = $2 }
-
-__expr__: /* Expression surrounded by optional whitespace */
-	__wsp__ expr __wsp__ { $$ = $2 }
-
-__ident__: /* Identifier surrounded by optional whitespace */
-	__wsp__ IDENT __wsp__ { $$ = $2 }
+|	'(' expr ')' { $$ = $2 }
 
 
 /**
@@ -162,7 +146,7 @@ assign_expr: /* Pattern matching assignment */
  */
 
 import_expr: /* import('module') */
-	KW_IMPORT '(' __expr__ ')' {
+	KW_IMPORT '(' expr ')' {
 		$$ = &ast.ImportNode{$3}
 	}
 
@@ -172,7 +156,7 @@ import_expr: /* import('module') */
  */
 
 record_expr: /* record Thing{a, b, c} */
-	KW_RECORD __ident__ '(' field_list ')' {
+	KW_RECORD IDENT '(' field_list ')' {
 		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $4)
 	}
 
@@ -186,10 +170,10 @@ field_list: /* Record field declaration */
 	}
 
 field: /* Record field declaration */
-	__ident__ {
+	IDENT {
 		$$ = ast.NewRecordFieldNode($1.(*ast.IdentifierNode).Name, nil)
 	}
-|	__ident__ ':' __expr__ {
+|	IDENT ':' expr {
 		$$ = ast.NewRecordFieldNode($1.(*ast.IdentifierNode).Name, $3)
 	}
 
@@ -199,7 +183,7 @@ field: /* Record field declaration */
  */
 
 vector_expr: /* Vector literals */
-	'[' __wsp__ ']' {
+	'[' ']' {
 		$$ = ast.NewVectorNode()
 	}
 |	'[' argument_list ']' {
@@ -207,10 +191,10 @@ vector_expr: /* Vector literals */
 	}
 
 argument_list: /* Function/vector arguments */
-	__expr__ {
+	expr {
 		$$ = ast.NewVectorNode($1)
 	}
-|	argument_list ',' __expr__ {
+|	argument_list ',' expr {
 		$1.(*ast.VectorNode).Append($3)
 		$$ = $1
 	}
@@ -221,7 +205,7 @@ argument_list: /* Function/vector arguments */
  */
 
 map_expr: /* Map literals */
-	'{' __wsp__ '}' {
+	'{' '}' {
 		$$ = ast.NewMapNode()
 	}
 |	'{' key_value_pair_list '}' {
@@ -230,7 +214,7 @@ map_expr: /* Map literals */
 
 key_value_pair: /* a: b */
 	shorthand_symbol_key
-|	__expr__ ':' __expr__ {
+|	expr ':' expr {
 		$$ = &ast.MapKeyNode{$1, $3}
 	}
 
@@ -244,7 +228,7 @@ key_value_pair_list: /* Map keys a: b, c: d */
 	}
 
 shorthand_symbol_key: /* Bare identifier for key-value pair */
-	__expr__ {
+	expr {
 		if ident, ok := $1.(*ast.IdentifierNode); ok == false {
 			 // only identifiers are allowed here
 			return 1
@@ -262,11 +246,14 @@ shorthand_symbol_key: /* Bare identifier for key-value pair */
  */
 
 function_expr: /* function name(a) { } */
-	KW_FUNCTION __ident__ lambda_expr {
+	KW_FUNCTION IDENT lambda_expr1 {
 		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $3)
 	}
 
 lambda_expr: /* Anonymous functions */
+	'#' lambda_expr1 { $$ = $2 }
+
+lambda_expr1:
 	function_signature function_body {
 		$$ = ast.NewFunctionNode(
 			$1.(*ast.VectorNode),
@@ -275,11 +262,10 @@ lambda_expr: /* Anonymous functions */
 	}
 
 function_signature: /* Parameter list declaration (a, b, c) */
-	'(' __wsp__ ')' {
+	'(' ')' {
 		$$ = ast.NewVectorNode()
 	}
 |	'(' argument_list ')' {
-		fmt.Println("SIG")
 		$$ = $2
 	}
 
@@ -294,7 +280,7 @@ function_body: /* Function implementation */
  */
 
 application_expr: /* something(a, b, c) */
-	IDENT '(' __wsp__ ')' {
+	IDENT '(' ')' {
 		$$ = nil
 	}
 |	IDENT '(' argument_list ')' {
@@ -307,7 +293,8 @@ application_expr: /* something(a, b, c) */
  */
 
 stmt: /* Valid program line */
-	/* empty */ { $$ = nil } | expr
+	/* empty */ { $$ = nil }
+|	expr
 
 stmt_list: /* Sequence of expressions */
 	stmt {
@@ -403,15 +390,30 @@ type BijouLex struct {
 	filename string
 	// The current line number reached by the lexer
 	line int
-	// The last scanned token
-	token int
+	// The state stack
+	stack []int
+	// Th current state
+	state int
 	// The input source to analyze
 	source io.RuneScanner
 	// The result AST, put here by BijouParse
 	tree ast.ASTNode
 	// The last error encountered
 	error string
+	// The previously read starting rune of the token
+	c rune
 }
+
+const (
+	// Block where statements are executed
+	ST_BLOCK = iota
+	// Inside parentheses
+	ST_PAREN
+	// Inside a Map
+	ST_MAP
+	// Inside a Vector
+	ST_VECTOR
+)
 
 // Return a lexer for source, used by BijouParse
 func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
@@ -419,48 +421,96 @@ func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
 		filename: filename,
 		line:     1,
 		source:   source,
+		stack:    make([]int, 0),
+		state:    ST_BLOCK,
 	}
 }
 
 // Return the next lexical token from the input stream
 func (lexer *BijouLex) Lex(lval *BijouSymType) int {
+	token := eof
 Loop:
 	for {
+		lexer.skipWhiteSpace()
 		c := lexer.peek()
 
 		switch {
 		case (c == '\n'):
-			lexer.token = lexer.scanEOL(lval)
-		case unicode.Is(space, c):
-			lexer.skipWhiteSpace()
+			token = lexer.scanEOL(lval)
+			if lexer.state == ST_BLOCK {
+				break
+			}
 			continue Loop
 		case (c == ';'):
 			lexer.skipComment()
 			continue Loop
 		case (c == ':'):
-			lexer.token = int(lexer.read())
+			token = int(lexer.read())
 			if unicode.Is(word, lexer.peek()) {
-				lexer.token = lexer.scanSymbol(lval)
+				token = lexer.scanSymbol(lval)
 			}
 		case (c == '"'):
-			lexer.token = lexer.scanDoubleString(lval)
+			token = lexer.scanDoubleString(lval)
 		case (c == '\''):
-			lexer.token = lexer.scanSingleString(lval)
+			token = lexer.scanSingleString(lval)
 		case unicode.Is(digit, c):
-			lexer.token = lexer.scanNumber(lval)
+			token = lexer.scanNumber(lval)
 		case unicode.Is(word, c):
-			lexer.token = lexer.scanWord(lval)
+			token = lexer.scanWord(lval)
 		default:
-			lexer.token = int(lexer.read())
+			token = int(lexer.read())
 		}
+
+		lexer.checkState(c)
+
 		break
 	}
-	return lexer.token
+
+	return token
 }
 
 // Handle a syntax error at parse time
 func (lexer *BijouLex) Error(err string) {
 	lexer.error = err
+}
+
+func (lexer *BijouLex) checkState(c rune) {
+	switch c {
+	case '(':
+		lexer.pushState(ST_PAREN)
+	case ')':
+		lexer.popState(ST_PAREN)
+	case '[':
+		lexer.pushState(ST_VECTOR)
+	case ']':
+		lexer.popState(ST_VECTOR)
+	case '{':
+		switch lexer.c {
+		case ')':
+			lexer.pushState(ST_BLOCK)
+		default:
+			lexer.pushState(ST_MAP)
+		}
+	case '}':
+		if lexer.state == ST_BLOCK || lexer.state == ST_MAP {
+			lexer.popState(lexer.state)
+		}
+	}
+
+	lexer.c = c
+}
+
+// Push the current state to the stack and switch to newState
+func (lexer *BijouLex) pushState(newState int) {
+	lexer.stack = append(lexer.stack, lexer.state)
+	lexer.state = newState
+}
+
+func (lexer *BijouLex) popState(oldState int) {
+	if lexer.state == oldState && len(lexer.stack) > 0 {
+		lexer.state = lexer.stack[len(lexer.stack)-1]
+		lexer.stack = lexer.stack[:len(lexer.stack)-1]
+	}
 }
 
 // Get the next character in the source, without consuming it
@@ -666,10 +716,10 @@ func (lexer *BijouLex) scanSymbol(lval *BijouSymType) int {
 
 func main() {
 	source := `
-	{Withdrawal, sort_by_score} = import('records/activity')
+	{Withdrawal, sort_by_score} = import('records/activity');
 
 	; Internal record used to handle the combine algorithm
-	record State(activities: [], withdrawals: [], fees: [])
+	record State(activities: [], withdrawals: [], fees: []);
 
 	; Return a vector of activities w/ withdrawals & ATM fees merged.
 	; @param [Vector] activities
@@ -678,7 +728,7 @@ func main() {
 	;   activities with withdrawals and ATM fees combined
 	function combine_fees(activities) {
 	  result = reduce(
-	    ({activities, withdrawals, fees}) {
+	    #({activities, withdrawals, fees}) {
 	    },
 	    activities,
 	    State()

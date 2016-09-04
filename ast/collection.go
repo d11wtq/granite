@@ -7,7 +7,7 @@ type Collection struct {
 
 // Create a new collection with elements.
 func NewCollection(elements ...ASTNode) *Collection {
-	return &Collection{make([]ASTNode, 0)}
+	return &Collection{elements}
 }
 
 // Append the given element to this collection.

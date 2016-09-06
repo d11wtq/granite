@@ -19,6 +19,9 @@ type ASTVisitor interface {
 	VisitImportNode(node *ImportNode)
 	VisitVectorNode(node *VectorNode)
 	VisitMapNode(node *MapNode)
-	VisitRecordNode(node *RecordNode)
-	VisitFunctionNode(node *FunctionNode)
+	VisitRecordPrototypeNode(node *RecordPrototypeNode)
+	VisitFunctionPrototypeNode(node *FunctionPrototypeNode)
+	VisitInvocationNode(node *InvocationNode)
+	VisitMemberLookupNode(node *MemberLookupNode)
+	VisitMatchNode(node *MatchNode)
 }

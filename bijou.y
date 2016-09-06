@@ -22,18 +22,20 @@ import (
 	node ast.ASTNode
 }
 
-%token <node> EOL
-%token <node> IDENT
-%token <node> INTEGER
-%token <node> FLOAT
-%token <node> SYMBOL
-%token <node> STRING
-%token <node> UNTERMINATED_STRING
-%token <node> INVALID_NUMBER
+%token	<node> EOL
+%token	<node> IDENT
+%token	<node> INTEGER
+%token	<node> FLOAT
+%token	<node> SYMBOL
+%token	<node> STRING
+%token	<node> UNTERMINATED_STRING
+%token	<node> INVALID_NUMBER
 
-%token <node> KW_IMPORT
-%token <node> KW_RECORD
-%token <node> KW_FUNCTION
+%token	<node> KW_IMPORT
+%token	<node> KW_RECORD
+%token	<node> KW_FUNCTION
+%token	<node> KW_MATCH
+%token	<node> KW_WHEN
 
 %token	'{' '}'
 %token	'(' ')'
@@ -45,44 +47,54 @@ import (
 %token	':'
 %token	'#'
 
+%right	'.'
 %right	'='
 
 %left	'+' '-'
 %left	'*' '/'
 
-%type <node> start
-%type <node> program
+%type	<node> start
+%type	<node> program
 
-%type <node> expr
+%type	<node> expr
 
-%type <node> arithmetic_expr
+%type	<node> arithmetic_expr
 
-%type <node> assign_expr
+%type	<node> assign_expr
 
-%type <node> import_expr
+%type	<node> import_expr
 
-%type <node> record_expr
-%type <node> field_list
-%type <node> field
+%type	<node> defrecord
+%type	<node> field_list
+%type	<node> field
 
-%type <node> vector_expr
-%type <node> argument_list
+%type	<node> vector_literal_expr
+%type	<node> argument_list
 
-%type <node> map_expr
-%type <node> key_value_pair
-%type <node> key_value_pair_list
-%type <node> shorthand_symbol_key
+%type	<node> map_literal_expr
+%type	<node> key_value_pair
+%type	<node> key_value_pair_list
+%type	<node> shorthand_symbol_key
 
-%type <node> function_expr
-%type <node> lambda_expr
-%type <node> lambda_expr1
-%type <node> function_signature
-%type <node> function_body
+%type	<node> record_literal_expr
 
-%type <node> application_expr
+%type	<node> shorthand_member_lookup
 
-%type <node> stmt
-%type <node> stmt_list
+%type	<node> deffunction
+%type	<node> lambda_expr
+%type	<node> lambda_expr1
+%type	<node> function_signature
+%type	<node> function_body
+
+%type	<node> match_expr
+%type	<node> match_clauses_body
+%type	<node> match_clause
+%type	<node> match_clause_list
+
+%type	<node> invocation_expr
+
+%type	<node> stmt
+%type	<node> stmt_list
 
 %start start
 
@@ -106,12 +118,15 @@ expr: /* Abribtrary expressions */
 	arithmetic_expr
 |	assign_expr
 |	import_expr
-|	record_expr
-|	vector_expr
-|	map_expr
+|	deffunction
+|	defrecord
+|	vector_literal_expr
+|	map_literal_expr
+|	record_literal_expr
 |	lambda_expr
-|	function_expr
-|	application_expr
+|	invocation_expr
+|	shorthand_member_lookup
+|	match_expr
 |	IDENT
 |	SYMBOL
 |	STRING
@@ -147,7 +162,7 @@ assign_expr: /* Pattern matching assignment */
 
 import_expr: /* import('module') */
 	KW_IMPORT '(' expr ')' {
-		$$ = &ast.ImportNode{$3}
+		$$ = ast.NewImportNode($3)
 	}
 
 
@@ -155,17 +170,17 @@ import_expr: /* import('module') */
  * Records.
  */
 
-record_expr: /* record Thing{a, b, c} */
-	KW_RECORD IDENT '(' field_list ')' {
+defrecord: /* record Thing{a, b, c} */
+	KW_RECORD IDENT '{' field_list '}' {
 		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $4)
 	}
 
 field_list: /* Record field declaration */
 	field {
-		$$ = ast.NewRecordNode($1.(*ast.RecordFieldNode))
+		$$ = ast.NewRecordPrototypeNode($1.(*ast.RecordFieldNode))
 	}
 |	field_list ',' field {
-		$1.(*ast.RecordNode).Append($3.(*ast.RecordFieldNode))
+		$1.(*ast.RecordPrototypeNode).Append($3.(*ast.RecordFieldNode))
 		$$ = $1
 	}
 
@@ -177,12 +192,49 @@ field: /* Record field declaration */
 		$$ = ast.NewRecordFieldNode($1.(*ast.IdentifierNode).Name, $3)
 	}
 
+record_literal_expr: /* Record{a, b, c} */
+	IDENT '{' '}'
+
+
+/**
+ * Functions & Lambdas.
+ */
+
+deffunction: /* function name(a) { } */
+	KW_FUNCTION IDENT lambda_expr1 {
+		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $3)
+	}
+
+lambda_expr: /* Anonymous functions */
+	'#' lambda_expr1 { $$ = $2 }
+
+lambda_expr1:
+	function_signature function_body {
+		$$ = ast.NewFunctionPrototypeNode(
+			$1.(*ast.VectorNode),
+			$2.(*ast.Collection),
+		)
+	}
+
+function_signature: /* Parameter list declaration (a, b, c) */
+	'(' ')' {
+		$$ = ast.NewVectorNode()
+	}
+|	'(' argument_list ')' {
+		$$ = $2
+	}
+
+function_body: /* Function implementation */
+	'{' stmt_list '}' {
+		$$ = $2
+	}
+
 
 /**
  * Vectors.
  */
 
-vector_expr: /* Vector literals */
+vector_literal_expr: /* Vector literals */
 	'[' ']' {
 		$$ = ast.NewVectorNode()
 	}
@@ -204,7 +256,7 @@ argument_list: /* Function/vector arguments */
  * Maps.
  */
 
-map_expr: /* Map literals */
+map_literal_expr: /* Map literals */
 	'{' '}' {
 		$$ = ast.NewMapNode()
 	}
@@ -235,43 +287,9 @@ shorthand_symbol_key: /* Bare identifier for key-value pair */
 		} else {
 			$$ = &ast.MapKeyNode{
 				ident,
-				&ast.SymbolNode{ident.Name},
+				ast.NewSymbolNode(ident.Name),
 			}
 		}
-	}
-
-
-/**
- * Functions.
- */
-
-function_expr: /* function name(a) { } */
-	KW_FUNCTION IDENT lambda_expr1 {
-		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $3)
-	}
-
-lambda_expr: /* Anonymous functions */
-	'#' lambda_expr1 { $$ = $2 }
-
-lambda_expr1:
-	function_signature function_body {
-		$$ = ast.NewFunctionNode(
-			$1.(*ast.VectorNode),
-			$2.(*ast.Collection),
-		)
-	}
-
-function_signature: /* Parameter list declaration (a, b, c) */
-	'(' ')' {
-		$$ = ast.NewVectorNode()
-	}
-|	'(' argument_list ')' {
-		$$ = $2
-	}
-
-function_body: /* Function implementation */
-	'{' stmt_list '}' {
-		$$ = $2
 	}
 
 
@@ -279,12 +297,52 @@ function_body: /* Function implementation */
  * Invocation.
  */
 
-application_expr: /* something(a, b, c) */
+invocation_expr: /* something(a, b, c) */
 	IDENT '(' ')' {
-		$$ = nil
+		$$ = ast.NewInvocationNode($1, ast.NewVectorNode())
 	}
 |	IDENT '(' argument_list ')' {
-		$$ = nil
+		$$ = ast.NewInvocationNode($1, $3.(*ast.VectorNode))
+	}
+
+
+/**
+ * Data accessors.
+ */
+
+shorthand_member_lookup: /* a.b */
+	expr '.' IDENT {
+		$$ = ast.NewMemberLookupNode(
+			$1,
+			ast.NewSymbolNode($3.(*ast.IdentifierNode).Name),
+		)
+	}
+
+
+/**
+ * Match contruct.
+ */
+
+match_expr: /* match(x) { ... } */
+	KW_MATCH '(' expr ')' match_clauses_body {
+		$$ = ast.NewMatchNode($3, $5.(*ast.MatchCaseListNode).Cases)
+	}
+
+match_clauses_body: /* { when x: this when y: that } */
+	'{' match_clause_list '}' { $$ = $2 }
+
+match_clause: /* when x: this */
+	KW_WHEN expr ':' stmt_list {
+		$$ = ast.NewMatchCaseNode($2, $4)
+	}
+
+match_clause_list: /* when x: this when y: that */
+	match_clause {
+		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+	}
+|	match_clause_list match_clause {
+		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
+		$$ = $1
 	}
 
 
@@ -400,8 +458,8 @@ type BijouLex struct {
 	tree ast.ASTNode
 	// The last error encountered
 	error string
-	// The previously read starting rune of the token
-	c rune
+	// The previously read token
+	token int
 }
 
 const (
@@ -413,6 +471,10 @@ const (
 	ST_MAP
 	// Inside a Vector
 	ST_VECTOR
+	// Introducing a match (x) { }
+	ST_MATCH_START
+	// Cases for a match
+	ST_MATCH_BODY
 )
 
 // Return a lexer for source, used by BijouParse
@@ -461,11 +523,10 @@ Loop:
 			token = int(lexer.read())
 		}
 
-		lexer.checkState(c)
-
 		break
 	}
 
+	lexer.checkState(token)
 	return token
 }
 
@@ -474,8 +535,18 @@ func (lexer *BijouLex) Error(err string) {
 	lexer.error = err
 }
 
-func (lexer *BijouLex) checkState(c rune) {
-	switch c {
+func (lexer *BijouLex) checkState(token int) {
+	switch token {
+	case KW_MATCH:
+		lexer.pushState(ST_MATCH_START)
+	case KW_WHEN:
+		if lexer.state == ST_BLOCK {
+			lexer.popState(ST_BLOCK)
+		}
+
+		if lexer.state == ST_MATCH_BODY {
+			lexer.pushState(ST_BLOCK)
+		}
 	case '(':
 		lexer.pushState(ST_PAREN)
 	case ')':
@@ -485,19 +556,29 @@ func (lexer *BijouLex) checkState(c rune) {
 	case ']':
 		lexer.popState(ST_VECTOR)
 	case '{':
-		switch lexer.c {
-		case ')':
-			lexer.pushState(ST_BLOCK)
+		switch lexer.state {
+		case ST_MATCH_START:
+			lexer.pushState(ST_MATCH_BODY)
 		default:
-			lexer.pushState(ST_MAP)
+			switch lexer.token {
+			case ')':
+				lexer.pushState(ST_BLOCK)
+			default:
+				lexer.pushState(ST_MAP)
+			}
 		}
 	case '}':
-		if lexer.state == ST_BLOCK || lexer.state == ST_MAP {
+		switch lexer.state {
+		case ST_BLOCK, ST_MAP:
 			lexer.popState(lexer.state)
+		}
+		if lexer.state == ST_MATCH_BODY {
+			lexer.popState(ST_MATCH_BODY)
+			lexer.popState(ST_MATCH_START)
 		}
 	}
 
-	lexer.c = c
+	lexer.token = token
 }
 
 // Push the current state to the stack and switch to newState
@@ -702,6 +783,10 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 		tok = KW_RECORD
 	case "function":
 		tok = KW_FUNCTION
+	case "match":
+		tok = KW_MATCH
+	case "when":
+		tok = KW_WHEN
 	}
 	lval.node = &ast.IdentifierNode{str}
 	return tok
@@ -710,16 +795,20 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 // Scan a :symbol
 func (lexer *BijouLex) scanSymbol(lval *BijouSymType) int {
 	str := lexer.readWord()
-	lval.node = &ast.SymbolNode{str}
+	lval.node = ast.NewSymbolNode(str)
 	return SYMBOL
 }
 
 func main() {
 	source := `
-	{Withdrawal, sort_by_score} = import('records/activity');
+	{Withdrawal, sort_by_score} = import('records/activity')
 
 	; Internal record used to handle the combine algorithm
-	record State(activities: [], withdrawals: [], fees: []);
+	record State{
+	  activities: [],
+	  withdrawals: [],
+	  fees: []
+	}
 
 	; Return a vector of activities w/ withdrawals & ATM fees merged.
 	; @param [Vector] activities
@@ -728,10 +817,16 @@ func main() {
 	;   activities with withdrawals and ATM fees combined
 	function combine_fees(activities) {
 	  result = reduce(
-	    #({activities, withdrawals, fees}) {
+	    #(state = {activities, withdrawals, fees}, activity) {
+	      match (activity.tags) {
+	        when ['non_bank_atm_operator_fee']:
+		  push(fees, activity)
+		when ['non_bank_atm_withdrawal']:
+		  push(withdrawals, activity)
+	      }
 	    },
 	    activities,
-	    State()
+	    State{}
 	  )
 
 	  process_result(result)

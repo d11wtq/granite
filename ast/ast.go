@@ -24,4 +24,6 @@ type ASTVisitor interface {
 	VisitInvocationNode(node *InvocationNode)
 	VisitMemberLookupNode(node *MemberLookupNode)
 	VisitMatchNode(node *MatchNode)
+	VisitSpreadNode(node *SpreadNode)
+	VisitRecordNode(node *RecordNode)
 }

@@ -1,17 +1,13 @@
 package ast
 
-// Records
+// Record definitions
 type RecordPrototypeNode struct {
-	Fields []*RecordFieldNode
+	Fields []*KeyValueNode
 }
 
 // Return a new RecordPrototypeNode with fields.
-func NewRecordPrototypeNode(fields ...*RecordFieldNode) *RecordPrototypeNode {
+func NewRecordPrototypeNode(fields []*KeyValueNode) *RecordPrototypeNode {
 	return &RecordPrototypeNode{fields}
-}
-
-func (node *RecordPrototypeNode) Append(field *RecordFieldNode) {
-	node.Fields = append(node.Fields, field)
 }
 
 func (node *RecordPrototypeNode) Accept(visitor ASTVisitor) {

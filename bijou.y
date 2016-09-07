@@ -31,6 +31,9 @@ import (
 %token	<node> UNTERMINATED_STRING
 %token	<node> INVALID_NUMBER
 
+%token	<node> OP_SPREAD
+%token	<node> OP_INVALID
+
 %token	<node> KW_IMPORT
 %token	<node> KW_RECORD
 %token	<node> KW_FUNCTION
@@ -55,43 +58,43 @@ import (
 
 %type	<node> start
 %type	<node> program
-
 %type	<node> expr
+%type	<node> arithmetic
 
-%type	<node> arithmetic_expr
-
-%type	<node> assign_expr
-
-%type	<node> import_expr
+%type	<node> assignment
+%type	<node> import
 
 %type	<node> defrecord
 %type	<node> field_list
+%type	<node> field_key
 %type	<node> field
 
-%type	<node> vector_literal_expr
+%type	<node> vector_literal
+%type	<node> argument
+%type	<node> spread_argument
 %type	<node> argument_list
 
-%type	<node> map_literal_expr
+%type	<node> map_literal
 %type	<node> key_value_pair
 %type	<node> key_value_pair_list
 %type	<node> shorthand_symbol_key
 
-%type	<node> record_literal_expr
-
+%type	<node> record_literal
 %type	<node> shorthand_member_lookup
 
 %type	<node> deffunction
-%type	<node> lambda_expr
-%type	<node> lambda_expr1
+%type	<node> lambda
+%type	<node> lambda1
 %type	<node> function_signature
 %type	<node> function_body
 
-%type	<node> match_expr
+%type	<node> match_construct
 %type	<node> match_clauses_body
 %type	<node> match_clause
 %type	<node> match_clause_list
 
-%type	<node> invocation_expr
+%type	<node> invocation
+%type	<node> invokable
 
 %type	<node> stmt
 %type	<node> stmt_list
@@ -115,31 +118,33 @@ program: /* Entire program (top) */
 	stmt_list
 
 expr: /* Abribtrary expressions */
-	arithmetic_expr
-|	assign_expr
-|	import_expr
+	arithmetic
+|	assignment
+|	import
 |	deffunction
 |	defrecord
-|	vector_literal_expr
-|	map_literal_expr
-|	record_literal_expr
-|	lambda_expr
-|	invocation_expr
-|	shorthand_member_lookup
-|	match_expr
-|	IDENT
+|	invokable
 |	SYMBOL
 |	STRING
 |	INTEGER
 |	FLOAT
-|	'(' expr ')' { $$ = $2 }
 
+invokable: /* Things that can be invoked as functions */
+	IDENT
+|	lambda
+|	vector_literal
+|	map_literal
+|	record_literal
+|	invocation
+|	shorthand_member_lookup
+|	match_construct
+|	'(' expr ')' { $$ = $2 }
 
 /**
  * Mathematical.
  */
 
-arithmetic_expr: /* Addition, subtraction, multiplication, division */
+arithmetic: /* Addition, subtraction, multiplication, division */
 	expr '*' expr { $$ = ast.NewArithmeticNode('*', $1, $3) }
 |	expr '/' expr { $$ = ast.NewArithmeticNode('/', $1, $3) }
 |	expr '+' expr { $$ = ast.NewArithmeticNode('+', $1, $3) }
@@ -150,7 +155,7 @@ arithmetic_expr: /* Addition, subtraction, multiplication, division */
  * Pattern matching.
  */
 
-assign_expr: /* Pattern matching assignment */
+assignment: /* Pattern matching assignment */
 	expr '=' expr {
 		$$ = ast.NewAssignNode($1, $3)
 	}
@@ -160,7 +165,7 @@ assign_expr: /* Pattern matching assignment */
  * Imports.
  */
 
-import_expr: /* import('module') */
+import: /* import('module') */
 	KW_IMPORT '(' expr ')' {
 		$$ = ast.NewImportNode($3)
 	}
@@ -172,28 +177,42 @@ import_expr: /* import('module') */
 
 defrecord: /* record Thing{a, b, c} */
 	KW_RECORD IDENT '{' field_list '}' {
-		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $4)
+		$$ = ast.NewDefNode(
+			$2.(*ast.IdentifierNode),
+			ast.NewRecordPrototypeNode($4.(*ast.MapNode).KeyValues),
+		)
 	}
 
 field_list: /* Record field declaration */
 	field {
-		$$ = ast.NewRecordPrototypeNode($1.(*ast.RecordFieldNode))
+		$$ = ast.NewMapNode($1.(*ast.KeyValueNode))
 	}
 |	field_list ',' field {
-		$1.(*ast.RecordPrototypeNode).Append($3.(*ast.RecordFieldNode))
+		$1.(*ast.MapNode).Append($3.(*ast.KeyValueNode))
 		$$ = $1
 	}
 
+field_key: /* Record field identifiers */
+	SYMBOL | IDENT
+
 field: /* Record field declaration */
-	IDENT {
-		$$ = ast.NewRecordFieldNode($1.(*ast.IdentifierNode).Name, nil)
+	field_key {
+		$$ = ast.NewKeyValueNode($1, nil)
 	}
-|	IDENT ':' expr {
-		$$ = ast.NewRecordFieldNode($1.(*ast.IdentifierNode).Name, $3)
+|	field_key ':' expr {
+		$$ = ast.NewKeyValueNode($1, $3)
+	}
+|	spread_argument {
+		$$ = ast.NewKeyValueNode($1, nil)
 	}
 
-record_literal_expr: /* Record{a, b, c} */
-	IDENT '{' '}'
+record_literal: /* Record{a, b, c} */
+	IDENT '{' '}' {
+		$$ = ast.NewRecordNode($1, ast.NewMapNode().KeyValues)
+	}
+|	IDENT '{' field_list '}' {
+		$$ = ast.NewRecordNode($1, $3.(*ast.MapNode).KeyValues)
+	}
 
 
 /**
@@ -201,14 +220,14 @@ record_literal_expr: /* Record{a, b, c} */
  */
 
 deffunction: /* function name(a) { } */
-	KW_FUNCTION IDENT lambda_expr1 {
+	KW_FUNCTION IDENT lambda1 {
 		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $3)
 	}
 
-lambda_expr: /* Anonymous functions */
-	'#' lambda_expr1 { $$ = $2 }
+lambda: /* Anonymous functions */
+	'#' lambda1 { $$ = $2 }
 
-lambda_expr1:
+lambda1:
 	function_signature function_body {
 		$$ = ast.NewFunctionPrototypeNode(
 			$1.(*ast.VectorNode),
@@ -234,7 +253,7 @@ function_body: /* Function implementation */
  * Vectors.
  */
 
-vector_literal_expr: /* Vector literals */
+vector_literal: /* Vector literals */
 	'[' ']' {
 		$$ = ast.NewVectorNode()
 	}
@@ -242,11 +261,22 @@ vector_literal_expr: /* Vector literals */
 		$$ = $2
 	}
 
+spread_argument: /* ...x */
+	OP_SPREAD {
+		$$ = ast.NewSpreadNode(nil)
+	}
+|	OP_SPREAD expr {
+		$$ = ast.NewSpreadNode($2)
+	}
+
+argument: /* Valid function/vector arg */
+	spread_argument | expr
+
 argument_list: /* Function/vector arguments */
-	expr {
+	argument {
 		$$ = ast.NewVectorNode($1)
 	}
-|	argument_list ',' expr {
+|	argument_list ',' argument {
 		$1.(*ast.VectorNode).Append($3)
 		$$ = $1
 	}
@@ -256,7 +286,7 @@ argument_list: /* Function/vector arguments */
  * Maps.
  */
 
-map_literal_expr: /* Map literals */
+map_literal: /* Map literals */
 	'{' '}' {
 		$$ = ast.NewMapNode()
 	}
@@ -267,29 +297,25 @@ map_literal_expr: /* Map literals */
 key_value_pair: /* a: b */
 	shorthand_symbol_key
 |	expr ':' expr {
-		$$ = &ast.MapKeyNode{$1, $3}
+		$$ = ast.NewKeyValueNode($1, $3)
+	}
+|	spread_argument {
+		$$ = ast.NewKeyValueNode($1, nil)
 	}
 
 key_value_pair_list: /* Map keys a: b, c: d */
 	key_value_pair {
-		$$ = ast.NewMapNode($1.(*ast.MapKeyNode))
+		$$ = ast.NewMapNode($1.(*ast.KeyValueNode))
 	}
 |	key_value_pair_list ',' key_value_pair {
-		$1.(*ast.MapNode).Append($3.(*ast.MapKeyNode))
+		$1.(*ast.MapNode).Append($3.(*ast.KeyValueNode))
 		$$ = $1
 	}
 
 shorthand_symbol_key: /* Bare identifier for key-value pair */
-	expr {
-		if ident, ok := $1.(*ast.IdentifierNode); ok == false {
-			 // only identifiers are allowed here
-			return 1
-		} else {
-			$$ = &ast.MapKeyNode{
-				ident,
-				ast.NewSymbolNode(ident.Name),
-			}
-		}
+	IDENT {
+		id := $1.(*ast.IdentifierNode)
+		$$ = ast.NewKeyValueNode(id, ast.NewSymbolNode(id.Name))
 	}
 
 
@@ -297,11 +323,11 @@ shorthand_symbol_key: /* Bare identifier for key-value pair */
  * Invocation.
  */
 
-invocation_expr: /* something(a, b, c) */
-	IDENT '(' ')' {
+invocation: /* something(a, b, c) */
+	invokable '(' ')' {
 		$$ = ast.NewInvocationNode($1, ast.NewVectorNode())
 	}
-|	IDENT '(' argument_list ')' {
+|	invokable '(' argument_list ')' {
 		$$ = ast.NewInvocationNode($1, $3.(*ast.VectorNode))
 	}
 
@@ -323,7 +349,7 @@ shorthand_member_lookup: /* a.b */
  * Match contruct.
  */
 
-match_expr: /* match(x) { ... } */
+match_construct: /* match(x) { ... } */
 	KW_MATCH '(' expr ')' match_clauses_body {
 		$$ = ast.NewMatchNode($3, $5.(*ast.MatchCaseListNode).Cases)
 	}
@@ -511,6 +537,8 @@ Loop:
 			if unicode.Is(word, lexer.peek()) {
 				token = lexer.scanSymbol(lval)
 			}
+		case (c == '.'):
+			token = lexer.scanDots(lval)
 		case (c == '"'):
 			token = lexer.scanDoubleString(lval)
 		case (c == '\''):
@@ -799,9 +827,31 @@ func (lexer *BijouLex) scanSymbol(lval *BijouSymType) int {
 	return SYMBOL
 }
 
+func (lexer *BijouLex) scanDots(lval *BijouSymType) int {
+	if lexer.read() != '.' {
+		panic("Attempted to read non-'.' as '.'")
+	}
+
+	var c rune
+
+	c = lexer.read()
+	if c != '.' {
+		lexer.backup(c)
+		return int('.')
+	}
+
+	c = lexer.read()
+	if c != '.' {
+		lexer.backup(c)
+		return OP_INVALID
+	}
+
+	return OP_SPREAD
+}
+
 func main() {
 	source := `
-	{Withdrawal, sort_by_score} = import('records/activity')
+	{Withdrawal, sort_by_score, ...} = import('records/activity')
 
 	; Internal record used to handle the combine algorithm
 	record State{
@@ -819,10 +869,10 @@ func main() {
 	  result = reduce(
 	    #(state = {activities, withdrawals, fees}, activity) {
 	      match (activity.tags) {
-	        when ['non_bank_atm_operator_fee']:
-		  push(fees, activity)
-		when ['non_bank_atm_withdrawal']:
-		  push(withdrawals, activity)
+		when [..., 'non_bank_atm_withdrawal', ...]:
+                  State{...state, :withdrawals: push(withdrawals, activity)}
+	        when [..., 'non_bank_atm_operator_fee', ...]:
+                  State{...state, :fees: push(fees, activity)}
 	      }
 	    },
 	    activities,

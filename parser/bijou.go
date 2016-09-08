@@ -9,13 +9,10 @@ import __yyfmt__ "fmt"
 //line bijou.y:6
 import (
 	"./ast"
-	"fmt"
 	"io"
-	"strconv"
-	"unicode"
 )
 
-//line bijou.y:20
+//line bijou.y:17
 type BijouSymType struct {
 	yys  int
 	node ast.ASTNode
@@ -86,66 +83,9 @@ const BijouEofCode = 1
 const BijouErrCode = 2
 const BijouInitialStackSize = 16
 
-//line bijou.y:419
+//line bijou.y:416
 
 /* Program code */
-
-// value of the EOF indicator used by BijouParse
-const eof = 0
-
-// Whitespace characters (in order)
-// New lines are significant, so excluded
-var space = &unicode.RangeTable{
-	R16: []unicode.Range16{
-		{'\t', '\t', 1},
-		{'\r', '\r', 1},
-		{' ', ' ', 1},
-	},
-}
-
-// Numeric characters (in order)
-var digit = &unicode.RangeTable{
-	R16: []unicode.Range16{
-		{'0', '9', 1},
-	},
-}
-
-// Keyword/identifier characters (in order)
-var word = &unicode.RangeTable{
-	R16: []unicode.Range16{
-		{'0', '9', 1},
-		{'A', 'Z', 1},
-		{'_', '_', 1},
-		{'a', 'z', 1},
-	},
-}
-
-// Meaningful syntax error
-type BijouParseError struct {
-	// The lexer at the time the error occurred
-	lexer *BijouLex
-}
-
-func (e *BijouParseError) Error() string {
-	return fmt.Sprintf(
-		"%s in %s line %d",
-		e.errorMessage(),
-		e.currentFile(),
-		e.currentLine(),
-	)
-}
-
-func (e *BijouParseError) errorMessage() string {
-	return e.lexer.error
-}
-
-func (e *BijouParseError) currentFile() string {
-	return e.lexer.filename
-}
-
-func (e *BijouParseError) currentLine() int {
-	return e.lexer.line
-}
 
 // Parse source and return the AST, or nil on error
 func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
@@ -157,393 +97,6 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 	}
 
 	return nil, lexer.tree
-}
-
-// Lexer for reading Bijou code
-type BijouLex struct {
-	// The path to the file being scanned
-	filename string
-	// The current line number reached by the lexer
-	line int
-	// The state stack
-	stack []int
-	// Th current state
-	state int
-	// The input source to analyze
-	source io.RuneScanner
-	// The result AST, put here by BijouParse
-	tree ast.ASTNode
-	// The last error encountered
-	error string
-	// The previously read token
-	token int
-}
-
-const (
-	// Block where statements are executed
-	ST_BLOCK = iota
-	// Inside parentheses
-	ST_PAREN
-	// Inside a Map
-	ST_MAP
-	// Inside a Vector
-	ST_VECTOR
-	// Introducing a match (x) { }
-	ST_MATCH_START
-	// Cases for a match
-	ST_MATCH_BODY
-)
-
-// Return a lexer for source, used by BijouParse
-func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
-	return &BijouLex{
-		filename: filename,
-		line:     1,
-		source:   source,
-		stack:    make([]int, 0),
-		state:    ST_BLOCK,
-	}
-}
-
-// Return the next lexical token from the input stream
-func (lexer *BijouLex) Lex(lval *BijouSymType) int {
-	token := eof
-Loop:
-	for {
-		lexer.skipWhiteSpace()
-		c := lexer.peek()
-
-		switch {
-		case (c == '\n'):
-			token = lexer.scanEOL(lval)
-			if lexer.state == ST_BLOCK {
-				break
-			}
-			continue Loop
-		case (c == ';'):
-			lexer.skipComment()
-			continue Loop
-		case (c == ':'):
-			token = int(lexer.read())
-			if unicode.Is(word, lexer.peek()) {
-				token = lexer.scanSymbol(lval)
-			}
-		case (c == '.'):
-			token = lexer.scanDots(lval)
-		case (c == '"'):
-			token = lexer.scanDoubleString(lval)
-		case (c == '\''):
-			token = lexer.scanSingleString(lval)
-		case unicode.Is(digit, c):
-			token = lexer.scanNumber(lval)
-		case unicode.Is(word, c):
-			token = lexer.scanWord(lval)
-		default:
-			token = int(lexer.read())
-		}
-
-		break
-	}
-
-	lexer.checkState(token)
-	return token
-}
-
-// Handle a syntax error at parse time
-func (lexer *BijouLex) Error(err string) {
-	lexer.error = err
-}
-
-func (lexer *BijouLex) checkState(token int) {
-	switch token {
-	case KW_MATCH:
-		lexer.pushState(ST_MATCH_START)
-	case KW_WHEN, KW_ELSE:
-		if lexer.state == ST_BLOCK {
-			lexer.popState(ST_BLOCK)
-		}
-
-		if lexer.state == ST_MATCH_BODY {
-			lexer.pushState(ST_BLOCK)
-		}
-	case '(':
-		lexer.pushState(ST_PAREN)
-	case ')':
-		lexer.popState(ST_PAREN)
-	case '[':
-		lexer.pushState(ST_VECTOR)
-	case ']':
-		lexer.popState(ST_VECTOR)
-	case '{':
-		switch lexer.state {
-		case ST_MATCH_START:
-			lexer.pushState(ST_MATCH_BODY)
-		default:
-			switch lexer.token {
-			case ')':
-				lexer.pushState(ST_BLOCK)
-			default:
-				lexer.pushState(ST_MAP)
-			}
-		}
-	case '}':
-		switch lexer.state {
-		case ST_BLOCK, ST_MAP:
-			lexer.popState(lexer.state)
-		}
-		if lexer.state == ST_MATCH_BODY {
-			lexer.popState(ST_MATCH_BODY)
-			lexer.popState(ST_MATCH_START)
-		}
-	}
-
-	lexer.token = token
-}
-
-// Push the current state to the stack and switch to newState
-func (lexer *BijouLex) pushState(newState int) {
-	lexer.stack = append(lexer.stack, lexer.state)
-	lexer.state = newState
-}
-
-func (lexer *BijouLex) popState(oldState int) {
-	if lexer.state == oldState && len(lexer.stack) > 0 {
-		lexer.state = lexer.stack[len(lexer.stack)-1]
-		lexer.stack = lexer.stack[:len(lexer.stack)-1]
-	}
-}
-
-// Get the next character in the source, without consuming it
-func (lexer *BijouLex) peek() rune {
-	c, _, err := lexer.source.ReadRune()
-	if err != nil {
-		return eof
-	}
-
-	lexer.source.UnreadRune()
-	return c
-}
-
-// Get the next character in the souce, incrementing line number if required
-func (lexer *BijouLex) read() rune {
-	c, _, err := lexer.source.ReadRune()
-	if err != nil {
-		return eof
-	}
-
-	if c == '\n' {
-		lexer.line += 1
-	}
-	return c
-}
-
-// Unread the last read character from the source, so it can be read again
-func (lexer *BijouLex) backup(c rune) {
-	if c == '\n' {
-		lexer.line -= 1
-	}
-	lexer.source.UnreadRune()
-}
-
-// Read all source characters while white space
-func (lexer *BijouLex) skipWhiteSpace() {
-	for {
-		c := lexer.read()
-		if c == eof {
-			break
-		}
-		if !unicode.Is(space, c) {
-			lexer.backup(c)
-			break
-		}
-	}
-}
-
-// Read all source characters up to end of line
-func (lexer *BijouLex) skipComment() {
-	if lexer.read() != ';' {
-		panic("Attempt to skip non-comment")
-	}
-
-	for {
-		c := lexer.read()
-		if c == eof {
-			break
-		}
-		if c == '\n' {
-			lexer.backup(c)
-			break
-		}
-	}
-}
-
-func (lexer *BijouLex) scanEOL(lval *BijouSymType) int {
-	if lexer.read() != '\n' {
-		panic("Attempt to read non-EOL as EOL")
-	}
-	return EOL
-}
-
-// Scan a double-quoted string
-func (lexer *BijouLex) scanDoubleString(lval *BijouSymType) int {
-	if lexer.read() != '"' {
-		panic("Attempt to read non-string as string")
-	}
-
-	tok := UNTERMINATED_STRING
-	str := make([]rune, 0)
-
-	for {
-		c := lexer.read()
-		if c == '\\' {
-			c = lexer.read()
-			switch c {
-			case 't':
-				c = '\t'
-			case 'r':
-				c = '\r'
-			case 'n':
-				c = '\n'
-			default:
-				str = append(str, '\\')
-			}
-		}
-		if c == eof {
-			break
-		}
-		if c == '"' {
-			tok = STRING
-			break
-		}
-		str = append(str, c)
-	}
-	lval.node = &ast.StringNode{string(str)}
-	return tok
-}
-
-// Scan a single-quoted string
-func (lexer *BijouLex) scanSingleString(lval *BijouSymType) int {
-	if lexer.read() != '\'' {
-		panic("Attempt to read non-string as string")
-	}
-
-	tok := UNTERMINATED_STRING
-	str := make([]rune, 0)
-
-	for {
-		c := lexer.read()
-		if c == '\\' {
-			c = lexer.read()
-			if c != '\'' {
-				str = append(str, '\\')
-			}
-		}
-		if c == eof {
-			break
-		}
-		if c == '\'' {
-			tok = STRING
-			break
-		}
-		str = append(str, c)
-	}
-	lval.node = &ast.StringNode{string(str)}
-	return tok
-}
-
-// Scan one of the numeric types
-func (lexer *BijouLex) scanNumber(lval *BijouSymType) int {
-	str := make([]rune, 0)
-	for {
-		c := lexer.read()
-		if c == eof {
-			break
-		}
-		if !unicode.Is(word, c) {
-			lexer.backup(c)
-			break
-		}
-		str = append(str, c)
-	}
-	n, err := strconv.ParseInt(string(str), 10, 64)
-	if err != nil {
-		lval.node = &ast.StringNode{string(str)}
-		return INVALID_NUMBER
-	}
-	lval.node = &ast.IntegerNode{n}
-	return INTEGER
-}
-
-// Read a word token from the source, without interpretation
-func (lexer *BijouLex) readWord() string {
-	str := make([]rune, 0)
-	for {
-		c := lexer.read()
-		if c == eof {
-			break
-		}
-		if !unicode.Is(word, c) {
-			lexer.backup(c)
-			break
-		}
-		str = append(str, c)
-	}
-	return string(str)
-}
-
-// Scan a keyword or identifier
-func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
-	tok := IDENT
-	str := lexer.readWord()
-	switch str {
-	case "import":
-		tok = KW_IMPORT
-	case "record":
-		tok = KW_RECORD
-	case "function":
-		tok = KW_FUNCTION
-	case "match":
-		tok = KW_MATCH
-	case "when":
-		tok = KW_WHEN
-	case "else":
-		tok = KW_ELSE
-	case "and":
-		tok = OP_AND
-	case "or":
-		tok = OP_OR
-	}
-	lval.node = &ast.IdentifierNode{str}
-	return tok
-}
-
-// Scan a :symbol
-func (lexer *BijouLex) scanSymbol(lval *BijouSymType) int {
-	str := lexer.readWord()
-	lval.node = ast.NewSymbolNode(str)
-	return SYMBOL
-}
-
-func (lexer *BijouLex) scanDots(lval *BijouSymType) int {
-	if lexer.read() != '.' {
-		panic("Attempted to read non-'.' as '.'")
-	}
-
-	var c rune
-
-	c = lexer.read()
-	if c != '.' {
-		lexer.backup(c)
-		return int('.')
-	}
-
-	c = lexer.read()
-	if c != '.' {
-		lexer.backup(c)
-		return OP_INVALID
-	}
-
-	return OP_SPREAD
 }
 
 //line yacctab:1
@@ -1041,55 +594,55 @@ Bijoudefault:
 
 	case 1:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:117
+		//line bijou.y:114
 		{
 			Bijoulex.(*BijouLex).tree = BijouDollar[1].node
 		}
 	case 22:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:146
+		//line bijou.y:143
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 23:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:153
+		//line bijou.y:150
 		{
 			BijouVAL.node = ast.NewArithmeticNode('*', BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 24:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:154
+		//line bijou.y:151
 		{
 			BijouVAL.node = ast.NewArithmeticNode('/', BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 25:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:155
+		//line bijou.y:152
 		{
 			BijouVAL.node = ast.NewArithmeticNode('+', BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 26:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:156
+		//line bijou.y:153
 		{
 			BijouVAL.node = ast.NewArithmeticNode('-', BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 29:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:172
+		//line bijou.y:169
 		{
 			BijouVAL.node = ast.NewAssignNode(BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 30:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:182
+		//line bijou.y:179
 		{
 			BijouVAL.node = ast.NewImportNode(BijouDollar[3].node)
 		}
 	case 31:
 		BijouDollar = BijouS[Bijoupt-5 : Bijoupt+1]
-		//line bijou.y:192
+		//line bijou.y:189
 		{
 			BijouVAL.node = ast.NewDefNode(
 				BijouDollar[2].node.(*ast.IdentifierNode),
@@ -1098,62 +651,62 @@ Bijoudefault:
 		}
 	case 32:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:200
+		//line bijou.y:197
 		{
 			BijouVAL.node = ast.NewMapNode(BijouDollar[1].node.(*ast.KeyValueNode))
 		}
 	case 33:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:203
+		//line bijou.y:200
 		{
 			BijouDollar[1].node.(*ast.MapNode).Append(BijouDollar[3].node.(*ast.KeyValueNode))
 			BijouVAL.node = BijouDollar[1].node
 		}
 	case 36:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:212
+		//line bijou.y:209
 		{
 			BijouVAL.node = ast.NewKeyValueNode(BijouDollar[1].node, nil)
 		}
 	case 37:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:215
+		//line bijou.y:212
 		{
 			BijouVAL.node = ast.NewKeyValueNode(BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 38:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:218
+		//line bijou.y:215
 		{
 			BijouVAL.node = ast.NewKeyValueNode(BijouDollar[1].node, nil)
 		}
 	case 39:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:223
+		//line bijou.y:220
 		{
 			BijouVAL.node = ast.NewRecordNode(BijouDollar[1].node, ast.NewMapNode().KeyValues)
 		}
 	case 40:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:226
+		//line bijou.y:223
 		{
 			BijouVAL.node = ast.NewRecordNode(BijouDollar[1].node, BijouDollar[3].node.(*ast.MapNode).KeyValues)
 		}
 	case 41:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:236
+		//line bijou.y:233
 		{
 			BijouVAL.node = ast.NewDefNode(BijouDollar[2].node.(*ast.IdentifierNode), BijouDollar[3].node)
 		}
 	case 42:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:241
+		//line bijou.y:238
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 43:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:244
+		//line bijou.y:241
 		{
 			BijouVAL.node = ast.NewFunctionPrototypeNode(
 				BijouDollar[1].node.(*ast.VectorNode),
@@ -1162,118 +715,118 @@ Bijoudefault:
 		}
 	case 44:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:252
+		//line bijou.y:249
 		{
 			BijouVAL.node = ast.NewVectorNode()
 		}
 	case 45:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:255
+		//line bijou.y:252
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 46:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:260
+		//line bijou.y:257
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 47:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:270
+		//line bijou.y:267
 		{
 			BijouVAL.node = ast.NewVectorNode()
 		}
 	case 48:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:273
+		//line bijou.y:270
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 49:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:278
+		//line bijou.y:275
 		{
 			BijouVAL.node = ast.NewSpreadNode(nil)
 		}
 	case 50:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:281
+		//line bijou.y:278
 		{
 			BijouVAL.node = ast.NewSpreadNode(BijouDollar[2].node)
 		}
 	case 53:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:289
+		//line bijou.y:286
 		{
 			BijouVAL.node = ast.NewVectorNode(BijouDollar[1].node)
 		}
 	case 54:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:292
+		//line bijou.y:289
 		{
 			BijouDollar[1].node.(*ast.VectorNode).Append(BijouDollar[3].node)
 			BijouVAL.node = BijouDollar[1].node
 		}
 	case 55:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:303
+		//line bijou.y:300
 		{
 			BijouVAL.node = ast.NewMapNode()
 		}
 	case 56:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:306
+		//line bijou.y:303
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 58:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:312
+		//line bijou.y:309
 		{
 			BijouVAL.node = ast.NewKeyValueNode(BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 59:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:315
+		//line bijou.y:312
 		{
 			BijouVAL.node = ast.NewKeyValueNode(BijouDollar[1].node, nil)
 		}
 	case 60:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:320
+		//line bijou.y:317
 		{
 			BijouVAL.node = ast.NewMapNode(BijouDollar[1].node.(*ast.KeyValueNode))
 		}
 	case 61:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:323
+		//line bijou.y:320
 		{
 			BijouDollar[1].node.(*ast.MapNode).Append(BijouDollar[3].node.(*ast.KeyValueNode))
 			BijouVAL.node = BijouDollar[1].node
 		}
 	case 62:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:329
+		//line bijou.y:326
 		{
 			id := BijouDollar[1].node.(*ast.IdentifierNode)
 			BijouVAL.node = ast.NewKeyValueNode(id, ast.NewSymbolNode(id.Name))
 		}
 	case 63:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:340
+		//line bijou.y:337
 		{
 			BijouVAL.node = ast.NewInvocationNode(BijouDollar[1].node, ast.NewVectorNode())
 		}
 	case 64:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:343
+		//line bijou.y:340
 		{
 			BijouVAL.node = ast.NewInvocationNode(BijouDollar[1].node, BijouDollar[3].node.(*ast.VectorNode))
 		}
 	case 65:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:353
+		//line bijou.y:350
 		{
 			BijouVAL.node = ast.NewMemberLookupNode(
 				BijouDollar[1].node,
@@ -1282,50 +835,50 @@ Bijoudefault:
 		}
 	case 66:
 		BijouDollar = BijouS[Bijoupt-5 : Bijoupt+1]
-		//line bijou.y:366
+		//line bijou.y:363
 		{
 			BijouVAL.node = ast.NewMatchNode(BijouDollar[3].node, BijouDollar[5].node.(*ast.MatchCaseListNode).Cases)
 		}
 	case 67:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:371
+		//line bijou.y:368
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 68:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:374
+		//line bijou.y:371
 		{
 			BijouVAL.node = ast.NewMatchCaseNode(BijouDollar[2].node, BijouDollar[4].node)
 		}
 	case 69:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:379
+		//line bijou.y:376
 		{
 			BijouVAL.node = ast.NewMatchCaseNode(nil, BijouDollar[3].node)
 		}
 	case 70:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:384
+		//line bijou.y:381
 		{
 			BijouVAL.node = ast.NewMatchCaseListNode(BijouDollar[1].node.(*ast.MatchCaseNode))
 		}
 	case 71:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:387
+		//line bijou.y:384
 		{
 			BijouDollar[1].node.(*ast.MatchCaseListNode).Append(BijouDollar[2].node.(*ast.MatchCaseNode))
 			BijouVAL.node = BijouDollar[1].node
 		}
 	case 74:
 		BijouDollar = BijouS[Bijoupt-0 : Bijoupt+1]
-		//line bijou.y:401
+		//line bijou.y:398
 		{
 			BijouVAL.node = nil
 		}
 	case 76:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:405
+		//line bijou.y:402
 		{
 			if BijouDollar[1].node == nil {
 				BijouVAL.node = ast.NewCollection()
@@ -1335,7 +888,7 @@ Bijoudefault:
 		}
 	case 77:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:412
+		//line bijou.y:409
 		{
 			if BijouDollar[3].node != nil {
 				BijouDollar[1].node.(*ast.Collection).Append(BijouDollar[3].node)

@@ -3,13 +3,12 @@
 
 /* Program code */
 
-package main
+package parser
 
 import (
 	"./ast"
 	"fmt"
 	"io"
-	"strings"
 	"strconv"
 	"unicode"
 )
@@ -31,14 +30,15 @@ import (
 %token	<node> UNTERMINATED_STRING
 %token	<node> INVALID_NUMBER
 
-%token	<node> OP_SPREAD
-%token	<node> OP_INVALID
+%token	OP_SPREAD
+%token	OP_INVALID
 
-%token	<node> KW_IMPORT
-%token	<node> KW_RECORD
-%token	<node> KW_FUNCTION
-%token	<node> KW_MATCH
-%token	<node> KW_WHEN
+%token	KW_IMPORT
+%token	KW_RECORD
+%token	KW_FUNCTION
+%token	KW_MATCH
+%token	KW_WHEN
+%token	KW_ELSE
 
 %token	'{' '}'
 %token	'(' ')'
@@ -53,6 +53,7 @@ import (
 %right	'.'
 %right	'='
 
+%left	OP_AND  OP_OR
 %left	'+' '-'
 %left	'*' '/'
 
@@ -60,6 +61,7 @@ import (
 %type	<node> program
 %type	<node> expr
 %type	<node> arithmetic
+%type	<node> logical
 
 %type	<node> assignment
 %type	<node> import
@@ -90,7 +92,9 @@ import (
 
 %type	<node> match_construct
 %type	<node> match_clauses_body
-%type	<node> match_clause
+%type	<node> match_when
+%type	<node> match_else
+%type	<node> match_when_list
 %type	<node> match_clause_list
 
 %type	<node> invocation
@@ -119,6 +123,7 @@ program: /* Entire program (top) */
 
 expr: /* Abribtrary expressions */
 	arithmetic
+|	logical
 |	assignment
 |	import
 |	deffunction
@@ -150,6 +155,14 @@ arithmetic: /* Addition, subtraction, multiplication, division */
 |	expr '+' expr { $$ = ast.NewArithmeticNode('+', $1, $3) }
 |	expr '-' expr { $$ = ast.NewArithmeticNode('-', $1, $3) }
 
+
+/**
+ * Boolean logic.
+ */
+
+logical: /* a and b or c */
+	expr OP_AND expr
+|	expr OP_OR expr
 
 /**
  * Pattern matching.
@@ -357,19 +370,27 @@ match_construct: /* match(x) { ... } */
 match_clauses_body: /* { when x: this when y: that } */
 	'{' match_clause_list '}' { $$ = $2 }
 
-match_clause: /* when x: this */
+match_when: /* when x: this */
 	KW_WHEN expr ':' stmt_list {
 		$$ = ast.NewMatchCaseNode($2, $4)
 	}
 
-match_clause_list: /* when x: this when y: that */
-	match_clause {
+match_else: /* when x: this */
+	KW_ELSE ':' stmt_list {
+		$$ = ast.NewMatchCaseNode(nil, $3)
+	}
+
+match_when_list: /* when x: this when y: that */
+	match_when {
 		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
 	}
-|	match_clause_list match_clause {
+|	match_when_list match_when {
 		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
 		$$ = $1
 	}
+
+match_clause_list: /* when x: this when y: that else: other */
+	match_when_list | match_when_list match_else
 
 
 /**
@@ -567,7 +588,7 @@ func (lexer *BijouLex) checkState(token int) {
 	switch token {
 	case KW_MATCH:
 		lexer.pushState(ST_MATCH_START)
-	case KW_WHEN:
+	case KW_WHEN, KW_ELSE:
 		if lexer.state == ST_BLOCK {
 			lexer.popState(ST_BLOCK)
 		}
@@ -815,6 +836,12 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 		tok = KW_MATCH
 	case "when":
 		tok = KW_WHEN
+	case "else":
+		tok = KW_ELSE
+	case "and":
+		tok = OP_AND
+	case "or":
+		tok = OP_OR
 	}
 	lval.node = &ast.IdentifierNode{str}
 	return tok
@@ -847,59 +874,4 @@ func (lexer *BijouLex) scanDots(lval *BijouSymType) int {
 	}
 
 	return OP_SPREAD
-}
-
-func main() {
-	source := `
-	{Withdrawal, sort_by_score, ...} = import('records/activity')
-
-	; Internal record used to handle the combine algorithm
-	record State{
-	  activities: [],
-	  withdrawals: [],
-	  fees: []
-	}
-
-	; Return a vector of activities w/ withdrawals & ATM fees merged.
-	; @param [Vector] activities
-	;   uncombined feed input
-	; @return [Vector]
-	;   activities with withdrawals and ATM fees combined
-	function combine_fees(activities) {
-	  result = reduce(
-	    #(state = {activities, withdrawals, fees}, activity) {
-	      match (activity.tags) {
-		when [..., 'non_bank_atm_withdrawal', ...]:
-                  State{...state, :withdrawals: push(withdrawals, activity)}
-	        when [..., 'non_bank_atm_operator_fee', ...]:
-                  State{...state, :fees: push(fees, activity)}
-	      }
-	    },
-	    activities,
-	    State{}
-	  )
-
-	  process_result(result)
-	}
-
-	; Store 42 in x
-	x = 42
-	; Store 42 in a and 7 in b
-	[a, [b]] = [42, [7]]
-	; Store [a,b,c] in z
-	z = [
-	  a,
-	  b,
-	  c
-	]
-	; Store 3 * 4 in x
-	x = (
-	  3 * 4
-	)`
-	err, ast := Parse(strings.NewReader(source), "/some/example.bjx")
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
-	}
-	fmt.Printf("%s\n", ast)
 }

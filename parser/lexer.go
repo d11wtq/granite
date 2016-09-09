@@ -65,7 +65,7 @@ type BijouLex struct {
 	// The input source to analyze
 	source io.RuneScanner
 	// The result AST, put here by BijouParse
-	tree ast.ASTNode
+	result ast.ASTNode
 	// The last error encountered
 	error string
 	// The previously read token
@@ -81,6 +81,17 @@ func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
 		stack:    make([]int, 0),
 		state:    ST_BLOCK,
 	}
+}
+
+// Set the AST from the finished parse.
+func (lexer *BijouLex) SetResult(result ast.ASTNode) {
+	lexer.result = result
+}
+
+// Get the parse result as an AST.
+// The parser places the result here on a successful parse.
+func (lexer *BijouLex) Result() ast.ASTNode {
+	return lexer.result
 }
 
 // Return the next lexical token from the input stream

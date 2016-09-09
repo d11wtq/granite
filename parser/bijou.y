@@ -1,4 +1,4 @@
-// vim: noet:ts=8:sw=8
+/* vim: noet:ts=8:sw=8 */
 %{
 
 /* Program code */
@@ -9,6 +9,19 @@ import (
 	"./ast"
 	"io"
 )
+
+// Parse source and return the AST, or nil on error.
+// Errors indicate the problem line and column in the source.
+func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
+	lexer := BijouNewLexer(source, filename)
+
+	BijouErrorVerbose = true
+	if BijouParse(lexer) > 0 {
+		return &BijouParseError{lexer}, nil
+	}
+
+	return nil, lexer.Result()
+}
 
 %}
 
@@ -112,7 +125,7 @@ import (
 
 start: /* Initial rule */
 	program {
-		Bijoulex.(*BijouLex).tree = $1
+		Bijoulex.(*BijouLex).SetResult($1)
 	}
 
 program: /* Entire program (top) */
@@ -325,7 +338,7 @@ key_value_pair_list: /* Map keys a: b, c: d */
 shorthand_symbol_key: /* Bare identifier for key-value pair */
 	IDENT {
 		id := $1.(*ast.IdentifierNode)
-		$$ = ast.NewKeyValueNode(id, ast.NewSymbolNode(id.Name))
+		$$ = ast.NewKeyValueNode(ast.NewSymbolNode(id.Name), id)
 	}
 
 
@@ -412,19 +425,3 @@ stmt_list: /* Sequence of expressions */
 		}
 		$$ = $1
 	}
-
-%%
-
-/* Program code */
-
-// Parse source and return the AST, or nil on error
-func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
-	lexer := BijouNewLexer(source, filename)
-
-	BijouErrorVerbose = true
-	if BijouParse(lexer) > 0 {
-		return &BijouParseError{lexer}, nil
-	}
-
-	return nil, lexer.tree
-}

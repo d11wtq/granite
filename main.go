@@ -2,6 +2,7 @@ package main
 
 import (
 	"./parser"
+	"./parser/ast"
 	"bufio"
 	"fmt"
 	"os"
@@ -19,7 +20,7 @@ func main() {
 		return
 	}
 
-	err, ast := parser.Parse(
+	err, result := parser.Parse(
 		bufio.NewReader(file),
 		os.Args[1],
 	)
@@ -29,5 +30,5 @@ func main() {
 		return
 	}
 
-	fmt.Printf("%s\n", ast)
+	ast.Inspect(result)
 }

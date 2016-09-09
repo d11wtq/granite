@@ -46,6 +46,8 @@ const (
 	ST_MAP
 	// Inside a Vector
 	ST_VECTOR
+	// Introducing a function
+	ST_FUNCTION_START
 	// Introducing a match (x) { }
 	ST_MATCH_START
 	// Cases for a match
@@ -155,6 +157,8 @@ func (lexer *BijouLex) checkState(token int) {
 		if lexer.state == ST_MATCH_BODY {
 			lexer.pushState(ST_BLOCK)
 		}
+	case KW_FUNCTION, '#':
+		lexer.pushState(ST_FUNCTION_START)
 	case '(':
 		lexer.pushState(ST_PAREN)
 	case ')':
@@ -165,22 +169,22 @@ func (lexer *BijouLex) checkState(token int) {
 		lexer.popState(ST_VECTOR)
 	case '{':
 		switch lexer.state {
+		case ST_FUNCTION_START:
+			lexer.pushState(ST_BLOCK)
 		case ST_MATCH_START:
 			lexer.pushState(ST_MATCH_BODY)
 		default:
-			switch lexer.token {
-			case ')':
-				lexer.pushState(ST_BLOCK)
-			default:
-				lexer.pushState(ST_MAP)
-			}
+			lexer.pushState(ST_MAP)
 		}
 	case '}':
 		switch lexer.state {
 		case ST_BLOCK, ST_MAP:
 			lexer.popState(lexer.state)
 		}
-		if lexer.state == ST_MATCH_BODY {
+		switch lexer.state {
+		case ST_FUNCTION_START:
+			lexer.popState(ST_FUNCTION_START)
+		case ST_MATCH_BODY:
 			lexer.popState(ST_MATCH_BODY)
 			lexer.popState(ST_MATCH_START)
 		}

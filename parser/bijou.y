@@ -77,6 +77,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> import
 
 %type	<node> defrecord
+%type	<node> defrecord_fields
 %type	<node> field_list
 %type	<node> field_key
 %type	<node> field
@@ -199,11 +200,19 @@ import: /* import('module') */
  */
 
 defrecord: /* record Thing{a, b, c} */
-	KW_RECORD IDENT '{' field_list '}' {
+	KW_RECORD IDENT defrecord_fields {
 		$$ = ast.NewDefNode(
 			$2.(*ast.IdentifierNode),
-			ast.NewRecordPrototypeNode($4.(*ast.MapNode).KeyValues),
+			ast.NewRecordPrototypeNode($3.(*ast.MapNode).KeyValues),
 		)
+	}
+
+defrecord_fields: /* { field, field: value } */
+	'{' '}' {
+		$$ = ast.NewMapNode()
+	}
+|	'{' field_list '}' {
+		$$ = $2
 	}
 
 field_list: /* Record field declaration */
@@ -230,10 +239,10 @@ field: /* Record field declaration */
 	}
 
 record_literal: /* Record{a, b, c} */
-	IDENT '{' '}' {
+	invokable '{' '}' {
 		$$ = ast.NewRecordNode($1, ast.NewMapNode().KeyValues)
 	}
-|	IDENT '{' field_list '}' {
+|	invokable '{' field_list '}' {
 		$$ = ast.NewRecordNode($1, $3.(*ast.MapNode).KeyValues)
 	}
 

@@ -62,8 +62,6 @@ type BijouLex struct {
 	lineNo int
 	// The current column on the line
 	columnNo int
-	// Last column of the previous line
-	previousLineColumnNo int
 	// The current line contents
 	lineBuffer []rune
 	// The state stack
@@ -234,7 +232,6 @@ func (lexer *BijouLex) read() rune {
 	lexer.columnNo += 1
 	if c == '\n' {
 		lexer.lineNo += 1
-		lexer.previousLineColumnNo = (lexer.columnNo - 1)
 		lexer.columnNo = 0
 	}
 
@@ -259,7 +256,7 @@ func (lexer *BijouLex) backup(c rune) {
 
 	if c == '\n' {
 		lexer.lineNo -= 1
-		lexer.columnNo = lexer.previousLineColumnNo
+		lexer.columnNo = len(lexer.lineBuffer)
 	}
 	lexer.source.UnreadRune()
 }

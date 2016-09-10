@@ -59,7 +59,11 @@ type BijouLex struct {
 	// The path to the file being scanned
 	filename string
 	// The current line number reached by the lexer
-	line int
+	lineNo int
+	// The current column on the line
+	columnNo int
+	// Last column of the previous line
+	previousLineColumnNo int
 	// The state stack
 	stack []int
 	// Th current state
@@ -78,7 +82,7 @@ type BijouLex struct {
 func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
 	return &BijouLex{
 		filename: filename,
-		line:     1,
+		lineNo:   1,
 		source:   source,
 		stack:    make([]int, 0),
 		state:    ST_BLOCK,
@@ -224,16 +228,21 @@ func (lexer *BijouLex) read() rune {
 		return eof
 	}
 
+	lexer.columnNo += 1
 	if c == '\n' {
-		lexer.line += 1
+		lexer.lineNo += 1
+		lexer.previousLineColumnNo = (lexer.columnNo - 1)
+		lexer.columnNo = 0
 	}
 	return c
 }
 
 // Unread the last read character from the source, so it can be read again
 func (lexer *BijouLex) backup(c rune) {
+	lexer.columnNo -= 1
 	if c == '\n' {
-		lexer.line -= 1
+		lexer.lineNo -= 1
+		lexer.columnNo = lexer.previousLineColumnNo
 	}
 	lexer.source.UnreadRune()
 }

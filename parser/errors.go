@@ -12,10 +12,11 @@ type BijouParseError struct {
 
 func (e *BijouParseError) Error() string {
 	return fmt.Sprintf(
-		"%s in %s line %d",
+		"%s in %s line %d, column %d",
 		e.errorMessage(),
 		e.currentFile(),
 		e.currentLine(),
+		e.currentColumn(),
 	)
 }
 
@@ -28,5 +29,9 @@ func (e *BijouParseError) currentFile() string {
 }
 
 func (e *BijouParseError) currentLine() int {
-	return e.lexer.line
+	return e.lexer.lineNo
+}
+
+func (e *BijouParseError) currentColumn() int {
+	return e.lexer.columnNo
 }

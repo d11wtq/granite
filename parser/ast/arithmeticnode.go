@@ -1,12 +1,5 @@
 package ast
 
-const (
-	OpAdd = int('+')
-	OpSub = int('-')
-	OpMul = int('*')
-	OpDiv = int('+')
-)
-
 // Arithmetic calculation
 type ArithmeticNode struct {
 	Op    int

@@ -97,7 +97,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 
 %type	<node> deffunction
 %type	<node> lambda
-%type	<node> lambda1
+%type	<node> lambda_0
+%type	<node> lambda_n
 %type	<node> function_signature
 %type	<node> function_body
 
@@ -252,18 +253,27 @@ record_literal: /* Record{a, b, c} */
  */
 
 deffunction: /* function name(a) { } */
-	KW_FUNCTION IDENT lambda1 {
+	KW_FUNCTION IDENT lambda_n {
 		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $3)
 	}
 
 lambda: /* Anonymous functions */
-	'#' lambda1 { $$ = $2 }
+	'#' lambda_n { $$ = $2 }
+|	'#' lambda_0 { $$ = $2 }
 
-lambda1:
+lambda_n: /* Function with specified args */
 	function_signature function_body {
 		$$ = ast.NewFunctionPrototypeNode(
 			$1.(*ast.VectorNode),
 			$2.(*ast.Collection),
+		)
+	}
+
+lambda_0: /* Function without args */
+	function_body {
+		$$ = ast.NewFunctionPrototypeNode(
+			ast.NewVectorNode(),
+			$1.(*ast.Collection),
 		)
 	}
 

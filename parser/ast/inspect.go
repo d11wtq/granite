@@ -58,6 +58,22 @@ func (i *Inspector) VisitArithmeticNode(node *ArithmeticNode) {
 	i.nested().nested().Visit(node.Right)
 }
 
+func (i *Inspector) VisitLogicalAndNode(node *LogicalAndNode) {
+	i.dump("and:")
+	i.nested().dump("left:")
+	i.nested().nested().Visit(node.Left)
+	i.nested().dump("right:")
+	i.nested().nested().Visit(node.Right)
+}
+
+func (i *Inspector) VisitLogicalOrNode(node *LogicalOrNode) {
+	i.dump("or:")
+	i.nested().dump("left:")
+	i.nested().nested().Visit(node.Left)
+	i.nested().dump("right:")
+	i.nested().nested().Visit(node.Right)
+}
+
 func (i *Inspector) VisitDefNode(node *DefNode) {
 	i.dump("define (%s):", node.Name.Name)
 	i.nested().Visit(node.Value)

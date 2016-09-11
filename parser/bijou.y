@@ -45,7 +45,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 
 %token	KW_IMPORT
 %token	KW_RECORD
-%token	KW_FUNCTION
+%token	KW_FUNC
 %token	KW_MATCH
 %token	KW_WHEN
 %token	KW_ELSE
@@ -86,8 +86,10 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> argument
 %type	<node> spread_argument
 %type	<node> argument_list
+%type	<node> positional_argument_list
 
 %type	<node> map_literal
+%type	<node> map_arguments
 %type	<node> key_value_pair
 %type	<node> key_value_pair_list
 %type	<node> shorthand_symbol_key
@@ -97,8 +99,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 
 %type	<node> deffunction
 %type	<node> lambda
+%type	<node> lambda_p
 %type	<node> lambda_0
-%type	<node> lambda_n
 %type	<node> function_signature
 %type	<node> function_body
 
@@ -173,8 +175,12 @@ arithmetic: /* Addition, subtraction, multiplication, division */
  */
 
 logical: /* a and b or c */
-	expr OP_AND expr
-|	expr OP_OR expr
+	expr OP_AND expr {
+		$$ = ast.NewLogicalAndNode($1, $3)
+	}
+|	expr OP_OR expr {
+		$$ = ast.NewLogicalOrNode($1, $3)
+	}
 
 /**
  * Pattern matching.
@@ -240,11 +246,8 @@ field: /* Record field declaration */
 	}
 
 record_literal: /* Record{a, b, c} */
-	invokable '{' '}' {
-		$$ = ast.NewRecordNode($1, ast.NewMapNode().KeyValues)
-	}
-|	invokable '{' field_list '}' {
-		$$ = ast.NewRecordNode($1, $3.(*ast.MapNode).KeyValues)
+	invokable map_literal {
+		$$ = ast.NewRecordNode($1, $2.(*ast.MapNode).KeyValues)
 	}
 
 
@@ -253,15 +256,15 @@ record_literal: /* Record{a, b, c} */
  */
 
 deffunction: /* function name(a) { } */
-	KW_FUNCTION IDENT lambda_n {
+	KW_FUNC IDENT lambda_p {
 		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $3)
 	}
 
 lambda: /* Anonymous functions */
-	'#' lambda_n { $$ = $2 }
+	'#' lambda_p { $$ = $2 }
 |	'#' lambda_0 { $$ = $2 }
 
-lambda_n: /* Function with specified args */
+lambda_p: /* Function with specified args */
 	function_signature function_body {
 		$$ = ast.NewFunctionPrototypeNode(
 			$1.(*ast.VectorNode),
@@ -323,6 +326,15 @@ argument_list: /* Function/vector arguments */
 		$$ = $1
 	}
 
+positional_argument_list: /* Simple a, b, c */
+	expr {
+		$$ = ast.NewVectorNode($1)
+	}
+|	positional_argument_list ',' expr {
+		$1.(*ast.VectorNode).Append($3)
+		$$ = $1
+	}
+
 
 /**
  * Maps.
@@ -332,9 +344,19 @@ map_literal: /* Map literals */
 	'{' '}' {
 		$$ = ast.NewMapNode()
 	}
-|	'{' key_value_pair_list '}' {
+|	'{' map_arguments '}' {
 		$$ = $2
 	}
+
+map_arguments: /* Fields provided to a Map */
+	positional_argument_list {
+		node := ast.NewMapNode()
+		for _, v := range $1.(*ast.VectorNode).Elements {
+			node.Append(ast.NewKeyValueNode(nil, v))
+		}
+		$$ = node
+	}
+|	key_value_pair_list
 
 key_value_pair: /* a: b */
 	shorthand_symbol_key
@@ -354,9 +376,9 @@ key_value_pair_list: /* Map keys a: b, c: d */
 		$$ = $1
 	}
 
-shorthand_symbol_key: /* Bare identifier for key-value pair */
-	IDENT {
-		id := $1.(*ast.IdentifierNode)
+shorthand_symbol_key: /* Dot-identifier for key-value pair */
+	'.' IDENT {
+		id := $2.(*ast.IdentifierNode)
 		$$ = ast.NewKeyValueNode(ast.NewSymbolNode(id.Name), id)
 	}
 
@@ -419,7 +441,11 @@ match_when_list: /* when x: this when y: that */
 	}
 
 match_clause_list: /* when x: this when y: that else: other */
-	match_when_list | match_when_list match_else
+	match_when_list
+|	match_when_list match_else {
+		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
+		$$ = $1
+	}
 
 
 /**

@@ -30,7 +30,9 @@ var digit = &unicode.RangeTable{
 // Keyword/identifier characters (in order)
 var word = &unicode.RangeTable{
 	R16: []unicode.Range16{
+		{'$', '$', 1},
 		{'0', '9', 1},
+		{'@', '@', 1},
 		{'A', 'Z', 1},
 		{'_', '_', 1},
 		{'a', 'z', 1},
@@ -46,8 +48,8 @@ const (
 	ST_MAP
 	// Inside a Vector
 	ST_VECTOR
-	// Introducing a function
-	ST_FUNCTION_START
+	// Introducing a func
+	ST_FUNC_START
 	// Introducing a match (x) { }
 	ST_MATCH_START
 	// Cases for a match
@@ -162,8 +164,8 @@ func (lexer *BijouLex) checkState(token int) {
 		if lexer.state == ST_MATCH_BODY {
 			lexer.pushState(ST_BLOCK)
 		}
-	case KW_FUNCTION, '#':
-		lexer.pushState(ST_FUNCTION_START)
+	case KW_FUNC, '#':
+		lexer.pushState(ST_FUNC_START)
 	case '(':
 		lexer.pushState(ST_PAREN)
 	case ')':
@@ -174,7 +176,7 @@ func (lexer *BijouLex) checkState(token int) {
 		lexer.popState(ST_VECTOR)
 	case '{':
 		switch lexer.state {
-		case ST_FUNCTION_START:
+		case ST_FUNC_START:
 			lexer.pushState(ST_BLOCK)
 		case ST_MATCH_START:
 			lexer.pushState(ST_MATCH_BODY)
@@ -187,8 +189,8 @@ func (lexer *BijouLex) checkState(token int) {
 			lexer.popState(lexer.state)
 		}
 		switch lexer.state {
-		case ST_FUNCTION_START:
-			lexer.popState(ST_FUNCTION_START)
+		case ST_FUNC_START:
+			lexer.popState(ST_FUNC_START)
 		case ST_MATCH_BODY:
 			lexer.popState(ST_MATCH_BODY)
 			lexer.popState(ST_MATCH_START)
@@ -416,8 +418,8 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 		tok = KW_IMPORT
 	case "record":
 		tok = KW_RECORD
-	case "function":
-		tok = KW_FUNCTION
+	case "func":
+		tok = KW_FUNC
 	case "match":
 		tok = KW_MATCH
 	case "when":

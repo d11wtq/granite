@@ -156,7 +156,7 @@ func (lexer *BijouLex) checkState(token int) {
 	switch token {
 	case KW_MATCH:
 		lexer.pushState(ST_MATCH_START)
-	case KW_WHEN, KW_ELSE:
+	case KW_CASE, KW_ELSE:
 		if lexer.state == ST_BLOCK {
 			lexer.popState(ST_BLOCK)
 		}
@@ -401,6 +401,10 @@ func (lexer *BijouLex) readWord() string {
 			break
 		}
 		if !unicode.Is(word, c) {
+			if c == '?' || c == '!' {
+				str = append(str, c)
+				break
+			}
 			lexer.backup(c)
 			break
 		}
@@ -420,10 +424,12 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 		tok = KW_RECORD
 	case "func":
 		tok = KW_FUNC
+	case "of":
+		tok = KW_OF
 	case "match":
 		tok = KW_MATCH
-	case "when":
-		tok = KW_WHEN
+	case "case":
+		tok = KW_CASE
 	case "else":
 		tok = KW_ELSE
 	case "and":

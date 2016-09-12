@@ -46,8 +46,9 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	KW_IMPORT
 %token	KW_RECORD
 %token	KW_FUNC
+%token	KW_OF
 %token	KW_MATCH
-%token	KW_WHEN
+%token	KW_CASE
 %token	KW_ELSE
 
 %token	'{' '}'
@@ -59,6 +60,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	','
 %token	':'
 %token	'#'
+%token	'?'
+%token	'!'
 
 %right	'.'
 %right	'='
@@ -106,9 +109,9 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 
 %type	<node> match_construct
 %type	<node> match_clauses_body
-%type	<node> match_when
+%type	<node> match_case
 %type	<node> match_else
-%type	<node> match_when_list
+%type	<node> match_case_list
 %type	<node> match_clause_list
 
 %type	<node> invocation
@@ -414,35 +417,35 @@ shorthand_member_lookup: /* a.b */
  */
 
 match_construct: /* match(x) { ... } */
-	KW_MATCH '(' expr ')' match_clauses_body {
-		$$ = ast.NewMatchNode($3, $5.(*ast.MatchCaseListNode).Cases)
+	KW_MATCH '(' expr ')' KW_OF match_clauses_body {
+		$$ = ast.NewMatchNode($3, $6.(*ast.MatchCaseListNode).Cases)
 	}
 
-match_clauses_body: /* { when x: this when y: that } */
+match_clauses_body: /* { case x: this case y: that } */
 	'{' match_clause_list '}' { $$ = $2 }
 
-match_when: /* when x: this */
-	KW_WHEN expr ':' stmt_list {
+match_case: /* case x: this */
+	KW_CASE expr ':' stmt_list {
 		$$ = ast.NewMatchCaseNode($2, $4)
 	}
 
-match_else: /* when x: this */
+match_else: /* case x: this */
 	KW_ELSE ':' stmt_list {
 		$$ = ast.NewMatchCaseNode(nil, $3)
 	}
 
-match_when_list: /* when x: this when y: that */
-	match_when {
+match_case_list: /* case x: this case y: that */
+	match_case {
 		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
 	}
-|	match_when_list match_when {
+|	match_case_list match_case {
 		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
 		$$ = $1
 	}
 
-match_clause_list: /* when x: this when y: that else: other */
-	match_when_list
-|	match_when_list match_else {
+match_clause_list: /* case x: this case y: that else: other */
+	match_case_list
+|	match_case_list match_else {
 		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
 		$$ = $1
 	}

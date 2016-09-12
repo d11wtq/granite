@@ -2,13 +2,12 @@ package ast
 
 // Functions
 type FunctionPrototypeNode struct {
-	Signature *VectorNode
-	Body      *Collection
+	Cases []*MatchCaseNode
 }
 
-// Return a new FunctionPrototypeNode with signature and body.
-func NewFunctionPrototypeNode(signature *VectorNode, body *Collection) *FunctionPrototypeNode {
-	return &FunctionPrototypeNode{signature, body}
+// Return a new FunctionPrototypeNode wit cases.
+func NewFunctionPrototypeNode(cases []*MatchCaseNode) *FunctionPrototypeNode {
+	return &FunctionPrototypeNode{cases}
 }
 
 func (node *FunctionPrototypeNode) Accept(visitor ASTVisitor) {

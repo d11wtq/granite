@@ -122,10 +122,13 @@ func (i *Inspector) VisitRecordPrototypeNode(node *RecordPrototypeNode) {
 
 func (i *Inspector) VisitFunctionPrototypeNode(node *FunctionPrototypeNode) {
 	i.dump("function prototype:")
-	i.nested().dump("signature:")
-	i.nested().nested().Visit(node.Signature)
-	i.nested().dump("body:")
-	i.nested().nested().Visit(node.Body)
+	i.nested().dump("cases (%d):", len(node.Cases))
+	for _, case_ := range node.Cases {
+		i.nested().nested().dump("- signature:")
+		i.nested().nested().nested().nested().Visit(case_.When)
+		i.nested().nested().nested().dump("body:")
+		i.nested().nested().nested().nested().Visit(case_.Then)
+	}
 }
 
 func (i *Inspector) VisitInvocationNode(node *InvocationNode) {

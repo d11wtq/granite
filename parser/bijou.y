@@ -69,6 +69,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %left	OP_AND  OP_OR
 %left	'+' '-'
 %left	'*' '/'
+%left	'<' '>'
 
 %type	<node> start
 %type	<node> program
@@ -101,11 +102,16 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> shorthand_member_lookup
 
 %type	<node> deffunction
+%type	<node> function
 %type	<node> lambda
 %type	<node> lambda_p
 %type	<node> lambda_0
+%type	<node> lambda_m
 %type	<node> function_signature
-%type	<node> function_body
+%type	<node> simple_function_body
+%type	<node> match_function_body
+%type	<node> function_case
+%type	<node> function_case_list
 
 %type	<node> match_construct
 %type	<node> match_clauses_body
@@ -259,27 +265,36 @@ record_literal: /* Record{a, b, c} */
  */
 
 deffunction: /* function name(a) { } */
-	KW_FUNC IDENT lambda_p {
+	KW_FUNC IDENT function {
 		$$ = ast.NewDefNode($2.(*ast.IdentifierNode), $3)
 	}
+
+function: /* Concrete function definition */
+	lambda_p | lambda_m
 
 lambda: /* Anonymous functions */
 	'#' lambda_p { $$ = $2 }
 |	'#' lambda_0 { $$ = $2 }
+|	'#' lambda_m { $$ = $2 }
 
 lambda_p: /* Function with specified args */
-	function_signature function_body {
-		$$ = ast.NewFunctionPrototypeNode(
-			$1.(*ast.VectorNode),
-			$2.(*ast.Collection),
-		)
+	function_signature simple_function_body {
+		cases := ast.NewMatchCaseListNode(ast.NewMatchCaseNode($1, $2))
+		$$ = ast.NewFunctionPrototypeNode(cases.Cases)
 	}
 
 lambda_0: /* Function without args */
-	function_body {
+	simple_function_body {
+		cases := ast.NewMatchCaseListNode(
+			ast.NewMatchCaseNode(ast.NewVectorNode(), $1),
+		)
+		$$ = ast.NewFunctionPrototypeNode(cases.Cases)
+	}
+
+lambda_m: /* Pattern matched function */
+	match_function_body {
 		$$ = ast.NewFunctionPrototypeNode(
-			ast.NewVectorNode(),
-			$1.(*ast.Collection),
+			$1.(*ast.MatchCaseListNode).Cases,
 		)
 	}
 
@@ -291,9 +306,28 @@ function_signature: /* Parameter list declaration (a, b, c) */
 		$$ = $2
 	}
 
-function_body: /* Function implementation */
+simple_function_body: /* Function body expressions */
 	'{' stmt_list '}' {
 		$$ = $2
+	}
+
+match_function_body: /* of { case (a, b): this() else: that() }  */
+	KW_OF '{' function_case_list '}' {
+		$$ = $3
+	}
+
+function_case: /* case (x): this */
+	KW_CASE function_signature ':' stmt_list {
+		$$ = ast.NewMatchCaseNode($2, $4)
+	}
+
+function_case_list: /* case (x): this case (y): that */
+	function_case {
+		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+	}
+|	function_case_list function_case {
+		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
+		$$ = $1
 	}
 
 
@@ -309,7 +343,7 @@ vector_literal: /* Vector literals */
 		$$ = $2
 	}
 
-spread_argument: /* ...x */
+spread_argument: /* ...xs */
 	OP_SPREAD {
 		$$ = ast.NewSpreadNode(nil)
 	}

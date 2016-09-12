@@ -154,7 +154,7 @@ func (lexer *BijouLex) Error(err string) {
 
 func (lexer *BijouLex) checkState(token int) {
 	switch token {
-	case KW_MATCH:
+	case KW_OF:
 		lexer.pushState(ST_MATCH_START)
 	case KW_CASE, KW_ELSE:
 		if lexer.state == ST_BLOCK {
@@ -188,12 +188,12 @@ func (lexer *BijouLex) checkState(token int) {
 		case ST_BLOCK, ST_MAP:
 			lexer.popState(lexer.state)
 		}
-		switch lexer.state {
-		case ST_FUNC_START:
-			lexer.popState(ST_FUNC_START)
-		case ST_MATCH_BODY:
+		if lexer.state == ST_MATCH_BODY {
 			lexer.popState(ST_MATCH_BODY)
 			lexer.popState(ST_MATCH_START)
+		}
+		if lexer.state == ST_FUNC_START {
+			lexer.popState(ST_FUNC_START)
 		}
 	}
 

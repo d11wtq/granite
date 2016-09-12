@@ -1,7 +1,7 @@
 
 state 0
 	$accept: .start $end 
-	stmt: .    (81)
+	stmt: .    (89)
 
 	IDENT  shift 20
 	INTEGER  shift 15
@@ -16,7 +16,7 @@ state 0
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	.  reduce 81 (src line 458)
+	.  reduce 89 (src line 492)
 
 	start  goto 1
 	program  goto 2
@@ -48,7 +48,7 @@ state 1
 state 2
 	start:  program.    (1)
 
-	.  reduce 1 (src line 133)
+	.  reduce 1 (src line 139)
 
 
 state 3
@@ -56,13 +56,13 @@ state 3
 	stmt_list:  stmt_list.EOL stmt 
 
 	EOL  shift 33
-	.  reduce 2 (src line 138)
+	.  reduce 2 (src line 144)
 
 
 state 4
-	stmt_list:  stmt.    (83)
+	stmt_list:  stmt.    (91)
 
-	.  reduce 83 (src line 462)
+	.  reduce 91 (src line 496)
 
 
 state 5
@@ -74,7 +74,7 @@ state 5
 	logical:  expr.OP_OR expr 
 	assignment:  expr.'=' expr 
 	shorthand_member_lookup:  expr.'.' IDENT 
-	stmt:  expr.    (82)
+	stmt:  expr.    (90)
 
 	'.'  shift 41
 	'='  shift 40
@@ -84,43 +84,43 @@ state 5
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 82 (src line 460)
+	.  reduce 90 (src line 494)
 
 
 state 6
 	expr:  arithmetic.    (3)
 
-	.  reduce 3 (src line 141)
+	.  reduce 3 (src line 147)
 
 
 state 7
 	expr:  logical.    (4)
 
-	.  reduce 4 (src line 143)
+	.  reduce 4 (src line 149)
 
 
 state 8
 	expr:  assignment.    (5)
 
-	.  reduce 5 (src line 144)
+	.  reduce 5 (src line 150)
 
 
 state 9
 	expr:  import.    (6)
 
-	.  reduce 6 (src line 145)
+	.  reduce 6 (src line 151)
 
 
 state 10
 	expr:  deffunction.    (7)
 
-	.  reduce 7 (src line 146)
+	.  reduce 7 (src line 152)
 
 
 state 11
 	expr:  defrecord.    (8)
 
-	.  reduce 8 (src line 147)
+	.  reduce 8 (src line 153)
 
 
 state 12
@@ -131,32 +131,32 @@ state 12
 
 	'{'  shift 31
 	'('  shift 43
-	.  reduce 9 (src line 148)
+	.  reduce 9 (src line 154)
 
 	map_literal  goto 42
 
 state 13
 	expr:  SYMBOL.    (10)
 
-	.  reduce 10 (src line 149)
+	.  reduce 10 (src line 155)
 
 
 state 14
 	expr:  STRING.    (11)
 
-	.  reduce 11 (src line 150)
+	.  reduce 11 (src line 156)
 
 
 state 15
 	expr:  INTEGER.    (12)
 
-	.  reduce 12 (src line 151)
+	.  reduce 12 (src line 157)
 
 
 state 16
 	expr:  FLOAT.    (13)
 
-	.  reduce 13 (src line 152)
+	.  reduce 13 (src line 158)
 
 
 state 17
@@ -167,7 +167,7 @@ state 17
 
 
 state 18
-	deffunction:  KW_FUNC.IDENT lambda_p 
+	deffunction:  KW_FUNC.IDENT function 
 
 	IDENT  shift 45
 	.  error
@@ -183,49 +183,49 @@ state 19
 state 20
 	invokable:  IDENT.    (14)
 
-	.  reduce 14 (src line 154)
+	.  reduce 14 (src line 160)
 
 
 state 21
 	invokable:  lambda.    (15)
 
-	.  reduce 15 (src line 156)
+	.  reduce 15 (src line 162)
 
 
 state 22
 	invokable:  vector_literal.    (16)
 
-	.  reduce 16 (src line 157)
+	.  reduce 16 (src line 163)
 
 
 state 23
 	invokable:  map_literal.    (17)
 
-	.  reduce 17 (src line 158)
+	.  reduce 17 (src line 164)
 
 
 state 24
 	invokable:  record_literal.    (18)
 
-	.  reduce 18 (src line 159)
+	.  reduce 18 (src line 165)
 
 
 state 25
 	invokable:  invocation.    (19)
 
-	.  reduce 19 (src line 160)
+	.  reduce 19 (src line 166)
 
 
 state 26
 	invokable:  shorthand_member_lookup.    (20)
 
-	.  reduce 20 (src line 161)
+	.  reduce 20 (src line 167)
 
 
 state 27
 	invokable:  match_construct.    (21)
 
-	.  reduce 21 (src line 162)
+	.  reduce 21 (src line 168)
 
 
 state 28
@@ -265,15 +265,19 @@ state 28
 state 29
 	lambda:  '#'.lambda_p 
 	lambda:  '#'.lambda_0 
+	lambda:  '#'.lambda_m 
 
-	'{'  shift 53
-	'('  shift 52
+	KW_OF  shift 56
+	'{'  shift 55
+	'('  shift 54
 	.  error
 
 	lambda_p  goto 48
 	lambda_0  goto 49
-	function_signature  goto 50
-	function_body  goto 51
+	lambda_m  goto 50
+	function_signature  goto 51
+	simple_function_body  goto 52
+	match_function_body  goto 53
 
 state 30
 	vector_literal:  '['.']' 
@@ -284,7 +288,7 @@ state 30
 	FLOAT  shift 16
 	SYMBOL  shift 13
 	STRING  shift 14
-	OP_SPREAD  shift 59
+	OP_SPREAD  shift 62
 	KW_IMPORT  shift 17
 	KW_RECORD  shift 19
 	KW_FUNC  shift 18
@@ -292,20 +296,20 @@ state 30
 	'{'  shift 31
 	'('  shift 28
 	'['  shift 30
-	']'  shift 54
+	']'  shift 57
 	'#'  shift 29
 	.  error
 
-	expr  goto 58
+	expr  goto 61
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
 	import  goto 9
 	defrecord  goto 11
 	vector_literal  goto 22
-	argument  goto 56
-	spread_argument  goto 57
-	argument_list  goto 55
+	argument  goto 59
+	spread_argument  goto 60
+	argument_list  goto 58
 	map_literal  goto 23
 	record_literal  goto 24
 	shorthand_member_lookup  goto 26
@@ -324,33 +328,33 @@ state 31
 	FLOAT  shift 16
 	SYMBOL  shift 13
 	STRING  shift 14
-	OP_SPREAD  shift 59
+	OP_SPREAD  shift 62
 	KW_IMPORT  shift 17
 	KW_RECORD  shift 19
 	KW_FUNC  shift 18
 	KW_MATCH  shift 32
 	'{'  shift 31
-	'}'  shift 60
+	'}'  shift 63
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	'.'  shift 68
+	'.'  shift 71
 	.  error
 
-	expr  goto 64
+	expr  goto 67
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
 	import  goto 9
 	defrecord  goto 11
 	vector_literal  goto 22
-	spread_argument  goto 67
-	positional_argument_list  goto 62
+	spread_argument  goto 70
+	positional_argument_list  goto 65
 	map_literal  goto 23
-	map_arguments  goto 61
-	key_value_pair  goto 65
-	key_value_pair_list  goto 63
-	shorthand_symbol_key  goto 66
+	map_arguments  goto 64
+	key_value_pair  goto 68
+	key_value_pair_list  goto 66
+	shorthand_symbol_key  goto 69
 	record_literal  goto 24
 	shorthand_member_lookup  goto 26
 	deffunction  goto 10
@@ -362,13 +366,13 @@ state 31
 state 32
 	match_construct:  KW_MATCH.'(' expr ')' KW_OF match_clauses_body 
 
-	'('  shift 69
+	'('  shift 72
 	.  error
 
 
 state 33
 	stmt_list:  stmt_list EOL.stmt 
-	stmt: .    (81)
+	stmt: .    (89)
 
 	IDENT  shift 20
 	INTEGER  shift 15
@@ -383,7 +387,7 @@ state 33
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	.  reduce 81 (src line 458)
+	.  reduce 89 (src line 492)
 
 	expr  goto 5
 	arithmetic  goto 6
@@ -400,7 +404,7 @@ state 33
 	match_construct  goto 27
 	invocation  goto 25
 	invokable  goto 12
-	stmt  goto 70
+	stmt  goto 73
 
 state 34
 	arithmetic:  expr '*'.expr 
@@ -420,7 +424,7 @@ state 34
 	'#'  shift 29
 	.  error
 
-	expr  goto 71
+	expr  goto 74
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -454,7 +458,7 @@ state 35
 	'#'  shift 29
 	.  error
 
-	expr  goto 72
+	expr  goto 75
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -488,7 +492,7 @@ state 36
 	'#'  shift 29
 	.  error
 
-	expr  goto 73
+	expr  goto 76
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -522,7 +526,7 @@ state 37
 	'#'  shift 29
 	.  error
 
-	expr  goto 74
+	expr  goto 77
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -556,7 +560,7 @@ state 38
 	'#'  shift 29
 	.  error
 
-	expr  goto 75
+	expr  goto 78
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -590,7 +594,7 @@ state 39
 	'#'  shift 29
 	.  error
 
-	expr  goto 76
+	expr  goto 79
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -624,7 +628,7 @@ state 40
 	'#'  shift 29
 	.  error
 
-	expr  goto 77
+	expr  goto 80
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -643,14 +647,14 @@ state 40
 state 41
 	shorthand_member_lookup:  expr '.'.IDENT 
 
-	IDENT  shift 78
+	IDENT  shift 81
 	.  error
 
 
 state 42
 	record_literal:  invokable map_literal.    (41)
 
-	.  reduce 41 (src line 251)
+	.  reduce 41 (src line 257)
 
 
 state 43
@@ -662,28 +666,28 @@ state 43
 	FLOAT  shift 16
 	SYMBOL  shift 13
 	STRING  shift 14
-	OP_SPREAD  shift 59
+	OP_SPREAD  shift 62
 	KW_IMPORT  shift 17
 	KW_RECORD  shift 19
 	KW_FUNC  shift 18
 	KW_MATCH  shift 32
 	'{'  shift 31
 	'('  shift 28
-	')'  shift 79
+	')'  shift 82
 	'['  shift 30
 	'#'  shift 29
 	.  error
 
-	expr  goto 58
+	expr  goto 61
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
 	import  goto 9
 	defrecord  goto 11
 	vector_literal  goto 22
-	argument  goto 56
-	spread_argument  goto 57
-	argument_list  goto 80
+	argument  goto 59
+	spread_argument  goto 60
+	argument_list  goto 83
 	map_literal  goto 23
 	record_literal  goto 24
 	shorthand_member_lookup  goto 26
@@ -711,7 +715,7 @@ state 44
 	'#'  shift 29
 	.  error
 
-	expr  goto 81
+	expr  goto 84
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -728,21 +732,25 @@ state 44
 	invokable  goto 12
 
 state 45
-	deffunction:  KW_FUNC IDENT.lambda_p 
+	deffunction:  KW_FUNC IDENT.function 
 
-	'('  shift 52
+	KW_OF  shift 56
+	'('  shift 54
 	.  error
 
-	lambda_p  goto 82
-	function_signature  goto 50
+	function  goto 85
+	lambda_p  goto 86
+	lambda_m  goto 87
+	function_signature  goto 51
+	match_function_body  goto 53
 
 state 46
 	defrecord:  KW_RECORD IDENT.defrecord_fields 
 
-	'{'  shift 84
+	'{'  shift 89
 	.  error
 
-	defrecord_fields  goto 83
+	defrecord_fields  goto 88
 
 state 47
 	invokable:  '(' expr.')' 
@@ -755,7 +763,7 @@ state 47
 	assignment:  expr.'=' expr 
 	shorthand_member_lookup:  expr.'.' IDENT 
 
-	')'  shift 85
+	')'  shift 90
 	'.'  shift 41
 	'='  shift 40
 	OP_AND  shift 38
@@ -768,32 +776,44 @@ state 47
 
 
 state 48
-	lambda:  '#' lambda_p.    (43)
+	lambda:  '#' lambda_p.    (45)
 
-	.  reduce 43 (src line 266)
+	.  reduce 45 (src line 275)
 
 
 state 49
-	lambda:  '#' lambda_0.    (44)
+	lambda:  '#' lambda_0.    (46)
 
-	.  reduce 44 (src line 268)
+	.  reduce 46 (src line 277)
 
 
 state 50
-	lambda_p:  function_signature.function_body 
+	lambda:  '#' lambda_m.    (47)
 
-	'{'  shift 53
-	.  error
+	.  reduce 47 (src line 278)
 
-	function_body  goto 86
 
 state 51
-	lambda_0:  function_body.    (46)
+	lambda_p:  function_signature.simple_function_body 
 
-	.  reduce 46 (src line 278)
+	'{'  shift 55
+	.  error
 
+	simple_function_body  goto 91
 
 state 52
+	lambda_0:  simple_function_body.    (49)
+
+	.  reduce 49 (src line 286)
+
+
+state 53
+	lambda_m:  match_function_body.    (50)
+
+	.  reduce 50 (src line 294)
+
+
+state 54
 	function_signature:  '('.')' 
 	function_signature:  '('.argument_list ')' 
 
@@ -802,28 +822,28 @@ state 52
 	FLOAT  shift 16
 	SYMBOL  shift 13
 	STRING  shift 14
-	OP_SPREAD  shift 59
+	OP_SPREAD  shift 62
 	KW_IMPORT  shift 17
 	KW_RECORD  shift 19
 	KW_FUNC  shift 18
 	KW_MATCH  shift 32
 	'{'  shift 31
 	'('  shift 28
-	')'  shift 87
+	')'  shift 92
 	'['  shift 30
 	'#'  shift 29
 	.  error
 
-	expr  goto 58
+	expr  goto 61
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
 	import  goto 9
 	defrecord  goto 11
 	vector_literal  goto 22
-	argument  goto 56
-	spread_argument  goto 57
-	argument_list  goto 88
+	argument  goto 59
+	spread_argument  goto 60
+	argument_list  goto 93
 	map_literal  goto 23
 	record_literal  goto 24
 	shorthand_member_lookup  goto 26
@@ -833,9 +853,9 @@ state 52
 	invocation  goto 25
 	invokable  goto 12
 
-state 53
-	function_body:  '{'.stmt_list '}' 
-	stmt: .    (81)
+state 55
+	simple_function_body:  '{'.stmt_list '}' 
+	stmt: .    (89)
 
 	IDENT  shift 20
 	INTEGER  shift 15
@@ -850,7 +870,7 @@ state 53
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	.  reduce 81 (src line 458)
+	.  reduce 89 (src line 492)
 
 	expr  goto 5
 	arithmetic  goto 6
@@ -868,36 +888,43 @@ state 53
 	invocation  goto 25
 	invokable  goto 12
 	stmt  goto 4
-	stmt_list  goto 89
+	stmt_list  goto 94
 
-state 54
-	vector_literal:  '[' ']'.    (50)
+state 56
+	match_function_body:  KW_OF.'{' function_case_list '}' 
 
-	.  reduce 50 (src line 304)
-
-
-state 55
-	vector_literal:  '[' argument_list.']' 
-	argument_list:  argument_list.',' argument 
-
-	']'  shift 90
-	','  shift 91
+	'{'  shift 95
 	.  error
 
 
-state 56
-	argument_list:  argument.    (56)
-
-	.  reduce 56 (src line 323)
-
-
 state 57
-	argument:  spread_argument.    (54)
+	vector_literal:  '[' ']'.    (58)
 
-	.  reduce 54 (src line 320)
+	.  reduce 58 (src line 338)
 
 
 state 58
+	vector_literal:  '[' argument_list.']' 
+	argument_list:  argument_list.',' argument 
+
+	']'  shift 96
+	','  shift 97
+	.  error
+
+
+state 59
+	argument_list:  argument.    (64)
+
+	.  reduce 64 (src line 357)
+
+
+state 60
+	argument:  spread_argument.    (62)
+
+	.  reduce 62 (src line 354)
+
+
+state 61
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -905,7 +932,7 @@ state 58
 	logical:  expr.OP_AND expr 
 	logical:  expr.OP_OR expr 
 	assignment:  expr.'=' expr 
-	argument:  expr.    (55)
+	argument:  expr.    (63)
 	shorthand_member_lookup:  expr.'.' IDENT 
 
 	'.'  shift 41
@@ -916,11 +943,11 @@ state 58
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 55 (src line 321)
+	.  reduce 63 (src line 355)
 
 
-state 59
-	spread_argument:  OP_SPREAD.    (52)
+state 62
+	spread_argument:  OP_SPREAD.    (60)
 	spread_argument:  OP_SPREAD.expr 
 
 	IDENT  shift 20
@@ -936,119 +963,7 @@ state 59
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	.  reduce 52 (src line 312)
-
-	expr  goto 92
-	arithmetic  goto 6
-	logical  goto 7
-	assignment  goto 8
-	import  goto 9
-	defrecord  goto 11
-	vector_literal  goto 22
-	map_literal  goto 23
-	record_literal  goto 24
-	shorthand_member_lookup  goto 26
-	deffunction  goto 10
-	lambda  goto 21
-	match_construct  goto 27
-	invocation  goto 25
-	invokable  goto 12
-
-state 60
-	map_literal:  '{' '}'.    (60)
-
 	.  reduce 60 (src line 346)
-
-
-state 61
-	map_literal:  '{' map_arguments.'}' 
-
-	'}'  shift 93
-	.  error
-
-
-state 62
-	positional_argument_list:  positional_argument_list.',' expr 
-	map_arguments:  positional_argument_list.    (62)
-
-	','  shift 94
-	.  reduce 62 (src line 354)
-
-
-state 63
-	map_arguments:  key_value_pair_list.    (63)
-	key_value_pair_list:  key_value_pair_list.',' key_value_pair 
-
-	','  shift 95
-	.  reduce 63 (src line 362)
-
-
-state 64
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	positional_argument_list:  expr.    (58)
-	key_value_pair:  expr.':' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
-
-	':'  shift 96
-	'.'  shift 41
-	'='  shift 40
-	OP_AND  shift 38
-	OP_OR  shift 39
-	'+'  shift 36
-	'-'  shift 37
-	'*'  shift 34
-	'/'  shift 35
-	.  reduce 58 (src line 332)
-
-
-state 65
-	key_value_pair_list:  key_value_pair.    (67)
-
-	.  reduce 67 (src line 373)
-
-
-state 66
-	key_value_pair:  shorthand_symbol_key.    (64)
-
-	.  reduce 64 (src line 364)
-
-
-state 67
-	key_value_pair:  spread_argument.    (66)
-
-	.  reduce 66 (src line 369)
-
-
-state 68
-	shorthand_symbol_key:  '.'.IDENT 
-
-	IDENT  shift 97
-	.  error
-
-
-state 69
-	match_construct:  KW_MATCH '('.expr ')' KW_OF match_clauses_body 
-
-	IDENT  shift 20
-	INTEGER  shift 15
-	FLOAT  shift 16
-	SYMBOL  shift 13
-	STRING  shift 14
-	KW_IMPORT  shift 17
-	KW_RECORD  shift 19
-	KW_FUNC  shift 18
-	KW_MATCH  shift 32
-	'{'  shift 31
-	'('  shift 28
-	'['  shift 30
-	'#'  shift 29
-	.  error
 
 	expr  goto 98
 	arithmetic  goto 6
@@ -1066,13 +981,125 @@ state 69
 	invocation  goto 25
 	invokable  goto 12
 
-state 70
-	stmt_list:  stmt_list EOL stmt.    (84)
+state 63
+	map_literal:  '{' '}'.    (68)
 
-	.  reduce 84 (src line 470)
+	.  reduce 68 (src line 380)
+
+
+state 64
+	map_literal:  '{' map_arguments.'}' 
+
+	'}'  shift 99
+	.  error
+
+
+state 65
+	positional_argument_list:  positional_argument_list.',' expr 
+	map_arguments:  positional_argument_list.    (70)
+
+	','  shift 100
+	.  reduce 70 (src line 388)
+
+
+state 66
+	map_arguments:  key_value_pair_list.    (71)
+	key_value_pair_list:  key_value_pair_list.',' key_value_pair 
+
+	','  shift 101
+	.  reduce 71 (src line 396)
+
+
+state 67
+	arithmetic:  expr.'*' expr 
+	arithmetic:  expr.'/' expr 
+	arithmetic:  expr.'+' expr 
+	arithmetic:  expr.'-' expr 
+	logical:  expr.OP_AND expr 
+	logical:  expr.OP_OR expr 
+	assignment:  expr.'=' expr 
+	positional_argument_list:  expr.    (66)
+	key_value_pair:  expr.':' expr 
+	shorthand_member_lookup:  expr.'.' IDENT 
+
+	':'  shift 102
+	'.'  shift 41
+	'='  shift 40
+	OP_AND  shift 38
+	OP_OR  shift 39
+	'+'  shift 36
+	'-'  shift 37
+	'*'  shift 34
+	'/'  shift 35
+	.  reduce 66 (src line 366)
+
+
+state 68
+	key_value_pair_list:  key_value_pair.    (75)
+
+	.  reduce 75 (src line 407)
+
+
+state 69
+	key_value_pair:  shorthand_symbol_key.    (72)
+
+	.  reduce 72 (src line 398)
+
+
+state 70
+	key_value_pair:  spread_argument.    (74)
+
+	.  reduce 74 (src line 403)
 
 
 state 71
+	shorthand_symbol_key:  '.'.IDENT 
+
+	IDENT  shift 103
+	.  error
+
+
+state 72
+	match_construct:  KW_MATCH '('.expr ')' KW_OF match_clauses_body 
+
+	IDENT  shift 20
+	INTEGER  shift 15
+	FLOAT  shift 16
+	SYMBOL  shift 13
+	STRING  shift 14
+	KW_IMPORT  shift 17
+	KW_RECORD  shift 19
+	KW_FUNC  shift 18
+	KW_MATCH  shift 32
+	'{'  shift 31
+	'('  shift 28
+	'['  shift 30
+	'#'  shift 29
+	.  error
+
+	expr  goto 104
+	arithmetic  goto 6
+	logical  goto 7
+	assignment  goto 8
+	import  goto 9
+	defrecord  goto 11
+	vector_literal  goto 22
+	map_literal  goto 23
+	record_literal  goto 24
+	shorthand_member_lookup  goto 26
+	deffunction  goto 10
+	lambda  goto 21
+	match_construct  goto 27
+	invocation  goto 25
+	invokable  goto 12
+
+state 73
+	stmt_list:  stmt_list EOL stmt.    (92)
+
+	.  reduce 92 (src line 504)
+
+
+state 74
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr '*' expr.    (23)
 	arithmetic:  expr.'/' expr 
@@ -1083,10 +1110,10 @@ state 71
 	assignment:  expr.'=' expr 
 	shorthand_member_lookup:  expr.'.' IDENT 
 
-	.  reduce 23 (src line 169)
+	.  reduce 23 (src line 175)
 
 
-state 72
+state 75
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr '/' expr.    (24)
@@ -1097,10 +1124,10 @@ state 72
 	assignment:  expr.'=' expr 
 	shorthand_member_lookup:  expr.'.' IDENT 
 
-	.  reduce 24 (src line 171)
+	.  reduce 24 (src line 177)
 
 
-state 73
+state 76
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1113,10 +1140,10 @@ state 73
 
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 25 (src line 172)
+	.  reduce 25 (src line 178)
 
 
-state 74
+state 77
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1129,10 +1156,10 @@ state 74
 
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 26 (src line 173)
+	.  reduce 26 (src line 179)
 
 
-state 75
+state 78
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1147,10 +1174,10 @@ state 75
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 27 (src line 180)
+	.  reduce 27 (src line 186)
 
 
-state 76
+state 79
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1165,10 +1192,10 @@ state 76
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 28 (src line 184)
+	.  reduce 28 (src line 190)
 
 
-state 77
+state 80
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1186,31 +1213,31 @@ state 77
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 29 (src line 192)
-
-
-state 78
-	shorthand_member_lookup:  expr '.' IDENT.    (72)
-
-	.  reduce 72 (src line 406)
-
-
-state 79
-	invocation:  invokable '(' ')'.    (70)
-
-	.  reduce 70 (src line 393)
-
-
-state 80
-	argument_list:  argument_list.',' argument 
-	invocation:  invokable '(' argument_list.')' 
-
-	')'  shift 99
-	','  shift 91
-	.  error
+	.  reduce 29 (src line 198)
 
 
 state 81
+	shorthand_member_lookup:  expr '.' IDENT.    (80)
+
+	.  reduce 80 (src line 440)
+
+
+state 82
+	invocation:  invokable '(' ')'.    (78)
+
+	.  reduce 78 (src line 427)
+
+
+state 83
+	argument_list:  argument_list.',' argument 
+	invocation:  invokable '(' argument_list.')' 
+
+	')'  shift 105
+	','  shift 97
+	.  error
+
+
+state 84
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1221,7 +1248,7 @@ state 81
 	import:  KW_IMPORT '(' expr.')' 
 	shorthand_member_lookup:  expr.'.' IDENT 
 
-	')'  shift 100
+	')'  shift 106
 	'.'  shift 41
 	'='  shift 40
 	OP_AND  shift 38
@@ -1233,76 +1260,97 @@ state 81
 	.  error
 
 
-state 82
-	deffunction:  KW_FUNC IDENT lambda_p.    (42)
-
-	.  reduce 42 (src line 261)
-
-
-state 83
-	defrecord:  KW_RECORD IDENT defrecord_fields.    (31)
-
-	.  reduce 31 (src line 212)
-
-
-state 84
-	defrecord_fields:  '{'.'}' 
-	defrecord_fields:  '{'.field_list '}' 
-
-	IDENT  shift 107
-	SYMBOL  shift 106
-	OP_SPREAD  shift 59
-	'}'  shift 101
-	.  error
-
-	field_list  goto 102
-	field_key  goto 104
-	field  goto 103
-	spread_argument  goto 105
-
 state 85
-	invokable:  '(' expr ')'.    (22)
+	deffunction:  KW_FUNC IDENT function.    (42)
 
-	.  reduce 22 (src line 163)
+	.  reduce 42 (src line 267)
 
 
 state 86
-	lambda_p:  function_signature function_body.    (45)
+	function:  lambda_p.    (43)
 
-	.  reduce 45 (src line 270)
+	.  reduce 43 (src line 272)
 
 
 state 87
-	function_signature:  '(' ')'.    (47)
+	function:  lambda_m.    (44)
 
-	.  reduce 47 (src line 286)
+	.  reduce 44 (src line 273)
 
 
 state 88
-	function_signature:  '(' argument_list.')' 
-	argument_list:  argument_list.',' argument 
+	defrecord:  KW_RECORD IDENT defrecord_fields.    (31)
 
-	')'  shift 108
-	','  shift 91
-	.  error
+	.  reduce 31 (src line 218)
 
 
 state 89
-	function_body:  '{' stmt_list.'}' 
-	stmt_list:  stmt_list.EOL stmt 
+	defrecord_fields:  '{'.'}' 
+	defrecord_fields:  '{'.field_list '}' 
 
-	EOL  shift 33
-	'}'  shift 109
+	IDENT  shift 113
+	SYMBOL  shift 112
+	OP_SPREAD  shift 62
+	'}'  shift 107
 	.  error
 
+	field_list  goto 108
+	field_key  goto 110
+	field  goto 109
+	spread_argument  goto 111
 
 state 90
-	vector_literal:  '[' argument_list ']'.    (51)
+	invokable:  '(' expr ')'.    (22)
 
-	.  reduce 51 (src line 308)
+	.  reduce 22 (src line 169)
 
 
 state 91
+	lambda_p:  function_signature simple_function_body.    (48)
+
+	.  reduce 48 (src line 280)
+
+
+state 92
+	function_signature:  '(' ')'.    (51)
+
+	.  reduce 51 (src line 301)
+
+
+state 93
+	function_signature:  '(' argument_list.')' 
+	argument_list:  argument_list.',' argument 
+
+	')'  shift 114
+	','  shift 97
+	.  error
+
+
+state 94
+	simple_function_body:  '{' stmt_list.'}' 
+	stmt_list:  stmt_list.EOL stmt 
+
+	EOL  shift 33
+	'}'  shift 115
+	.  error
+
+
+state 95
+	match_function_body:  KW_OF '{'.function_case_list '}' 
+
+	KW_CASE  shift 118
+	.  error
+
+	function_case  goto 117
+	function_case_list  goto 116
+
+state 96
+	vector_literal:  '[' argument_list ']'.    (59)
+
+	.  reduce 59 (src line 342)
+
+
+state 97
 	argument_list:  argument_list ','.argument 
 
 	IDENT  shift 20
@@ -1310,7 +1358,7 @@ state 91
 	FLOAT  shift 16
 	SYMBOL  shift 13
 	STRING  shift 14
-	OP_SPREAD  shift 59
+	OP_SPREAD  shift 62
 	KW_IMPORT  shift 17
 	KW_RECORD  shift 19
 	KW_FUNC  shift 18
@@ -1321,15 +1369,15 @@ state 91
 	'#'  shift 29
 	.  error
 
-	expr  goto 58
+	expr  goto 61
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
 	import  goto 9
 	defrecord  goto 11
 	vector_literal  goto 22
-	argument  goto 110
-	spread_argument  goto 57
+	argument  goto 119
+	spread_argument  goto 60
 	map_literal  goto 23
 	record_literal  goto 24
 	shorthand_member_lookup  goto 26
@@ -1339,7 +1387,7 @@ state 91
 	invocation  goto 25
 	invokable  goto 12
 
-state 92
+state 98
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1347,7 +1395,7 @@ state 92
 	logical:  expr.OP_AND expr 
 	logical:  expr.OP_OR expr 
 	assignment:  expr.'=' expr 
-	spread_argument:  OP_SPREAD expr.    (53)
+	spread_argument:  OP_SPREAD expr.    (61)
 	shorthand_member_lookup:  expr.'.' IDENT 
 
 	'.'  shift 41
@@ -1358,16 +1406,16 @@ state 92
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 53 (src line 316)
-
-
-state 93
-	map_literal:  '{' map_arguments '}'.    (61)
-
 	.  reduce 61 (src line 350)
 
 
-state 94
+state 99
+	map_literal:  '{' map_arguments '}'.    (69)
+
+	.  reduce 69 (src line 384)
+
+
+state 100
 	positional_argument_list:  positional_argument_list ','.expr 
 
 	IDENT  shift 20
@@ -1385,7 +1433,7 @@ state 94
 	'#'  shift 29
 	.  error
 
-	expr  goto 111
+	expr  goto 120
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -1401,7 +1449,7 @@ state 94
 	invocation  goto 25
 	invokable  goto 12
 
-state 95
+state 101
 	key_value_pair_list:  key_value_pair_list ','.key_value_pair 
 
 	IDENT  shift 20
@@ -1409,7 +1457,7 @@ state 95
 	FLOAT  shift 16
 	SYMBOL  shift 13
 	STRING  shift 14
-	OP_SPREAD  shift 59
+	OP_SPREAD  shift 62
 	KW_IMPORT  shift 17
 	KW_RECORD  shift 19
 	KW_FUNC  shift 18
@@ -1418,20 +1466,20 @@ state 95
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	'.'  shift 68
+	'.'  shift 71
 	.  error
 
-	expr  goto 113
+	expr  goto 122
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
 	import  goto 9
 	defrecord  goto 11
 	vector_literal  goto 22
-	spread_argument  goto 67
+	spread_argument  goto 70
 	map_literal  goto 23
-	key_value_pair  goto 112
-	shorthand_symbol_key  goto 66
+	key_value_pair  goto 121
+	shorthand_symbol_key  goto 69
 	record_literal  goto 24
 	shorthand_member_lookup  goto 26
 	deffunction  goto 10
@@ -1440,7 +1488,7 @@ state 95
 	invocation  goto 25
 	invokable  goto 12
 
-state 96
+state 102
 	key_value_pair:  expr ':'.expr 
 
 	IDENT  shift 20
@@ -1458,7 +1506,7 @@ state 96
 	'#'  shift 29
 	.  error
 
-	expr  goto 114
+	expr  goto 123
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -1474,13 +1522,13 @@ state 96
 	invocation  goto 25
 	invokable  goto 12
 
-state 97
-	shorthand_symbol_key:  '.' IDENT.    (69)
+state 103
+	shorthand_symbol_key:  '.' IDENT.    (77)
 
-	.  reduce 69 (src line 382)
+	.  reduce 77 (src line 416)
 
 
-state 98
+state 104
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1491,7 +1539,7 @@ state 98
 	shorthand_member_lookup:  expr.'.' IDENT 
 	match_construct:  KW_MATCH '(' expr.')' KW_OF match_clauses_body 
 
-	')'  shift 115
+	')'  shift 124
 	'.'  shift 41
 	'='  shift 40
 	OP_AND  shift 38
@@ -1503,84 +1551,108 @@ state 98
 	.  error
 
 
-state 99
-	invocation:  invokable '(' argument_list ')'.    (71)
-
-	.  reduce 71 (src line 397)
-
-
-state 100
-	import:  KW_IMPORT '(' expr ')'.    (30)
-
-	.  reduce 30 (src line 202)
-
-
-state 101
-	defrecord_fields:  '{' '}'.    (32)
-
-	.  reduce 32 (src line 220)
-
-
-state 102
-	defrecord_fields:  '{' field_list.'}' 
-	field_list:  field_list.',' field 
-
-	'}'  shift 116
-	','  shift 117
-	.  error
-
-
-state 103
-	field_list:  field.    (34)
-
-	.  reduce 34 (src line 228)
-
-
-state 104
-	field:  field_key.    (38)
-	field:  field_key.':' expr 
-
-	':'  shift 118
-	.  reduce 38 (src line 240)
-
-
 state 105
-	field:  spread_argument.    (40)
+	invocation:  invokable '(' argument_list ')'.    (79)
 
-	.  reduce 40 (src line 247)
+	.  reduce 79 (src line 431)
 
 
 state 106
-	field_key:  SYMBOL.    (36)
+	import:  KW_IMPORT '(' expr ')'.    (30)
 
-	.  reduce 36 (src line 237)
+	.  reduce 30 (src line 208)
 
 
 state 107
-	field_key:  IDENT.    (37)
+	defrecord_fields:  '{' '}'.    (32)
 
-	.  reduce 37 (src line 238)
+	.  reduce 32 (src line 226)
 
 
 state 108
-	function_signature:  '(' argument_list ')'.    (48)
+	defrecord_fields:  '{' field_list.'}' 
+	field_list:  field_list.',' field 
 
-	.  reduce 48 (src line 290)
+	'}'  shift 125
+	','  shift 126
+	.  error
 
 
 state 109
-	function_body:  '{' stmt_list '}'.    (49)
+	field_list:  field.    (34)
 
-	.  reduce 49 (src line 294)
+	.  reduce 34 (src line 234)
 
 
 state 110
-	argument_list:  argument_list ',' argument.    (57)
+	field:  field_key.    (38)
+	field:  field_key.':' expr 
 
-	.  reduce 57 (src line 327)
+	':'  shift 127
+	.  reduce 38 (src line 246)
 
 
 state 111
+	field:  spread_argument.    (40)
+
+	.  reduce 40 (src line 253)
+
+
+state 112
+	field_key:  SYMBOL.    (36)
+
+	.  reduce 36 (src line 243)
+
+
+state 113
+	field_key:  IDENT.    (37)
+
+	.  reduce 37 (src line 244)
+
+
+state 114
+	function_signature:  '(' argument_list ')'.    (52)
+
+	.  reduce 52 (src line 305)
+
+
+state 115
+	simple_function_body:  '{' stmt_list '}'.    (53)
+
+	.  reduce 53 (src line 309)
+
+
+state 116
+	match_function_body:  KW_OF '{' function_case_list.'}' 
+	function_case_list:  function_case_list.function_case 
+
+	KW_CASE  shift 118
+	'}'  shift 128
+	.  error
+
+	function_case  goto 129
+
+state 117
+	function_case_list:  function_case.    (56)
+
+	.  reduce 56 (src line 324)
+
+
+state 118
+	function_case:  KW_CASE.function_signature ':' stmt_list 
+
+	'('  shift 54
+	.  error
+
+	function_signature  goto 130
+
+state 119
+	argument_list:  argument_list ',' argument.    (65)
+
+	.  reduce 65 (src line 361)
+
+
+state 120
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1588,7 +1660,7 @@ state 111
 	logical:  expr.OP_AND expr 
 	logical:  expr.OP_OR expr 
 	assignment:  expr.'=' expr 
-	positional_argument_list:  positional_argument_list ',' expr.    (59)
+	positional_argument_list:  positional_argument_list ',' expr.    (67)
 	shorthand_member_lookup:  expr.'.' IDENT 
 
 	'.'  shift 41
@@ -1599,16 +1671,16 @@ state 111
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 59 (src line 336)
+	.  reduce 67 (src line 370)
 
 
-state 112
-	key_value_pair_list:  key_value_pair_list ',' key_value_pair.    (68)
+state 121
+	key_value_pair_list:  key_value_pair_list ',' key_value_pair.    (76)
 
-	.  reduce 68 (src line 377)
+	.  reduce 76 (src line 411)
 
 
-state 113
+state 122
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1619,7 +1691,7 @@ state 113
 	key_value_pair:  expr.':' expr 
 	shorthand_member_lookup:  expr.'.' IDENT 
 
-	':'  shift 96
+	':'  shift 102
 	'.'  shift 41
 	'='  shift 40
 	OP_AND  shift 38
@@ -1631,7 +1703,7 @@ state 113
 	.  error
 
 
-state 114
+state 123
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1639,7 +1711,7 @@ state 114
 	logical:  expr.OP_AND expr 
 	logical:  expr.OP_OR expr 
 	assignment:  expr.'=' expr 
-	key_value_pair:  expr ':' expr.    (65)
+	key_value_pair:  expr ':' expr.    (73)
 	shorthand_member_lookup:  expr.'.' IDENT 
 
 	'.'  shift 41
@@ -1650,35 +1722,35 @@ state 114
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 65 (src line 366)
+	.  reduce 73 (src line 400)
 
 
-state 115
+state 124
 	match_construct:  KW_MATCH '(' expr ')'.KW_OF match_clauses_body 
 
-	KW_OF  shift 119
+	KW_OF  shift 131
 	.  error
 
 
-state 116
+state 125
 	defrecord_fields:  '{' field_list '}'.    (33)
 
-	.  reduce 33 (src line 224)
+	.  reduce 33 (src line 230)
 
 
-state 117
+state 126
 	field_list:  field_list ','.field 
 
-	IDENT  shift 107
-	SYMBOL  shift 106
-	OP_SPREAD  shift 59
+	IDENT  shift 113
+	SYMBOL  shift 112
+	OP_SPREAD  shift 62
 	.  error
 
-	field_key  goto 104
-	field  goto 120
-	spread_argument  goto 105
+	field_key  goto 110
+	field  goto 132
+	spread_argument  goto 111
 
-state 118
+state 127
 	field:  field_key ':'.expr 
 
 	IDENT  shift 20
@@ -1696,7 +1768,7 @@ state 118
 	'#'  shift 29
 	.  error
 
-	expr  goto 121
+	expr  goto 133
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -1712,21 +1784,40 @@ state 118
 	invocation  goto 25
 	invokable  goto 12
 
-state 119
-	match_construct:  KW_MATCH '(' expr ')' KW_OF.match_clauses_body 
+state 128
+	match_function_body:  KW_OF '{' function_case_list '}'.    (54)
 
-	'{'  shift 123
+	.  reduce 54 (src line 314)
+
+
+state 129
+	function_case_list:  function_case_list function_case.    (57)
+
+	.  reduce 57 (src line 328)
+
+
+state 130
+	function_case:  KW_CASE function_signature.':' stmt_list 
+
+	':'  shift 134
 	.  error
 
-	match_clauses_body  goto 122
 
-state 120
+state 131
+	match_construct:  KW_MATCH '(' expr ')' KW_OF.match_clauses_body 
+
+	'{'  shift 136
+	.  error
+
+	match_clauses_body  goto 135
+
+state 132
 	field_list:  field_list ',' field.    (35)
 
-	.  reduce 35 (src line 232)
+	.  reduce 35 (src line 238)
 
 
-state 121
+state 133
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1745,51 +1836,96 @@ state 121
 	'-'  shift 37
 	'*'  shift 34
 	'/'  shift 35
-	.  reduce 39 (src line 244)
+	.  reduce 39 (src line 250)
 
 
-state 122
-	match_construct:  KW_MATCH '(' expr ')' KW_OF match_clauses_body.    (73)
+state 134
+	function_case:  KW_CASE function_signature ':'.stmt_list 
+	stmt: .    (89)
 
-	.  reduce 73 (src line 419)
+	IDENT  shift 20
+	INTEGER  shift 15
+	FLOAT  shift 16
+	SYMBOL  shift 13
+	STRING  shift 14
+	KW_IMPORT  shift 17
+	KW_RECORD  shift 19
+	KW_FUNC  shift 18
+	KW_MATCH  shift 32
+	'{'  shift 31
+	'('  shift 28
+	'['  shift 30
+	'#'  shift 29
+	.  reduce 89 (src line 492)
+
+	expr  goto 5
+	arithmetic  goto 6
+	logical  goto 7
+	assignment  goto 8
+	import  goto 9
+	defrecord  goto 11
+	vector_literal  goto 22
+	map_literal  goto 23
+	record_literal  goto 24
+	shorthand_member_lookup  goto 26
+	deffunction  goto 10
+	lambda  goto 21
+	match_construct  goto 27
+	invocation  goto 25
+	invokable  goto 12
+	stmt  goto 4
+	stmt_list  goto 137
+
+state 135
+	match_construct:  KW_MATCH '(' expr ')' KW_OF match_clauses_body.    (81)
+
+	.  reduce 81 (src line 453)
 
 
-state 123
+state 136
 	match_clauses_body:  '{'.match_clause_list '}' 
 
-	KW_CASE  shift 127
+	KW_CASE  shift 141
 	.  error
 
-	match_case  goto 126
-	match_case_list  goto 125
-	match_clause_list  goto 124
+	match_case  goto 140
+	match_case_list  goto 139
+	match_clause_list  goto 138
 
-state 124
+state 137
+	function_case:  KW_CASE function_signature ':' stmt_list.    (55)
+	stmt_list:  stmt_list.EOL stmt 
+
+	EOL  shift 33
+	.  reduce 55 (src line 319)
+
+
+state 138
 	match_clauses_body:  '{' match_clause_list.'}' 
 
-	'}'  shift 128
+	'}'  shift 142
 	.  error
 
 
-state 125
+state 139
 	match_case_list:  match_case_list.match_case 
-	match_clause_list:  match_case_list.    (79)
+	match_clause_list:  match_case_list.    (87)
 	match_clause_list:  match_case_list.match_else 
 
-	KW_CASE  shift 127
-	KW_ELSE  shift 131
-	.  reduce 79 (src line 446)
+	KW_CASE  shift 141
+	KW_ELSE  shift 145
+	.  reduce 87 (src line 480)
 
-	match_case  goto 129
-	match_else  goto 130
+	match_case  goto 143
+	match_else  goto 144
 
-state 126
-	match_case_list:  match_case.    (77)
+state 140
+	match_case_list:  match_case.    (85)
 
-	.  reduce 77 (src line 437)
+	.  reduce 85 (src line 471)
 
 
-state 127
+state 141
 	match_case:  KW_CASE.expr ':' stmt_list 
 
 	IDENT  shift 20
@@ -1807,7 +1943,7 @@ state 127
 	'#'  shift 29
 	.  error
 
-	expr  goto 132
+	expr  goto 146
 	arithmetic  goto 6
 	logical  goto 7
 	assignment  goto 8
@@ -1823,32 +1959,32 @@ state 127
 	invocation  goto 25
 	invokable  goto 12
 
-state 128
-	match_clauses_body:  '{' match_clause_list '}'.    (74)
+state 142
+	match_clauses_body:  '{' match_clause_list '}'.    (82)
 
-	.  reduce 74 (src line 424)
-
-
-state 129
-	match_case_list:  match_case_list match_case.    (78)
-
-	.  reduce 78 (src line 441)
+	.  reduce 82 (src line 458)
 
 
-state 130
-	match_clause_list:  match_case_list match_else.    (80)
+state 143
+	match_case_list:  match_case_list match_case.    (86)
 
-	.  reduce 80 (src line 448)
+	.  reduce 86 (src line 475)
 
 
-state 131
+state 144
+	match_clause_list:  match_case_list match_else.    (88)
+
+	.  reduce 88 (src line 482)
+
+
+state 145
 	match_else:  KW_ELSE.':' stmt_list 
 
-	':'  shift 133
+	':'  shift 147
 	.  error
 
 
-state 132
+state 146
 	arithmetic:  expr.'*' expr 
 	arithmetic:  expr.'/' expr 
 	arithmetic:  expr.'+' expr 
@@ -1859,7 +1995,7 @@ state 132
 	shorthand_member_lookup:  expr.'.' IDENT 
 	match_case:  KW_CASE expr.':' stmt_list 
 
-	':'  shift 134
+	':'  shift 148
 	'.'  shift 41
 	'='  shift 40
 	OP_AND  shift 38
@@ -1871,9 +2007,9 @@ state 132
 	.  error
 
 
-state 133
+state 147
 	match_else:  KW_ELSE ':'.stmt_list 
-	stmt: .    (81)
+	stmt: .    (89)
 
 	IDENT  shift 20
 	INTEGER  shift 15
@@ -1888,7 +2024,7 @@ state 133
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	.  reduce 81 (src line 458)
+	.  reduce 89 (src line 492)
 
 	expr  goto 5
 	arithmetic  goto 6
@@ -1906,11 +2042,11 @@ state 133
 	invocation  goto 25
 	invokable  goto 12
 	stmt  goto 4
-	stmt_list  goto 135
+	stmt_list  goto 149
 
-state 134
+state 148
 	match_case:  KW_CASE expr ':'.stmt_list 
-	stmt: .    (81)
+	stmt: .    (89)
 
 	IDENT  shift 20
 	INTEGER  shift 15
@@ -1925,7 +2061,7 @@ state 134
 	'('  shift 28
 	'['  shift 30
 	'#'  shift 29
-	.  reduce 81 (src line 458)
+	.  reduce 89 (src line 492)
 
 	expr  goto 5
 	arithmetic  goto 6
@@ -1943,33 +2079,33 @@ state 134
 	invocation  goto 25
 	invokable  goto 12
 	stmt  goto 4
-	stmt_list  goto 136
+	stmt_list  goto 150
 
-state 135
-	match_else:  KW_ELSE ':' stmt_list.    (76)
+state 149
+	match_else:  KW_ELSE ':' stmt_list.    (84)
 	stmt_list:  stmt_list.EOL stmt 
 
 	EOL  shift 33
-	.  reduce 76 (src line 432)
+	.  reduce 84 (src line 466)
 
 
-state 136
-	match_case:  KW_CASE expr ':' stmt_list.    (75)
+state 150
+	match_case:  KW_CASE expr ':' stmt_list.    (83)
 	stmt_list:  stmt_list.EOL stmt 
 
 	EOL  shift 33
-	.  reduce 75 (src line 427)
+	.  reduce 83 (src line 461)
 
 
-41 terminals, 41 nonterminals
-85 grammar rules, 137/2000 states
+43 terminals, 46 nonterminals
+93 grammar rules, 151/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-90 working sets used
-memory: parser 946/30000
-87 extra closures
-515 shift entries, 1 exceptions
-78 goto entries
-365 entries saved by goto default
-Optimizer space used: output 304/30000
-304 table entries, 15 zero
-maximum spread: 41, maximum offset: 134
+95 working sets used
+memory: parser 849/30000
+99 extra closures
+537 shift entries, 1 exceptions
+87 goto entries
+382 entries saved by goto default
+Optimizer space used: output 318/30000
+318 table entries, 12 zero
+maximum spread: 41, maximum offset: 148

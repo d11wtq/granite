@@ -152,11 +152,14 @@ func (lexer *BijouLex) Error(err string) {
 	lexer.error = err
 }
 
+// FIXME: This is messy
+// FIXME: ST_FUNC_START now also used for KW_WHEN (rename to ST_CONSTRUCT_START?)
+// FIXME: ST_MAP also used for records (rename to ST_DATA?)
 func (lexer *BijouLex) checkState(token int) {
 	switch token {
 	case KW_OF:
 		lexer.pushState(ST_MATCH_START)
-	case KW_CASE, KW_ELSE:
+	case KW_CASE, KW_THEN, KW_ELSE:
 		if lexer.state == ST_BLOCK {
 			lexer.popState(ST_BLOCK)
 		}
@@ -164,7 +167,7 @@ func (lexer *BijouLex) checkState(token int) {
 		if lexer.state == ST_MATCH_BODY {
 			lexer.pushState(ST_BLOCK)
 		}
-	case KW_FUNC, '#':
+	case KW_FUNC, '#', KW_WHEN:
 		lexer.pushState(ST_FUNC_START)
 	case '(':
 		lexer.pushState(ST_PAREN)
@@ -415,8 +418,10 @@ func (lexer *BijouLex) readWord() string {
 
 // Scan a keyword or identifier
 func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
-	tok := IDENT
 	str := lexer.readWord()
+	tok := IDENT
+	lval.node = ast.NewIdentifierNode(str)
+
 	switch str {
 	case "import":
 		tok = KW_IMPORT
@@ -428,16 +433,25 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 		tok = KW_OF
 	case "match":
 		tok = KW_MATCH
+	case "when":
+		tok = KW_WHEN
 	case "case":
 		tok = KW_CASE
+	case "then":
+		tok = KW_THEN
 	case "else":
 		tok = KW_ELSE
 	case "and":
 		tok = OP_AND
 	case "or":
 		tok = OP_OR
+	case "true":
+		tok = TRUE
+		lval.node = ast.TrueNode
+	case "false":
+		tok = FALSE
+		lval.node = ast.FalseNode
 	}
-	lval.node = &ast.IdentifierNode{str}
 	return tok
 }
 

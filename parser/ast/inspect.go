@@ -34,6 +34,10 @@ func (i *Inspector) VisitIntegerNode(node *IntegerNode) {
 	i.dump("INTEGER (%#v)", node.Value)
 }
 
+func (i *Inspector) VisitBooleanNode(node *BooleanNode) {
+	i.dump("BOOLEAN (%#v)", node.Value)
+}
+
 func (i *Inspector) VisitFloatNode(node *FloatNode) {
 	i.dump("FLOAT (%#v)", node.Value)
 }
@@ -52,6 +56,21 @@ func (i *Inspector) VisitIdentifierNode(node *IdentifierNode) {
 
 func (i *Inspector) VisitArithmeticNode(node *ArithmeticNode) {
 	i.dump("math (%c):", node.Op)
+	i.nested().dump("left:")
+	i.nested().nested().Visit(node.Left)
+	i.nested().dump("right:")
+	i.nested().nested().Visit(node.Right)
+}
+
+func (i *Inspector) VisitComparisonNode(node *ComparisonNode) {
+	var op string
+	switch node.Cmp {
+	case CMP_GT:
+		op = ">"
+	case CMP_LT:
+		op = "<"
+	}
+	i.dump("comparison (%s):", op)
 	i.nested().dump("left:")
 	i.nested().nested().Visit(node.Left)
 	i.nested().dump("right:")

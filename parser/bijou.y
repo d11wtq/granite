@@ -34,6 +34,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	<node> EOL
 %token	<node> IDENT
 %token	<node> INTEGER
+%token	<node> TRUE
+%token	<node> FALSE
 %token	<node> FLOAT
 %token	<node> SYMBOL
 %token	<node> STRING
@@ -48,7 +50,9 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	KW_FUNC
 %token	KW_OF
 %token	KW_MATCH
+%token	KW_WHEN
 %token	KW_CASE
+%token	KW_THEN
 %token	KW_ELSE
 
 %token	'{' '}'
@@ -65,16 +69,17 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 
 %right	'.'
 %right	'='
+%right	'<' '>'
 
 %left	OP_AND  OP_OR
 %left	'+' '-'
 %left	'*' '/'
-%left	'<' '>'
 
 %type	<node> start
 %type	<node> program
 %type	<node> expr
 %type	<node> arithmetic
+%type	<node> comparison
 %type	<node> logical
 
 %type	<node> assignment
@@ -120,6 +125,14 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> match_case_list
 %type	<node> match_clause_list
 
+%type	<node> when_construct
+%type	<node> when_body
+%type	<node> when_then_body
+%type	<node> when_cases_body
+%type	<node> when_then
+%type	<node> when_else
+%type	<node> when_case_list
+
 %type	<node> invocation
 %type	<node> invokable
 
@@ -146,12 +159,15 @@ program: /* Entire program (top) */
 
 expr: /* Abribtrary expressions */
 	arithmetic
+|	comparison
 |	logical
 |	assignment
 |	import
 |	deffunction
 |	defrecord
 |	invokable
+|	TRUE
+|	FALSE
 |	SYMBOL
 |	STRING
 |	INTEGER
@@ -166,7 +182,9 @@ invokable: /* Things that can be invoked as functions */
 |	invocation
 |	shorthand_member_lookup
 |	match_construct
+|	when_construct
 |	'(' expr ')' { $$ = $2 }
+
 
 /**
  * Mathematical.
@@ -177,6 +195,15 @@ arithmetic: /* Addition, subtraction, multiplication, division */
 |	expr '/' expr { $$ = ast.NewArithmeticNode('/', $1, $3) }
 |	expr '+' expr { $$ = ast.NewArithmeticNode('+', $1, $3) }
 |	expr '-' expr { $$ = ast.NewArithmeticNode('-', $1, $3) }
+
+
+/**
+ * Comparison.
+ */
+
+comparison: /* Greater-than, less-than, same-as etc */
+	expr '>' expr { $$ = ast.NewComparisonNode(ast.CMP_GT, $1, $3) }
+|	expr '<' expr { $$ = ast.NewComparisonNode(ast.CMP_LT, $1, $3) }
 
 
 /**
@@ -442,6 +469,55 @@ shorthand_member_lookup: /* a.b */
 		$$ = ast.NewMemberLookupNode(
 			$1,
 			ast.NewSymbolNode($3.(*ast.IdentifierNode).Name),
+		)
+	}
+
+/**
+ * When construct.
+ */
+
+when_construct: /* when(x > y) of { then: x else y } */
+	KW_WHEN '(' expr ')' when_body {
+		$$ = ast.NewMatchNode(
+			$3,
+			$5.(*ast.MatchCaseListNode).Cases,
+		)
+	}
+
+when_body: /* { x }, of { then: x else: y } */
+	when_then_body | when_cases_body
+
+when_then_body: /* { x } */
+	'{' stmt_list '}' {
+		$$ = ast.NewMatchCaseListNode(
+			ast.NewMatchCaseNode(ast.TrueNode, $2),
+		)
+	}
+
+when_cases_body: /* of { then: x else y } */
+	KW_OF '{' when_case_list '}' { $$ = $3 }
+
+when_then: /* then: x */
+	KW_THEN ':' stmt_list {
+		$$ = ast.NewMatchCaseNode(ast.TrueNode, $3)
+	}
+
+when_else: /* else: y */
+	KW_ELSE ':' stmt_list {
+		$$ = ast.NewMatchCaseNode(ast.FalseNode, $3)
+	}
+
+when_case_list: /* then: x else y */
+	when_then {
+		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+	}
+|	when_else {
+		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+	}
+|	when_then when_else {
+		$$ = ast.NewMatchCaseListNode(
+			$1.(*ast.MatchCaseNode),
+			$2.(*ast.MatchCaseNode),
 		)
 	}
 

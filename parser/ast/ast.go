@@ -9,10 +9,12 @@ type ASTNode interface {
 type ASTVisitor interface {
 	VisitCollection(node *Collection)
 	VisitIntegerNode(node *IntegerNode)
+	VisitBooleanNode(node *BooleanNode)
 	VisitFloatNode(node *FloatNode)
 	VisitStringNode(node *StringNode)
 	VisitSymbolNode(node *SymbolNode)
 	VisitIdentifierNode(node *IdentifierNode)
+	VisitComparisonNode(node *ComparisonNode)
 	VisitArithmeticNode(node *ArithmeticNode)
 	VisitLogicalAndNode(node *LogicalAndNode)
 	VisitLogicalOrNode(node *LogicalOrNode)

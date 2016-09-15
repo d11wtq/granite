@@ -2,11 +2,11 @@ package ast
 
 // Functions
 type FunctionPrototypeNode struct {
-	Cases []*MatchCaseNode
+	Cases []*PairNode
 }
 
-// Return a new FunctionPrototypeNode wit cases.
-func NewFunctionPrototypeNode(cases []*MatchCaseNode) *FunctionPrototypeNode {
+// Return a new FunctionPrototypeNode with the given cases.
+func NewFunctionPrototypeNode(cases []*PairNode) *FunctionPrototypeNode {
 	return &FunctionPrototypeNode{cases}
 }
 

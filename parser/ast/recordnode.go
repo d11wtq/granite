@@ -3,12 +3,12 @@ package ast
 // Records
 type RecordNode struct {
 	Prototype ASTNode
-	Fields    []*KeyValueNode
+	Fields    []*PairNode
 }
 
-// Return a new RecordNode with record and fields.
-func NewRecordNode(record ASTNode, fields []*KeyValueNode) *RecordNode {
-	return &RecordNode{record, fields}
+// Return a new RecordNode with prototype and fields.
+func NewRecordNode(prototype ASTNode, fields []*PairNode) *RecordNode {
+	return &RecordNode{prototype, fields}
 }
 
 func (node *RecordNode) Accept(visitor ASTVisitor) {

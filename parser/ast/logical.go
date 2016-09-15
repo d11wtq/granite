@@ -1,29 +1,21 @@
 package ast
 
-// Logical 'and' expression.
-type LogicalAndNode struct {
+const (
+	OP_AND = iota
+	OP_OR
+)
+
+// Logical 'and' or 'or' expression.
+type LogicalNode struct {
+	Op    int
 	Left  ASTNode
 	Right ASTNode
 }
 
-func NewLogicalAndNode(left, right ASTNode) *LogicalAndNode {
-	return &LogicalAndNode{left, right}
+func NewLogicalNode(op int, left, right ASTNode) *LogicalNode {
+	return &LogicalNode{op, left, right}
 }
 
-func (node *LogicalAndNode) Accept(visitor ASTVisitor) {
-	visitor.VisitLogicalAndNode(node)
-}
-
-// Logical 'or' expression.
-type LogicalOrNode struct {
-	Left  ASTNode
-	Right ASTNode
-}
-
-func NewLogicalOrNode(left, right ASTNode) *LogicalOrNode {
-	return &LogicalOrNode{left, right}
-}
-
-func (node *LogicalOrNode) Accept(visitor ASTVisitor) {
-	visitor.VisitLogicalOrNode(node)
+func (node *LogicalNode) Accept(visitor ASTVisitor) {
+	visitor.VisitLogicalNode(node)
 }

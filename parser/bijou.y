@@ -211,12 +211,8 @@ comparison: /* Greater-than, less-than, same-as etc */
  */
 
 logical: /* a and b or c */
-	expr OP_AND expr {
-		$$ = ast.NewLogicalAndNode($1, $3)
-	}
-|	expr OP_OR expr {
-		$$ = ast.NewLogicalOrNode($1, $3)
-	}
+	expr OP_AND expr { $$ = ast.NewLogicalNode(ast.OP_AND, $1, $3) }
+|	expr OP_OR expr  { $$ = ast.NewLogicalNode(ast.OP_OR,  $1, $3) }
 
 /**
  * Pattern matching.
@@ -246,7 +242,7 @@ defrecord: /* record Thing{a, b, c} */
 	KW_RECORD IDENT defrecord_fields {
 		$$ = ast.NewDefNode(
 			$2.(*ast.IdentifierNode),
-			ast.NewRecordPrototypeNode($3.(*ast.MapNode).KeyValues),
+			ast.NewRecordPrototypeNode($3.(*ast.MapNode).Pairs),
 		)
 	}
 
@@ -260,10 +256,10 @@ defrecord_fields: /* { field, field: value } */
 
 field_list: /* Record field declaration */
 	field {
-		$$ = ast.NewMapNode($1.(*ast.KeyValueNode))
+		$$ = ast.NewMapNode($1.(*ast.PairNode))
 	}
 |	field_list ',' field {
-		$1.(*ast.MapNode).Append($3.(*ast.KeyValueNode))
+		$1.(*ast.MapNode).Append($3.(*ast.PairNode))
 		$$ = $1
 	}
 
@@ -272,18 +268,18 @@ field_key: /* Record field identifiers */
 
 field: /* Record field declaration */
 	field_key {
-		$$ = ast.NewKeyValueNode($1, nil)
+		$$ = ast.NewPairNode($1, nil)
 	}
 |	field_key ':' expr {
-		$$ = ast.NewKeyValueNode($1, $3)
+		$$ = ast.NewPairNode($1, $3)
 	}
 |	spread_argument {
-		$$ = ast.NewKeyValueNode($1, nil)
+		$$ = ast.NewPairNode($1, nil)
 	}
 
 record_literal: /* Record{a, b, c} */
 	invokable map_literal {
-		$$ = ast.NewRecordNode($1, $2.(*ast.MapNode).KeyValues)
+		$$ = ast.NewRecordNode($1, $2.(*ast.MapNode).Pairs)
 	}
 
 
@@ -306,23 +302,19 @@ lambda: /* Anonymous functions */
 
 lambda_p: /* Function with specified args */
 	function_signature simple_function_body {
-		cases := ast.NewMatchCaseListNode(ast.NewMatchCaseNode($1, $2))
-		$$ = ast.NewFunctionPrototypeNode(cases.Cases)
+		cases := ast.NewMapNode(ast.NewPairNode($1, $2))
+		$$ = ast.NewFunctionPrototypeNode(cases.Pairs)
 	}
 
 lambda_0: /* Function without args */
 	simple_function_body {
-		cases := ast.NewMatchCaseListNode(
-			ast.NewMatchCaseNode(ast.NewVectorNode(), $1),
-		)
-		$$ = ast.NewFunctionPrototypeNode(cases.Cases)
+		cases := ast.NewMapNode(ast.NewPairNode(ast.NewVectorNode(), $1))
+		$$ = ast.NewFunctionPrototypeNode(cases.Pairs)
 	}
 
 lambda_m: /* Pattern matched function */
 	match_function_body {
-		$$ = ast.NewFunctionPrototypeNode(
-			$1.(*ast.MatchCaseListNode).Cases,
-		)
+		$$ = ast.NewFunctionPrototypeNode($1.(*ast.MapNode).Pairs)
 	}
 
 function_signature: /* Parameter list declaration (a, b, c) */
@@ -345,15 +337,15 @@ match_function_body: /* of { case (a, b): this() else: that() }  */
 
 function_case: /* case (x): this */
 	KW_CASE function_signature ':' stmt_list {
-		$$ = ast.NewMatchCaseNode($2, $4)
+		$$ = ast.NewPairNode($2, $4)
 	}
 
 function_case_list: /* case (x): this case (y): that */
 	function_case {
-		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+		$$ = ast.NewMapNode($1.(*ast.PairNode))
 	}
 |	function_case_list function_case {
-		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
+		$1.(*ast.MapNode).Append($2.(*ast.PairNode))
 		$$ = $1
 	}
 
@@ -416,7 +408,7 @@ map_arguments: /* Fields provided to a Map */
 	positional_argument_list {
 		node := ast.NewMapNode()
 		for _, v := range $1.(*ast.VectorNode).Elements {
-			node.Append(ast.NewKeyValueNode(nil, v))
+			node.Append(ast.NewPairNode(nil, v))
 		}
 		$$ = node
 	}
@@ -425,25 +417,25 @@ map_arguments: /* Fields provided to a Map */
 key_value_pair: /* a: b */
 	shorthand_symbol_key
 |	expr ':' expr {
-		$$ = ast.NewKeyValueNode($1, $3)
+		$$ = ast.NewPairNode($1, $3)
 	}
 |	spread_argument {
-		$$ = ast.NewKeyValueNode($1, nil)
+		$$ = ast.NewPairNode($1, nil)
 	}
 
 key_value_pair_list: /* Map keys a: b, c: d */
 	key_value_pair {
-		$$ = ast.NewMapNode($1.(*ast.KeyValueNode))
+		$$ = ast.NewMapNode($1.(*ast.PairNode))
 	}
 |	key_value_pair_list ',' key_value_pair {
-		$1.(*ast.MapNode).Append($3.(*ast.KeyValueNode))
+		$1.(*ast.MapNode).Append($3.(*ast.PairNode))
 		$$ = $1
 	}
 
 shorthand_symbol_key: /* Dot-identifier for key-value pair */
 	'.' IDENT {
 		id := $2.(*ast.IdentifierNode)
-		$$ = ast.NewKeyValueNode(ast.NewSymbolNode(id.Name), id)
+		$$ = ast.NewPairNode(ast.NewSymbolNode(id.Name), id)
 	}
 
 
@@ -478,10 +470,7 @@ shorthand_member_lookup: /* a.b */
 
 when_construct: /* when(x > y) of { then: x else y } */
 	KW_WHEN '(' expr ')' when_body {
-		$$ = ast.NewMatchNode(
-			$3,
-			$5.(*ast.MatchCaseListNode).Cases,
-		)
+		$$ = ast.NewMatchNode($3, $5.(*ast.MapNode).Pairs)
 	}
 
 when_body: /* { x }, of { then: x else: y } */
@@ -489,9 +478,7 @@ when_body: /* { x }, of { then: x else: y } */
 
 when_then_body: /* { x } */
 	'{' stmt_list '}' {
-		$$ = ast.NewMatchCaseListNode(
-			ast.NewMatchCaseNode(ast.TrueNode, $2),
-		)
+		$$ = ast.NewMapNode(ast.NewPairNode(ast.TrueNode, $2))
 	}
 
 when_cases_body: /* of { then: x else y } */
@@ -499,26 +486,23 @@ when_cases_body: /* of { then: x else y } */
 
 when_then: /* then: x */
 	KW_THEN ':' stmt_list {
-		$$ = ast.NewMatchCaseNode(ast.TrueNode, $3)
+		$$ = ast.NewPairNode(ast.TrueNode, $3)
 	}
 
 when_else: /* else: y */
 	KW_ELSE ':' stmt_list {
-		$$ = ast.NewMatchCaseNode(ast.FalseNode, $3)
+		$$ = ast.NewPairNode(ast.FalseNode, $3)
 	}
 
 when_case_list: /* then: x else y */
 	when_then {
-		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+		$$ = ast.NewMapNode($1.(*ast.PairNode))
 	}
 |	when_else {
-		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+		$$ = ast.NewMapNode($1.(*ast.PairNode))
 	}
 |	when_then when_else {
-		$$ = ast.NewMatchCaseListNode(
-			$1.(*ast.MatchCaseNode),
-			$2.(*ast.MatchCaseNode),
-		)
+		$$ = ast.NewMapNode($1.(*ast.PairNode), $2.(*ast.PairNode))
 	}
 
 
@@ -528,7 +512,7 @@ when_case_list: /* then: x else y */
 
 match_construct: /* match(x) { ... } */
 	KW_MATCH '(' expr ')' KW_OF match_clauses_body {
-		$$ = ast.NewMatchNode($3, $6.(*ast.MatchCaseListNode).Cases)
+		$$ = ast.NewMatchNode($3, $6.(*ast.MapNode).Pairs)
 	}
 
 match_clauses_body: /* { case x: this case y: that } */
@@ -536,27 +520,27 @@ match_clauses_body: /* { case x: this case y: that } */
 
 match_case: /* case x: this */
 	KW_CASE expr ':' stmt_list {
-		$$ = ast.NewMatchCaseNode($2, $4)
+		$$ = ast.NewPairNode($2, $4)
 	}
 
 match_else: /* case x: this */
 	KW_ELSE ':' stmt_list {
-		$$ = ast.NewMatchCaseNode(nil, $3)
+		$$ = ast.NewPairNode(nil, $3)
 	}
 
 match_case_list: /* case x: this case y: that */
 	match_case {
-		$$ = ast.NewMatchCaseListNode($1.(*ast.MatchCaseNode))
+		$$ = ast.NewMapNode($1.(*ast.PairNode))
 	}
 |	match_case_list match_case {
-		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
+		$1.(*ast.MapNode).Append($2.(*ast.PairNode))
 		$$ = $1
 	}
 
 match_clause_list: /* case x: this case y: that else: other */
 	match_case_list
 |	match_case_list match_else {
-		$1.(*ast.MatchCaseListNode).Append($2.(*ast.MatchCaseNode))
+		$1.(*ast.MapNode).Append($2.(*ast.PairNode))
 		$$ = $1
 	}
 

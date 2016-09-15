@@ -3,11 +3,11 @@ package ast
 // Match construct
 type MatchNode struct {
 	Expr  ASTNode
-	Cases []*MatchCaseNode
+	Cases []*PairNode
 }
 
-// Create a new match case list node.
-func NewMatchNode(expr ASTNode, cases []*MatchCaseNode) *MatchNode {
+// Create a new match node.
+func NewMatchNode(expr ASTNode, cases []*PairNode) *MatchNode {
 	return &MatchNode{expr, cases}
 }
 

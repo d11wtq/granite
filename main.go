@@ -30,5 +30,5 @@ func main() {
 		return
 	}
 
-	ast.Inspect(result)
+	ast.Dump(result)
 }

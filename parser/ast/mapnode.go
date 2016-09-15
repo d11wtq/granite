@@ -2,16 +2,16 @@ package ast
 
 // Map literal
 type MapNode struct {
-	KeyValues []*KeyValueNode
+	Pairs []*PairNode
 }
 
-// Create a new MapNode with the given keys.
-func NewMapNode(keyvalues ...*KeyValueNode) *MapNode {
-	return &MapNode{keyvalues}
+// Create a new MapNode with the given pairs.
+func NewMapNode(pairs ...*PairNode) *MapNode {
+	return &MapNode{pairs}
 }
 
-func (node *MapNode) Append(keyvalue *KeyValueNode) {
-	node.KeyValues = append(node.KeyValues, keyvalue)
+func (node *MapNode) Append(pair *PairNode) {
+	node.Pairs = append(node.Pairs, pair)
 }
 
 func (node *MapNode) Accept(visitor ASTVisitor) {

@@ -2,11 +2,11 @@ package ast
 
 // Record definitions
 type RecordPrototypeNode struct {
-	Fields []*KeyValueNode
+	Fields []*PairNode
 }
 
 // Return a new RecordPrototypeNode with fields.
-func NewRecordPrototypeNode(fields []*KeyValueNode) *RecordPrototypeNode {
+func NewRecordPrototypeNode(fields []*PairNode) *RecordPrototypeNode {
 	return &RecordPrototypeNode{fields}
 }
 

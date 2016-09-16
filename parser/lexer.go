@@ -45,11 +45,11 @@ const (
 	// Inside parentheses
 	ST_PAREN
 	// Inside a Map
-	ST_MAP
+	ST_DATA_LIST
 	// Inside a Vector
 	ST_VECTOR
 	// Introducing a func
-	ST_FUNC_START
+	ST_BLOCK_START
 	// Introducing a match (x) { }
 	ST_MATCH_START
 	// Cases for a match
@@ -152,23 +152,9 @@ func (lexer *BijouLex) Error(err string) {
 	lexer.error = err
 }
 
-// FIXME: This is messy
-// FIXME: ST_FUNC_START now also used for KW_WHEN (rename to ST_CONSTRUCT_START?)
-// FIXME: ST_MAP also used for records (rename to ST_DATA?)
+// Manage the state of the lexer to aid with ASI procedure
 func (lexer *BijouLex) checkState(token int) {
 	switch token {
-	case KW_OF:
-		lexer.pushState(ST_MATCH_START)
-	case KW_CASE, KW_THEN, KW_ELSE:
-		if lexer.state == ST_BLOCK {
-			lexer.popState(ST_BLOCK)
-		}
-
-		if lexer.state == ST_MATCH_BODY {
-			lexer.pushState(ST_BLOCK)
-		}
-	case KW_FUNC, '#', KW_WHEN:
-		lexer.pushState(ST_FUNC_START)
 	case '(':
 		lexer.pushState(ST_PAREN)
 	case ')':
@@ -177,27 +163,27 @@ func (lexer *BijouLex) checkState(token int) {
 		lexer.pushState(ST_VECTOR)
 	case ']':
 		lexer.popState(ST_VECTOR)
+	case KW_FUNC, '#', KW_WHEN, KW_MATCH:
+		lexer.pushState(ST_BLOCK_START)
+	case KW_OF:
+		lexer.swapState(ST_BLOCK_START, ST_MATCH_START)
+	case KW_CASE, KW_THEN, KW_ELSE:
+		lexer.keepState(ST_BLOCK)
 	case '{':
 		switch lexer.state {
-		case ST_FUNC_START:
-			lexer.pushState(ST_BLOCK)
+		case ST_BLOCK_START:
+			lexer.swapState(ST_BLOCK_START, ST_BLOCK)
 		case ST_MATCH_START:
-			lexer.pushState(ST_MATCH_BODY)
+			lexer.swapState(ST_MATCH_START, ST_MATCH_BODY)
 		default:
-			lexer.pushState(ST_MAP)
+			lexer.pushState(ST_DATA_LIST)
 		}
 	case '}':
 		switch lexer.state {
-		case ST_BLOCK, ST_MAP:
+		case ST_BLOCK, ST_DATA_LIST:
 			lexer.popState(lexer.state)
 		}
-		if lexer.state == ST_MATCH_BODY {
-			lexer.popState(ST_MATCH_BODY)
-			lexer.popState(ST_MATCH_START)
-		}
-		if lexer.state == ST_FUNC_START {
-			lexer.popState(ST_FUNC_START)
-		}
+		lexer.popState(ST_MATCH_BODY)
 	}
 
 	lexer.token = token
@@ -209,11 +195,22 @@ func (lexer *BijouLex) pushState(newState int) {
 	lexer.state = newState
 }
 
+// If the current state is oldState, pop it off the stack
 func (lexer *BijouLex) popState(oldState int) {
 	if lexer.state == oldState && len(lexer.stack) > 0 {
 		lexer.state = lexer.stack[len(lexer.stack)-1]
 		lexer.stack = lexer.stack[:len(lexer.stack)-1]
 	}
+}
+
+// Performs popState() and pushState()
+func (lexer *BijouLex) swapState(oldState, newState int) {
+	lexer.popState(oldState)
+	lexer.pushState(newState)
+}
+
+func (lexer *BijouLex) keepState(newState int) {
+	lexer.swapState(newState, newState)
 }
 
 // Get the next character in the source, without consuming it

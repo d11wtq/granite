@@ -40,7 +40,7 @@ func (e *BijouParseError) currentColumn() int {
 func (e *BijouParseError) locationMarker() string {
 	var before = e.lexer.lineBuffer
 	var after = make([]rune, 0)
-	var marker = make([]rune, len(before))
+	var marker = make([]rune, 0, len(before))
 
 	// Produce marker by replacing non-space chars with ' ', then adding '^'
 	for _, c := range before {

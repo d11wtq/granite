@@ -241,7 +241,7 @@ func (lexer *BijouLex) read() rune {
 	case 0:
 		// noop
 	case 1:
-		lexer.lineBuffer = []rune{c}
+		lexer.lineBuffer = append(lexer.lineBuffer[:0], c)
 	default:
 		lexer.lineBuffer = append(lexer.lineBuffer, c)
 	}

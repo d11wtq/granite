@@ -371,7 +371,14 @@ func (lexer *BijouLex) scanSingleString(lval *BijouSymType) int {
 
 // Scan one of the numeric types
 func (lexer *BijouLex) scanNumber(lval *BijouSymType) int {
+	var (
+		num  int64
+		err  error
+		base int = 10
+	)
+
 	str := make([]rune, 0)
+
 	for {
 		c := lexer.read()
 		if c == eof {
@@ -383,12 +390,32 @@ func (lexer *BijouLex) scanNumber(lval *BijouSymType) int {
 		}
 		str = append(str, c)
 	}
-	n, err := strconv.ParseInt(string(str), 10, 64)
+
+	if len(str) > 1 {
+		switch string(str[:2]) {
+		case "0b":
+			str = str[2:]
+			base = 2
+		case "0o":
+			str = str[2:]
+			base = 8
+		case "0x":
+			str = str[2:]
+			base = 16
+		}
+	}
+
+	num, err = strconv.ParseInt(
+		string(str),
+		base,
+		64,
+	)
+
 	if err != nil {
-		lval.node = &ast.StringNode{string(str)}
 		return INVALID_NUMBER
 	}
-	lval.node = &ast.IntegerNode{n}
+
+	lval.node = ast.NewIntegerNode(num)
 	return INTEGER
 }
 

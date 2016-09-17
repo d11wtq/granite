@@ -75,10 +75,13 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %left	'+' '-'
 %left	'*' '/'
 
+%right	UNARY
+
 %type	<node> start
 %type	<node> program
 %type	<node> expr
 %type	<node> arithmetic
+%type	<node> unary_expr
 %type	<node> comparison
 %type	<node> logical
 
@@ -191,10 +194,15 @@ invokable: /* Things that can be invoked as functions */
  */
 
 arithmetic: /* Addition, subtraction, multiplication, division */
-	expr '*' expr { $$ = ast.NewArithmeticNode('*', $1, $3) }
+	unary_expr
+|	expr '*' expr { $$ = ast.NewArithmeticNode('*', $1, $3) }
 |	expr '/' expr { $$ = ast.NewArithmeticNode('/', $1, $3) }
 |	expr '+' expr { $$ = ast.NewArithmeticNode('+', $1, $3) }
 |	expr '-' expr { $$ = ast.NewArithmeticNode('-', $1, $3) }
+
+unary_expr: /* -42, +7 */
+	'-' expr %prec UNARY { $$ = ast.NewUnaryNode('-', $2) }
+|	'+' expr %prec UNARY { $$ = ast.NewUnaryNode('+', $2) }
 
 
 /**

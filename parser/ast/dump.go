@@ -71,6 +71,10 @@ func (d *Dumper) VisitPairNode(node *PairNode) {
 	d.render("pair of", node.Left, node.Right)
 }
 
+func (d *Dumper) VisitUnaryNode(node *UnaryNode) {
+	d.render(fmt.Sprintf("unary (%c)", node.Op), node.Expr)
+}
+
 func (d *Dumper) VisitArithmeticNode(node *ArithmeticNode) {
 	d.render(fmt.Sprintf("math (%c)", node.Op), node.Left, node.Right)
 }

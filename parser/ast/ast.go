@@ -16,6 +16,7 @@ type ASTVisitor interface {
 	VisitIdentifierNode(node *IdentifierNode)
 	VisitPairNode(node *PairNode)
 	VisitComparisonNode(node *ComparisonNode)
+	VisitUnaryNode(node *UnaryNode)
 	VisitArithmeticNode(node *ArithmeticNode)
 	VisitLogicalNode(node *LogicalNode)
 	VisitDefNode(node *DefNode)

@@ -328,62 +328,52 @@ func (lexer *BijouLex) scanEOL(lval *BijouSymType) int {
 
 // Scan a double-quoted string
 func (lexer *BijouLex) scanDoubleString(lval *BijouSymType) int {
-	if lexer.read() != '"' {
-		panic("Attempt to read non-string as string")
-	}
-
-	tok := UNTERMINATED_STRING
-	str := make([]rune, 0)
-
-	for {
-		c := lexer.read()
-		if c == '\\' {
-			c = lexer.read()
-			switch c {
-			case 't':
-				c = '\t'
-			case 'r':
-				c = '\r'
-			case 'n':
-				c = '\n'
-			default:
-				str = append(str, '\\')
-			}
-		}
-		if c == eof {
-			break
-		}
-		if c == '"' {
-			tok = STRING
-			break
-		}
-		str = append(str, c)
-	}
-	lval.node = &ast.StringNode{string(str)}
-	return tok
+	return lexer.scanString(lval, '"', true)
 }
 
 // Scan a single-quoted string
 func (lexer *BijouLex) scanSingleString(lval *BijouSymType) int {
-	if lexer.read() != '\'' {
+	return lexer.scanString(lval, '\'', false)
+}
+
+// Scan a string delimited by quote with supported special chars
+func (lexer *BijouLex) scanString(lval *BijouSymType, quote rune, specials bool) int {
+	if lexer.read() != quote {
 		panic("Attempt to read non-string as string")
 	}
 
 	tok := UNTERMINATED_STRING
 	str := make([]rune, 0)
+	esc := false
 
 	for {
+		esc = false
 		c := lexer.read()
 		if c == '\\' {
+			esc = true
 			c = lexer.read()
-			if c != '\'' {
-				str = append(str, '\\')
+
+			if c != quote {
+				if specials == true {
+					switch c {
+					case 't':
+						c = '\t'
+					case 'r':
+						c = '\r'
+					case 'n':
+						c = '\n'
+					default:
+						str = append(str, '\\')
+					}
+				} else {
+					str = append(str, '\\')
+				}
 			}
 		}
 		if c == eof {
 			break
 		}
-		if c == '\'' {
+		if c == quote && esc == false {
 			tok = STRING
 			break
 		}
@@ -582,6 +572,7 @@ func (lexer *BijouLex) scanSymbol(lval *BijouSymType) int {
 	return SYMBOL
 }
 
+// Scan '.' or '...'
 func (lexer *BijouLex) scanDots(lval *BijouSymType) int {
 	if lexer.read() != '.' {
 		panic("Attempted to read non-'.' as '.'")

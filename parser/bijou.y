@@ -1,4 +1,4 @@
-/* vim: noet:ts=8:sw=8 */
+// vim: noet:ts=8:sw=8
 %{
 
 /* Program code */

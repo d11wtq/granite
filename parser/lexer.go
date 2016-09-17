@@ -4,6 +4,7 @@ import (
 	"./ast"
 	"io"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
@@ -24,6 +25,29 @@ var space = &unicode.RangeTable{
 var digit = &unicode.RangeTable{
 	R16: []unicode.Range16{
 		{'0', '9', 1},
+	},
+}
+
+// Hexadecimal characters (in order)
+var hexadecimal = &unicode.RangeTable{
+	R16: []unicode.Range16{
+		{'0', '9', 1},
+		{'A', 'F', 1},
+		{'a', 'f', 1},
+	},
+}
+
+// Octal characters (in order)
+var octal = &unicode.RangeTable{
+	R16: []unicode.Range16{
+		{'0', '7', 1},
+	},
+}
+
+// Binary characters (in order)
+var binary = &unicode.RangeTable{
+	R16: []unicode.Range16{
+		{'0', '1', 1},
 	},
 }
 
@@ -371,52 +395,124 @@ func (lexer *BijouLex) scanSingleString(lval *BijouSymType) int {
 
 // Scan one of the numeric types
 func (lexer *BijouLex) scanNumber(lval *BijouSymType) int {
+	str := lexer.readToken(digit)
+
+	switch lexer.peek() {
+	case '.':
+		return lexer.scanFloat(lval, str)
+	case 'e', 'E':
+		return lexer.scanExponent(lval, str)
+	}
+
+	return lexer.scanInteger(lval, str)
+}
+
+// Scan str into an integer type (1234, 0x1234, 0o1234, 0b0101)
+func (lexer *BijouLex) scanInteger(lval *BijouSymType, str string) int {
 	var (
 		num  int64
 		err  error
 		base int = 10
 	)
 
-	str := make([]rune, 0)
-
-	for {
-		c := lexer.read()
-		if c == eof {
-			break
-		}
-		if !unicode.Is(word, c) {
-			lexer.backup(c)
-			break
-		}
-		str = append(str, c)
-	}
-
-	if len(str) > 1 {
-		switch string(str[:2]) {
-		case "0b":
-			str = str[2:]
+	if str == "0" {
+		switch lexer.peek() {
+		case 'b':
+			lexer.read()
 			base = 2
-		case "0o":
-			str = str[2:]
+			str = lexer.readToken(binary)
+		case 'o':
+			lexer.read()
 			base = 8
-		case "0x":
-			str = str[2:]
+			str = lexer.readToken(octal)
+		case 'x':
+			lexer.read()
 			base = 16
+			str = lexer.readToken(hexadecimal)
 		}
 	}
 
-	num, err = strconv.ParseInt(
-		string(str),
-		base,
-		64,
-	)
-
+	num, err = strconv.ParseInt(str, base, 64)
 	if err != nil {
 		return INVALID_NUMBER
 	}
 
 	lval.node = ast.NewIntegerNode(num)
 	return INTEGER
+}
+
+// Scan str into a float type (12.34)
+func (lexer *BijouLex) scanFloat(lval *BijouSymType, str string) int {
+	if lexer.read() != '.' {
+		panic("Attempted to scan non-float as float")
+	}
+
+	str = strings.Join([]string{str, lexer.readToken(digit)}, ".")
+
+	switch lexer.peek() {
+	case 'e', 'E':
+		return lexer.scanExponent(lval, str)
+	}
+
+	var (
+		num float64
+		err error
+	)
+
+	num, err = strconv.ParseFloat(str, 64)
+	if err != nil {
+		return INVALID_NUMBER
+	}
+
+	lval.node = ast.NewFloatNode(num)
+	return FLOAT
+}
+
+// Scan str into a float with exponentiation (12.34e-7)
+func (lexer *BijouLex) scanExponent(lval *BijouSymType, str string) int {
+	var (
+		num float64
+		exp = make([]rune, 0)
+		err error
+	)
+
+	switch lexer.read() {
+	case 'e', 'E':
+		switch lexer.peek() {
+		case '+', '-':
+			exp = append(exp, lexer.read())
+		}
+		exp = append(exp, []rune(lexer.readToken(digit))...)
+	default:
+		panic("Attempted to scan non-exponential as exponential")
+	}
+
+	str = strings.Join([]string{str, string(exp)}, "e")
+
+	num, err = strconv.ParseFloat(str, 64)
+	if err != nil {
+		return INVALID_NUMBER
+	}
+
+	lval.node = ast.NewFloatNode(num)
+	return FLOAT
+}
+
+// Read a lexographic token from the source, without interpretation
+func (lexer *BijouLex) readToken(table *unicode.RangeTable) string {
+	str := make([]rune, 0)
+	for {
+		c := lexer.read()
+		if c == eof {
+			break
+		}
+		if !unicode.Is(table, c) {
+			lexer.backup(c)
+			break
+		}
+		str = append(str, c)
+	}
+	return string(str)
 }
 
 // Read a word token from the source, without interpretation

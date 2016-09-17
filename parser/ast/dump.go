@@ -52,7 +52,7 @@ func (d *Dumper) VisitBooleanNode(node *BooleanNode) {
 }
 
 func (d *Dumper) VisitFloatNode(node *FloatNode) {
-	d.render(fmt.Sprintf("FLOAT (%f)", node.Value))
+	d.render(fmt.Sprintf("FLOAT (%#v)", node.Value))
 }
 
 func (d *Dumper) VisitStringNode(node *StringNode) {

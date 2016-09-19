@@ -85,6 +85,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> comparison
 %type	<node> logical
 
+%type	<node> pair
+
 %type	<node> assignment
 %type	<node> import
 
@@ -166,6 +168,7 @@ expr: /* Abribtrary expressions */
 |	logical
 |	assignment
 |	import
+|	'(' pair ')' { $$ = $2 }
 |	deffunction
 |	defrecord
 |	invokable
@@ -444,6 +447,16 @@ shorthand_symbol_key: /* Dot-identifier for key-value pair */
 	'.' IDENT {
 		id := $2.(*ast.IdentifierNode)
 		$$ = ast.NewPairNode(ast.NewSymbolNode(id.Name), id)
+	}
+
+
+/**
+ * Pairs.
+ */
+
+pair: /* a: b */
+	expr ':' expr {
+		$$ = ast.NewPairNode($1, $3)
 	}
 
 

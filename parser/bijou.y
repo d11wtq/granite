@@ -100,7 +100,6 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> argument
 %type	<node> spread_argument
 %type	<node> argument_list
-%type	<node> positional_argument_list
 
 %type	<node> map_literal
 %type	<node> map_arguments
@@ -275,7 +274,7 @@ field_list: /* Record field declaration */
 	}
 
 field_key: /* Record field identifiers */
-	SYMBOL | IDENT
+	SYMBOL | IDENT { $$ = ast.NewSymbolNode($1.(*ast.IdentifierNode).Name) }
 
 field: /* Record field declaration */
 	field_key {
@@ -393,15 +392,6 @@ argument_list: /* Function/vector arguments */
 		$$ = $1
 	}
 
-positional_argument_list: /* Simple a, b, c */
-	expr {
-		$$ = ast.NewVectorNode($1)
-	}
-|	positional_argument_list ',' expr {
-		$1.(*ast.VectorNode).Append($3)
-		$$ = $1
-	}
-
 
 /**
  * Maps.
@@ -416,20 +406,11 @@ map_literal: /* Map literals */
 	}
 
 map_arguments: /* Fields provided to a Map */
-	positional_argument_list {
-		node := ast.NewMapNode()
-		for _, v := range $1.(*ast.VectorNode).Elements {
-			node.Append(ast.NewPairNode(nil, v))
-		}
-		$$ = node
-	}
-|	key_value_pair_list
+	key_value_pair_list
 
 key_value_pair: /* a: b */
 	shorthand_symbol_key
-|	expr ':' expr {
-		$$ = ast.NewPairNode($1, $3)
-	}
+|	pair
 |	spread_argument {
 		$$ = ast.NewPairNode($1, nil)
 	}

@@ -1,19 +1,16 @@
 package ast
 
-// Arbitrary associative data
+// Key value pairs
 type PairNode struct {
-	Left  ASTNode
-	Right ASTNode
+	Key   ASTNode
+	Value ASTNode
 }
 
-func NewPairNode(left, right ASTNode) *PairNode {
-	return &PairNode{left, right}
-}
-
-func (node *PairNode) IsPositional() bool {
-	return node.Left == nil
+// Create a new Pair.
+func NewPair(key, value ASTNode) *PairNode {
+	return &PairNode{key, value}
 }
 
 func (node *PairNode) Accept(visitor ASTVisitor) {
-	visitor.VisitPairNode(node)
+	visitor.VisitPair(node)
 }

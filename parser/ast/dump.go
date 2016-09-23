@@ -4,6 +4,19 @@ import (
 	"fmt"
 )
 
+var opNames = map[int]string{
+	OP_ADD: "+",
+	OP_MIN: "-",
+	OP_MUL: "*",
+	OP_DIV: "/",
+	OP_ASS: "=",
+	OP_GT:  ">",
+	OP_LT:  ">",
+	OP_AND: "and",
+	OP_OR:  "or",
+	OP_NOT: "not",
+}
+
 // Internal use only
 type sliceNode struct {
 	Name     string
@@ -11,13 +24,13 @@ type sliceNode struct {
 }
 
 // Create a new slice node for rendering in the AST
-func newSliceNode(name string, elements []ASTNode) *sliceNode {
+func newSlice(name string, elements []ASTNode) *sliceNode {
 	return &sliceNode{name, elements}
 }
 
 // Dangerously asserts visitor as a *Dumper and invokes visitSliceNode()
 func (node *sliceNode) Accept(visitor ASTVisitor) {
-	visitor.(*Dumper).visitSliceNode(node)
+	visitor.(*Dumper).visitSlice(node)
 }
 
 // The Dumper can render an AST.
@@ -36,159 +49,84 @@ func (d *Dumper) Visit(node ASTNode) {
 	node.Accept(d)
 }
 
-func (d *Dumper) VisitCollection(node *Collection) {
+func (d *Dumper) VisitInteger(node *IntegerNode) {
+	d.render(fmt.Sprintf("INTEGER (%d)", node.Value))
+}
+
+func (d *Dumper) VisitBoolean(node *BooleanNode) {
+	d.render(fmt.Sprintf("BOOLEAN (%#v)", node.Value))
+}
+
+func (d *Dumper) VisitFloat(node *FloatNode) {
+	d.render(fmt.Sprintf("FLOAT (%#v)", node.Value))
+}
+
+func (d *Dumper) VisitString(node *StringNode) {
+	d.render(fmt.Sprintf("STRING (%#v)", node.String))
+}
+
+func (d *Dumper) VisitSymbol(node *SymbolNode) {
+	d.render(fmt.Sprintf("SYMBOL (%s)", node.Name))
+}
+
+func (d *Dumper) VisitIdentifier(node *IdentifierNode) {
+	d.render(fmt.Sprintf("IDENT (%s)", node.Name))
+}
+
+func (d *Dumper) VisitExpressionList(node *ExpressionList) {
 	d.render(
-		fmt.Sprintf("statements (%d nodes)", len(node.Elements)),
+		fmt.Sprintf("expressions (%d nodes)", len(node.Elements)),
 		node.Elements...,
 	)
 }
 
-func (d *Dumper) VisitIntegerNode(node *IntegerNode) {
-	d.render(fmt.Sprintf("INTEGER (%d)", node.Value))
-}
-
-func (d *Dumper) VisitBooleanNode(node *BooleanNode) {
-	d.render(fmt.Sprintf("BOOLEAN (%#v)", node.Value))
-}
-
-func (d *Dumper) VisitFloatNode(node *FloatNode) {
-	d.render(fmt.Sprintf("FLOAT (%#v)", node.Value))
-}
-
-func (d *Dumper) VisitStringNode(node *StringNode) {
-	d.render(fmt.Sprintf("STRING (%#v)", node.String))
-}
-
-func (d *Dumper) VisitSymbolNode(node *SymbolNode) {
-	d.render(fmt.Sprintf("SYMBOL (%s)", node.Name))
-}
-
-func (d *Dumper) VisitIdentifierNode(node *IdentifierNode) {
-	d.render(fmt.Sprintf("IDENT (%s)", node.Name))
-}
-
-func (d *Dumper) VisitPairNode(node *PairNode) {
-	d.render("pair of", node.Left, node.Right)
-}
-
-func (d *Dumper) VisitUnaryNode(node *UnaryNode) {
-	d.render(fmt.Sprintf("unary (%c)", node.Op), node.Expr)
-}
-
-func (d *Dumper) VisitArithmeticNode(node *ArithmeticNode) {
-	d.render(fmt.Sprintf("math (%c)", node.Op), node.Left, node.Right)
-}
-
-func (d *Dumper) VisitComparisonNode(node *ComparisonNode) {
-	operators := map[int]string{
-		CMP_GT: ">",
-		CMP_LT: "<",
-	}
+func (d *Dumper) VisitBinaryExpression(node *BinaryExpressionNode) {
 	d.render(
-		fmt.Sprintf("comparison (%s)", operators[node.Cmp]),
+		fmt.Sprintf("binary expression (%s)", opNames[node.Op]),
 		node.Left,
 		node.Right,
 	)
 }
 
-func (d *Dumper) VisitLogicalNode(node *LogicalNode) {
-	operators := map[int]string{
-		OP_AND: "and",
-		OP_OR:  "or",
-	}
+func (d *Dumper) VisitUnaryExpression(node *UnaryExpressionNode) {
 	d.render(
-		fmt.Sprintf("logical (%s)", operators[node.Op]),
-		node.Left,
-		node.Right,
+		fmt.Sprintf("unary expression (%s)", opNames[node.Op]),
+		node.Expression,
 	)
 }
 
-func (d *Dumper) VisitDefNode(node *DefNode) {
-	d.render("define", node.Name, node.Value)
-}
-
-func (d *Dumper) VisitAssignNode(node *AssignNode) {
-	d.render("assignment (=)", node.Left, node.Right)
-}
-
-func (d *Dumper) VisitImportNode(node *ImportNode) {
-	d.render("import", node.Path)
-}
-
-func (d *Dumper) VisitVectorNode(node *VectorNode) {
+func (d *Dumper) VisitVector(node *VectorNode) {
 	d.render(
 		fmt.Sprintf("vector (%d nodes)", len(node.Elements)),
 		node.Elements...,
 	)
 }
 
-func (d *Dumper) VisitMapNode(node *MapNode) {
-	pairs := make([]ASTNode, 0)
-	for _, pair := range node.Pairs {
-		pairs = append(pairs, pair)
+func (d *Dumper) VisitMap(node *MapNode) {
+	elements := make([]ASTNode, 0)
+	for _, e := range node.Elements {
+		elements = append(elements, e)
 	}
-	d.render(fmt.Sprintf("map (%d nodes)", len(node.Pairs)), pairs...)
-}
 
-func (d *Dumper) VisitRecordPrototypeNode(node *RecordPrototypeNode) {
-	fields := make([]ASTNode, 0)
-	for _, field := range node.Fields {
-		fields = append(fields, field)
-	}
 	d.render(
-		fmt.Sprintf("record prototype (%d nodes)", len(node.Fields)),
-		fields...,
+		fmt.Sprintf("map (%d nodes)", len(node.Elements)),
+		elements...,
 	)
 }
 
-func (d *Dumper) VisitFunctionPrototypeNode(node *FunctionPrototypeNode) {
-	cases := make([]ASTNode, 0)
-	for _, case_ := range node.Cases {
-		cases = append(cases, case_)
-	}
-	d.render(
-		fmt.Sprintf("function prototype (%d nodes)", len(node.Cases)),
-		cases...,
-	)
+func (d *Dumper) VisitPair(node *PairNode) {
+	d.render("pair of", node.Key, node.Value)
 }
 
-func (d *Dumper) VisitInvocationNode(node *InvocationNode) {
-	d.render("invocation", node.Prototype, node.Args)
+func (d *Dumper) VisitFunctionApplication(node *FunctionApplicationNode) {
+	d.render("function application", node.Target, node.Arguments)
 }
 
-func (d *Dumper) VisitMemberLookupNode(node *MemberLookupNode) {
-	d.render("member lookup ([])", node.Target, node.Key)
+func (d *Dumper) VisitKeyAccess(node *KeyAccessNode) {
+	d.render("key access", node.Target, node.Key)
 }
 
-func (d *Dumper) VisitMatchNode(node *MatchNode) {
-	cases := make([]ASTNode, 0)
-	for _, case_ := range node.Cases {
-		cases = append(cases, case_)
-	}
-	d.render(
-		"match construct",
-		node.Expr,
-		newSliceNode(fmt.Sprintf("cases (%d nodes)", len(node.Cases)), cases),
-	)
-}
-
-func (d *Dumper) VisitSpreadNode(node *SpreadNode) {
-	d.render("spread of", node.Expr)
-}
-
-func (d *Dumper) VisitRecordNode(node *RecordNode) {
-	fields := make([]ASTNode, 0)
-	for _, field := range node.Fields {
-		fields = append(fields, field)
-	}
-	d.render(
-		"build record",
-		node.Prototype,
-		newSliceNode(fmt.Sprintf("fields (%d nodes)", len(node.Fields)), fields),
-	)
-}
-
-func (d *Dumper) visitSliceNode(node *sliceNode) {
+func (d *Dumper) visitSlice(node *sliceNode) {
 	d.render(node.Name, node.Elements...)
 }
 

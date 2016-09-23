@@ -6,10 +6,10 @@ type FloatNode struct {
 }
 
 // Create a new Float node
-func NewFloatNode(value float64) *FloatNode {
+func NewFloat(value float64) *FloatNode {
 	return &FloatNode{value}
 }
 
 func (node *FloatNode) Accept(visitor ASTVisitor) {
-	visitor.VisitFloatNode(node)
+	visitor.VisitFloat(node)
 }

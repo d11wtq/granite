@@ -1,18 +1,20 @@
 package ast
 
-// Vector literal
+// Vector literals
 type VectorNode struct {
 	Elements []ASTNode
 }
 
-func NewVectorNode(elements ...ASTNode) *VectorNode {
+// Create a new Vector with elements.
+func NewVector(elements ...ASTNode) *VectorNode {
 	return &VectorNode{elements}
 }
 
+// Append the given element to this vector.
 func (node *VectorNode) Append(element ASTNode) {
 	node.Elements = append(node.Elements, element)
 }
 
 func (node *VectorNode) Accept(visitor ASTVisitor) {
-	visitor.VisitVectorNode(node)
+	visitor.VisitVector(node)
 }

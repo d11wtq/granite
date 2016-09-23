@@ -1,50 +1,36 @@
 
 state 0
 	$accept: .start $end 
-	stmt: .    (107)
+	expression_or_empty: .    (26)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  reduce 26 (src line 142)
 
 	start  goto 1
 	program  goto 2
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 3
+	expression  goto 5
+	applicable_expression  goto 12
+	expression_or_empty  goto 4
+	expression_lines  goto 3
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 1
 	$accept:  start.$end 
@@ -56,2871 +42,1474 @@ state 1
 state 2
 	start:  program.    (1)
 
-	.  reduce 1 (src line 156)
+	.  reduce 1 (src line 105)
 
 
 state 3
-	program:  stmt_list.    (2)
-	stmt_list:  stmt_list.EOL stmt 
+	program:  expression_lines.    (2)
+	expression_lines:  expression_lines.EOL expression_or_empty 
 
-	EOL  shift 41
-	.  reduce 2 (src line 161)
+	EOL  shift 27
+	.  reduce 2 (src line 110)
 
 
 state 4
-	stmt_list:  stmt.    (109)
+	expression_lines:  expression_or_empty.    (28)
 
-	.  reduce 109 (src line 558)
+	.  reduce 28 (src line 146)
 
 
 state 5
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
-	stmt:  expr.    (108)
+	expression_or_empty:  expression.    (27)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 108 (src line 556)
+	'='  shift 32
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 27 (src line 144)
 
 
 state 6
-	expr:  arithmetic.    (3)
+	expression:  TRUE.    (3)
 
-	.  reduce 3 (src line 164)
+	.  reduce 3 (src line 113)
 
 
 state 7
-	expr:  comparison.    (4)
+	expression:  FALSE.    (4)
 
-	.  reduce 4 (src line 166)
+	.  reduce 4 (src line 115)
 
 
 state 8
-	expr:  logical.    (5)
+	expression:  STRING.    (5)
 
-	.  reduce 5 (src line 167)
+	.  reduce 5 (src line 116)
 
 
 state 9
-	expr:  assignment.    (6)
+	expression:  FLOAT.    (6)
 
-	.  reduce 6 (src line 168)
+	.  reduce 6 (src line 117)
 
 
 state 10
-	expr:  import.    (7)
+	expression:  binary_expression.    (7)
 
-	.  reduce 7 (src line 169)
+	.  reduce 7 (src line 118)
 
 
 state 11
-	expr:  '('.pair ')' 
-	invokable:  '('.expr ')' 
+	expression:  unary_expression.    (8)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
+	.  reduce 8 (src line 119)
 
-	expr  goto 53
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	pair  goto 52
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 12
-	expr:  deffunction.    (9)
+	expression:  applicable_expression.    (9)
+	function_application:  applicable_expression.'(' application_arguments ')' 
+	key_access:  applicable_expression.'.' IDENT 
+	key_access:  applicable_expression.'[' expression ']' 
 
-	.  reduce 9 (src line 171)
+	'('  shift 37
+	'['  shift 39
+	'.'  shift 38
+	.  reduce 9 (src line 120)
 
 
 state 13
-	expr:  defrecord.    (10)
+	unary_expression:  '-'.expression 
 
-	.  reduce 10 (src line 172)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 40
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 14
-	expr:  invokable.    (11)
-	record_literal:  invokable.map_literal 
-	invocation:  invokable.'(' ')' 
-	invocation:  invokable.'(' argument_list ')' 
+	unary_expression:  '+'.expression 
 
-	'{'  shift 38
-	'('  shift 55
-	.  reduce 11 (src line 173)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
-	map_literal  goto 54
+	expression  goto 41
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 15
-	expr:  TRUE.    (12)
+	unary_expression:  '!'.expression 
 
-	.  reduce 12 (src line 174)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 42
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 16
-	expr:  FALSE.    (13)
+	applicable_expression:  SYMBOL.    (10)
 
-	.  reduce 13 (src line 175)
+	.  reduce 10 (src line 122)
 
 
 state 17
-	expr:  SYMBOL.    (14)
+	applicable_expression:  INTEGER.    (11)
 
-	.  reduce 14 (src line 176)
+	.  reduce 11 (src line 124)
 
 
 state 18
-	expr:  STRING.    (15)
+	applicable_expression:  ident.    (12)
 
-	.  reduce 15 (src line 177)
+	.  reduce 12 (src line 125)
 
 
 state 19
-	expr:  INTEGER.    (16)
+	applicable_expression:  vector_literal.    (13)
 
-	.  reduce 16 (src line 178)
+	.  reduce 13 (src line 126)
 
 
 state 20
-	expr:  FLOAT.    (17)
+	applicable_expression:  map_literal.    (14)
 
-	.  reduce 17 (src line 179)
+	.  reduce 14 (src line 127)
 
 
 state 21
-	arithmetic:  unary_expr.    (28)
+	applicable_expression:  function_application.    (15)
 
-	.  reduce 28 (src line 198)
+	.  reduce 15 (src line 128)
 
 
 state 22
-	import:  KW_IMPORT.'(' expr ')' 
+	applicable_expression:  key_access.    (16)
 
-	'('  shift 56
-	.  error
+	.  reduce 16 (src line 129)
 
 
 state 23
-	deffunction:  KW_FUNC.IDENT function 
+	applicable_expression:  '('.expression ')' 
+	ident:  '('.'+' ')' 
+	ident:  '('.'-' ')' 
+	ident:  '('.'*' ')' 
+	ident:  '('.'/' ')' 
+	ident:  '('.'>' ')' 
+	ident:  '('.'<' ')' 
+	ident:  '('.'!' ')' 
 
-	IDENT  shift 57
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'<'  shift 49
+	'>'  shift 48
+	'!'  shift 50
+	'+'  shift 44
+	'-'  shift 45
+	'*'  shift 46
+	'/'  shift 47
 	.  error
 
+	expression  goto 43
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 24
-	defrecord:  KW_RECORD.IDENT defrecord_fields 
+	ident:  IDENT.    (18)
 
-	IDENT  shift 58
-	.  error
+	.  reduce 18 (src line 132)
 
 
 state 25
-	invokable:  IDENT.    (18)
+	vector_literal:  '['.']' 
+	vector_literal:  '['.arguments ']' 
 
-	.  reduce 18 (src line 181)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	']'  shift 51
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	'*'  shift 56
+	.  error
 
+	expression  goto 54
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	argument  goto 53
+	splat_argument  goto 55
+	arguments  goto 52
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 26
-	invokable:  lambda.    (19)
+	map_literal:  '{'.'}' 
+	map_literal:  '{'.associative_arguments '}' 
 
-	.  reduce 19 (src line 183)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'}'  shift 57
+	'('  shift 23
+	'['  shift 25
+	'.'  shift 62
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	'*'  shift 56
+	.  error
 
+	expression  goto 61
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	splat_argument  goto 60
+	associative_arguments  goto 58
+	pair  goto 59
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 27
-	invokable:  vector_literal.    (20)
+	expression_lines:  expression_lines EOL.expression_or_empty 
+	expression_or_empty: .    (26)
 
-	.  reduce 20 (src line 184)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  reduce 26 (src line 142)
 
+	expression  goto 5
+	applicable_expression  goto 12
+	expression_or_empty  goto 63
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 28
-	invokable:  map_literal.    (21)
+	binary_expression:  expression '+'.expression 
 
-	.  reduce 21 (src line 185)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 64
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 29
-	invokable:  record_literal.    (22)
+	binary_expression:  expression '-'.expression 
 
-	.  reduce 22 (src line 186)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 65
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 30
-	invokable:  invocation.    (23)
+	binary_expression:  expression '*'.expression 
 
-	.  reduce 23 (src line 187)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 66
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 31
-	invokable:  shorthand_member_lookup.    (24)
+	binary_expression:  expression '/'.expression 
 
-	.  reduce 24 (src line 188)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 67
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 32
-	invokable:  match_construct.    (25)
+	binary_expression:  expression '='.expression 
 
-	.  reduce 25 (src line 189)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 68
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 33
-	invokable:  when_construct.    (26)
+	binary_expression:  expression '>'.expression 
 
-	.  reduce 26 (src line 190)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 69
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 34
-	unary_expr:  '-'.expr 
+	binary_expression:  expression '<'.expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
-	expr  goto 59
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 70
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 35
-	unary_expr:  '+'.expr 
+	binary_expression:  expression AND.expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
-	expr  goto 60
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 71
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 36
-	lambda:  '#'.lambda_p 
-	lambda:  '#'.lambda_0 
-	lambda:  '#'.lambda_m 
+	binary_expression:  expression OR.expression 
 
-	KW_OF  shift 69
-	'{'  shift 68
-	'('  shift 67
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
-	lambda_p  goto 61
-	lambda_0  goto 62
-	lambda_m  goto 63
-	function_signature  goto 64
-	simple_function_body  goto 65
-	match_function_body  goto 66
+	expression  goto 72
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 37
-	vector_literal:  '['.']' 
-	vector_literal:  '['.argument_list ']' 
+	function_application:  applicable_expression '('.application_arguments ')' 
+	application_arguments: .    (58)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	OP_SPREAD  shift 75
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	']'  shift 70
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	'*'  shift 56
+	.  reduce 58 (src line 286)
 
-	expr  goto 74
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	argument  goto 72
-	spread_argument  goto 73
-	argument_list  goto 71
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 54
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	argument  goto 53
+	splat_argument  goto 55
+	arguments  goto 74
+	application_arguments  goto 73
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 38
-	map_literal:  '{'.'}' 
-	map_literal:  '{'.map_arguments '}' 
+	key_access:  applicable_expression '.'.IDENT 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	OP_SPREAD  shift 75
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'}'  shift 76
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'.'  shift 83
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 75
 	.  error
 
-	expr  goto 84
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	pair  goto 81
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	spread_argument  goto 82
-	map_literal  goto 28
-	map_arguments  goto 77
-	key_value_pair  goto 79
-	key_value_pair_list  goto 78
-	shorthand_symbol_key  goto 80
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 39
-	match_construct:  KW_MATCH.'(' expr ')' KW_OF match_clauses_body 
+	key_access:  applicable_expression '['.expression ']' 
 
-	'('  shift 85
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
+	expression  goto 76
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 40
-	when_construct:  KW_WHEN.'(' expr ')' when_body 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	unary_expression:  '-' expression.    (39)
 
-	'('  shift 86
-	.  error
+	.  reduce 39 (src line 193)
 
 
 state 41
-	stmt_list:  stmt_list EOL.stmt 
-	stmt: .    (107)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	unary_expression:  '+' expression.    (40)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
+	.  reduce 40 (src line 197)
 
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 87
 
 state 42
-	arithmetic:  expr '*'.expr 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	unary_expression:  '!' expression.    (41)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
+	.  reduce 41 (src line 200)
 
-	expr  goto 88
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 43
-	arithmetic:  expr '/'.expr 
+	applicable_expression:  '(' expression.')' 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	')'  shift 77
+	'='  shift 32
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
 	.  error
 
-	expr  goto 89
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 44
-	arithmetic:  expr '+'.expr 
+	ident:  '(' '+'.')' 
+	unary_expression:  '+'.expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	')'  shift 78
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
-	expr  goto 90
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 41
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 45
-	arithmetic:  expr '-'.expr 
+	ident:  '(' '-'.')' 
+	unary_expression:  '-'.expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	')'  shift 79
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
-	expr  goto 91
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 40
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 46
-	comparison:  expr '>'.expr 
+	ident:  '(' '*'.')' 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	')'  shift 80
 	.  error
 
-	expr  goto 92
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 47
-	comparison:  expr '<'.expr 
+	ident:  '(' '/'.')' 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	')'  shift 81
 	.  error
 
-	expr  goto 93
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 48
-	logical:  expr OP_AND.expr 
+	ident:  '(' '>'.')' 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	')'  shift 82
 	.  error
 
-	expr  goto 94
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 49
-	logical:  expr OP_OR.expr 
+	ident:  '(' '<'.')' 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	')'  shift 83
 	.  error
 
-	expr  goto 95
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 50
-	assignment:  expr '='.expr 
+	ident:  '(' '!'.')' 
+	unary_expression:  '!'.expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	')'  shift 84
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
-	expr  goto 96
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 42
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 51
-	shorthand_member_lookup:  expr '.'.IDENT 
+	vector_literal:  '[' ']'.    (47)
 
-	IDENT  shift 97
-	.  error
+	.  reduce 47 (src line 231)
 
 
 state 52
-	expr:  '(' pair.')' 
+	arguments:  arguments.',' argument 
+	vector_literal:  '[' arguments.']' 
 
-	')'  shift 98
+	']'  shift 86
+	','  shift 85
 	.  error
 
 
 state 53
-	invokable:  '(' expr.')' 
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	pair:  expr.':' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	arguments:  argument.    (44)
 
-	')'  shift 99
-	':'  shift 100
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  error
+	.  reduce 44 (src line 213)
 
 
 state 54
-	record_literal:  invokable map_literal.    (51)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	argument:  expression.    (42)
 
-	.  reduce 51 (src line 290)
+	'='  shift 32
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 42 (src line 209)
 
 
 state 55
-	invocation:  invokable '('.')' 
-	invocation:  invokable '('.argument_list ')' 
+	argument:  splat_argument.    (43)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	OP_SPREAD  shift 75
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	')'  shift 101
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
+	.  reduce 43 (src line 211)
 
-	expr  goto 74
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	argument  goto 72
-	spread_argument  goto 73
-	argument_list  goto 102
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 56
-	import:  KW_IMPORT '('.expr ')' 
+	splat_argument:  '*'.expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
 	.  error
 
-	expr  goto 103
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 87
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 57
-	deffunction:  KW_FUNC IDENT.function 
+	map_literal:  '{' '}'.    (49)
 
-	KW_OF  shift 69
-	'('  shift 67
-	.  error
+	.  reduce 49 (src line 244)
 
-	function  goto 104
-	lambda_p  goto 105
-	lambda_m  goto 106
-	function_signature  goto 64
-	match_function_body  goto 66
 
 state 58
-	defrecord:  KW_RECORD IDENT.defrecord_fields 
+	map_literal:  '{' associative_arguments.'}' 
+	associative_arguments:  associative_arguments.',' pair 
 
-	'{'  shift 108
+	'}'  shift 88
+	','  shift 89
 	.  error
 
-	defrecord_fields  goto 107
 
 state 59
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	unary_expr:  '-' expr.    (33)
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	associative_arguments:  pair.    (54)
 
-	.  reduce 33 (src line 205)
+	.  reduce 54 (src line 266)
 
 
 state 60
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	unary_expr:  '+' expr.    (34)
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	pair:  splat_argument.    (51)
 
-	.  reduce 34 (src line 207)
+	.  reduce 51 (src line 252)
 
 
 state 61
-	lambda:  '#' lambda_p.    (55)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	pair:  expression.DOUBLE_ARROW expression 
 
-	.  reduce 55 (src line 308)
+	'='  shift 32
+	DOUBLE_ARROW  shift 90
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  error
 
 
 state 62
-	lambda:  '#' lambda_0.    (56)
+	pair:  '.'.IDENT 
 
-	.  reduce 56 (src line 310)
+	IDENT  shift 91
+	.  error
 
 
 state 63
-	lambda:  '#' lambda_m.    (57)
+	expression_lines:  expression_lines EOL expression_or_empty.    (29)
 
-	.  reduce 57 (src line 311)
+	.  reduce 29 (src line 153)
 
 
 state 64
-	lambda_p:  function_signature.simple_function_body 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression '+' expression.    (30)
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	'{'  shift 68
-	.  error
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 30 (src line 164)
 
-	simple_function_body  goto 109
 
 state 65
-	lambda_0:  simple_function_body.    (59)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression '-' expression.    (31)
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	.  reduce 59 (src line 319)
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 31 (src line 168)
 
 
 state 66
-	lambda_m:  match_function_body.    (60)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression '*' expression.    (32)
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	.  reduce 60 (src line 325)
+	.  reduce 32 (src line 171)
 
 
 state 67
-	function_signature:  '('.')' 
-	function_signature:  '('.argument_list ')' 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression '/' expression.    (33)
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	OP_SPREAD  shift 75
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	')'  shift 110
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
+	.  reduce 33 (src line 174)
 
-	expr  goto 74
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	argument  goto 72
-	spread_argument  goto 73
-	argument_list  goto 111
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 68
-	simple_function_body:  '{'.stmt_list '}' 
-	stmt: .    (107)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression '=' expression.    (34)
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
+	'='  shift 32
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 34 (src line 177)
 
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 112
 
 state 69
-	match_function_body:  KW_OF.'{' function_case_list '}' 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression '>' expression.    (35)
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	'{'  shift 113
-	.  error
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 35 (src line 180)
 
 
 state 70
-	vector_literal:  '[' ']'.    (68)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression '<' expression.    (36)
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	.  reduce 68 (src line 367)
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 36 (src line 183)
 
 
 state 71
-	vector_literal:  '[' argument_list.']' 
-	argument_list:  argument_list.',' argument 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression AND expression.    (37)
+	binary_expression:  expression.OR expression 
 
-	']'  shift 114
-	','  shift 115
-	.  error
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 37 (src line 186)
 
 
 state 72
-	argument_list:  argument.    (74)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	binary_expression:  expression OR expression.    (38)
 
-	.  reduce 74 (src line 386)
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 38 (src line 189)
 
 
 state 73
-	argument:  spread_argument.    (72)
+	function_application:  applicable_expression '(' application_arguments.')' 
 
-	.  reduce 72 (src line 383)
+	')'  shift 92
+	.  error
 
 
 state 74
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	argument:  expr.    (73)
-	shorthand_member_lookup:  expr.'.' IDENT 
+	arguments:  arguments.',' argument 
+	application_arguments:  arguments.    (57)
 
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 73 (src line 384)
+	','  shift 85
+	.  reduce 57 (src line 284)
 
 
 state 75
-	spread_argument:  OP_SPREAD.    (70)
-	spread_argument:  OP_SPREAD.expr 
+	key_access:  applicable_expression '.' IDENT.    (59)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 70 (src line 375)
+	.  reduce 59 (src line 293)
 
-	expr  goto 116
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 76
-	map_literal:  '{' '}'.    (76)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	key_access:  applicable_expression '[' expression.']' 
 
-	.  reduce 76 (src line 400)
+	']'  shift 93
+	'='  shift 32
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  error
 
 
 state 77
-	map_literal:  '{' map_arguments.'}' 
+	applicable_expression:  '(' expression ')'.    (17)
 
-	'}'  shift 117
-	.  error
+	.  reduce 17 (src line 130)
 
 
 state 78
-	map_arguments:  key_value_pair_list.    (78)
-	key_value_pair_list:  key_value_pair_list.',' key_value_pair 
+	ident:  '(' '+' ')'.    (19)
 
-	','  shift 118
-	.  reduce 78 (src line 408)
+	.  reduce 19 (src line 134)
 
 
 state 79
-	key_value_pair_list:  key_value_pair.    (82)
+	ident:  '(' '-' ')'.    (20)
 
-	.  reduce 82 (src line 418)
+	.  reduce 20 (src line 135)
 
 
 state 80
-	key_value_pair:  shorthand_symbol_key.    (79)
+	ident:  '(' '*' ')'.    (21)
 
-	.  reduce 79 (src line 411)
+	.  reduce 21 (src line 136)
 
 
 state 81
-	key_value_pair:  pair.    (80)
+	ident:  '(' '/' ')'.    (22)
 
-	.  reduce 80 (src line 413)
+	.  reduce 22 (src line 137)
 
 
 state 82
-	key_value_pair:  spread_argument.    (81)
+	ident:  '(' '>' ')'.    (23)
 
-	.  reduce 81 (src line 414)
+	.  reduce 23 (src line 138)
 
 
 state 83
-	shorthand_symbol_key:  '.'.IDENT 
+	ident:  '(' '<' ')'.    (24)
 
-	IDENT  shift 119
-	.  error
+	.  reduce 24 (src line 139)
 
 
 state 84
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	pair:  expr.':' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	ident:  '(' '!' ')'.    (25)
 
-	':'  shift 100
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  error
+	.  reduce 25 (src line 140)
 
 
 state 85
-	match_construct:  KW_MATCH '('.expr ')' KW_OF match_clauses_body 
+	arguments:  arguments ','.argument 
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	'*'  shift 56
 	.  error
 
-	expr  goto 120
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
+	expression  goto 54
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	argument  goto 94
+	splat_argument  goto 55
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 86
-	when_construct:  KW_WHEN '('.expr ')' when_body 
+	vector_literal:  '[' arguments ']'.    (48)
 
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
+	.  reduce 48 (src line 235)
 
-	expr  goto 121
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
 
 state 87
-	stmt_list:  stmt_list EOL stmt.    (110)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	splat_argument:  '*' expression.    (46)
 
-	.  reduce 110 (src line 566)
+	'='  shift 32
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 46 (src line 221)
 
 
 state 88
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr '*' expr.    (29)
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	map_literal:  '{' associative_arguments '}'.    (50)
 
-	.  reduce 29 (src line 200)
+	.  reduce 50 (src line 248)
 
 
 state 89
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr '/' expr.    (30)
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	associative_arguments:  associative_arguments ','.pair 
 
-	.  reduce 30 (src line 201)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'.'  shift 62
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	'*'  shift 56
+	.  error
 
+	expression  goto 61
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	splat_argument  goto 60
+	pair  goto 95
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 90
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr '+' expr.    (31)
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	pair:  expression DOUBLE_ARROW.expression 
 
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 31 (src line 202)
+	IDENT  shift 24
+	INTEGER  shift 17
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 16
+	STRING  shift 8
+	'{'  shift 26
+	'('  shift 23
+	'['  shift 25
+	'!'  shift 15
+	'+'  shift 14
+	'-'  shift 13
+	.  error
 
+	expression  goto 96
+	applicable_expression  goto 12
+	ident  goto 18
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 19
+	map_literal  goto 20
+	function_application  goto 21
+	key_access  goto 22
 
 state 91
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	arithmetic:  expr '-' expr.    (32)
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	pair:  '.' IDENT.    (53)
 
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 32 (src line 203)
+	.  reduce 53 (src line 259)
 
 
 state 92
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr '>' expr.    (35)
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	function_application:  applicable_expression '(' application_arguments ')'.    (56)
 
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 35 (src line 214)
+	.  reduce 56 (src line 279)
 
 
 state 93
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	comparison:  expr '<' expr.    (36)
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	key_access:  applicable_expression '[' expression ']'.    (60)
 
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 36 (src line 216)
+	.  reduce 60 (src line 300)
 
 
 state 94
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr OP_AND expr.    (37)
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	arguments:  arguments ',' argument.    (45)
 
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 37 (src line 223)
+	.  reduce 45 (src line 217)
 
 
 state 95
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	logical:  expr OP_OR expr.    (38)
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
+	associative_arguments:  associative_arguments ',' pair.    (55)
 
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 38 (src line 225)
+	.  reduce 55 (src line 270)
 
 
 state 96
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	assignment:  expr '=' expr.    (39)
-	shorthand_member_lookup:  expr.'.' IDENT 
-
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 39 (src line 231)
-
-
-state 97
-	shorthand_member_lookup:  expr '.' IDENT.    (88)
-
-	.  reduce 88 (src line 461)
-
-
-state 98
-	expr:  '(' pair ')'.    (8)
-
-	.  reduce 8 (src line 170)
-
-
-state 99
-	invokable:  '(' expr ')'.    (27)
-
-	.  reduce 27 (src line 191)
-
-
-state 100
-	pair:  expr ':'.expr 
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
-
-	expr  goto 122
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-
-state 101
-	invocation:  invokable '(' ')'.    (86)
-
-	.  reduce 86 (src line 448)
-
-
-state 102
-	argument_list:  argument_list.',' argument 
-	invocation:  invokable '(' argument_list.')' 
-
-	')'  shift 123
-	','  shift 115
-	.  error
-
-
-state 103
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	import:  KW_IMPORT '(' expr.')' 
-	shorthand_member_lookup:  expr.'.' IDENT 
-
-	')'  shift 124
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  error
-
-
-state 104
-	deffunction:  KW_FUNC IDENT function.    (52)
-
-	.  reduce 52 (src line 300)
-
-
-state 105
-	function:  lambda_p.    (53)
-
-	.  reduce 53 (src line 305)
-
-
-state 106
-	function:  lambda_m.    (54)
-
-	.  reduce 54 (src line 306)
-
-
-state 107
-	defrecord:  KW_RECORD IDENT defrecord_fields.    (41)
-
-	.  reduce 41 (src line 251)
-
-
-state 108
-	defrecord_fields:  '{'.'}' 
-	defrecord_fields:  '{'.field_list '}' 
-
-	IDENT  shift 131
-	SYMBOL  shift 130
-	OP_SPREAD  shift 75
-	'}'  shift 125
-	.  error
-
-	field_list  goto 126
-	field_key  goto 128
-	field  goto 127
-	spread_argument  goto 129
-
-state 109
-	lambda_p:  function_signature simple_function_body.    (58)
-
-	.  reduce 58 (src line 313)
-
-
-state 110
-	function_signature:  '(' ')'.    (61)
-
-	.  reduce 61 (src line 330)
-
-
-state 111
-	function_signature:  '(' argument_list.')' 
-	argument_list:  argument_list.',' argument 
-
-	')'  shift 132
-	','  shift 115
-	.  error
-
-
-state 112
-	simple_function_body:  '{' stmt_list.'}' 
-	stmt_list:  stmt_list.EOL stmt 
-
-	EOL  shift 41
-	'}'  shift 133
-	.  error
-
-
-state 113
-	match_function_body:  KW_OF '{'.function_case_list '}' 
-
-	KW_CASE  shift 136
-	.  error
-
-	function_case  goto 135
-	function_case_list  goto 134
-
-state 114
-	vector_literal:  '[' argument_list ']'.    (69)
-
-	.  reduce 69 (src line 371)
-
-
-state 115
-	argument_list:  argument_list ','.argument 
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	OP_SPREAD  shift 75
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
-
-	expr  goto 74
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	argument  goto 137
-	spread_argument  goto 73
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-
-state 116
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	spread_argument:  OP_SPREAD expr.    (71)
-	shorthand_member_lookup:  expr.'.' IDENT 
-
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 71 (src line 379)
-
-
-state 117
-	map_literal:  '{' map_arguments '}'.    (77)
-
-	.  reduce 77 (src line 404)
-
-
-state 118
-	key_value_pair_list:  key_value_pair_list ','.key_value_pair 
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	OP_SPREAD  shift 75
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'.'  shift 83
-	'+'  shift 35
-	'-'  shift 34
-	.  error
-
-	expr  goto 84
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	pair  goto 81
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	spread_argument  goto 82
-	map_literal  goto 28
-	key_value_pair  goto 138
-	shorthand_symbol_key  goto 80
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-
-state 119
-	shorthand_symbol_key:  '.' IDENT.    (84)
-
-	.  reduce 84 (src line 427)
-
-
-state 120
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
-	match_construct:  KW_MATCH '(' expr.')' KW_OF match_clauses_body 
-
-	')'  shift 139
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  error
-
-
-state 121
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
-	when_construct:  KW_WHEN '(' expr.')' when_body 
-
-	')'  shift 140
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  error
-
-
-state 122
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	pair:  expr ':' expr.    (85)
-	shorthand_member_lookup:  expr.'.' IDENT 
-
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 85 (src line 438)
-
-
-state 123
-	invocation:  invokable '(' argument_list ')'.    (87)
-
-	.  reduce 87 (src line 452)
-
-
-state 124
-	import:  KW_IMPORT '(' expr ')'.    (40)
-
-	.  reduce 40 (src line 241)
-
-
-state 125
-	defrecord_fields:  '{' '}'.    (42)
-
-	.  reduce 42 (src line 259)
-
-
-state 126
-	defrecord_fields:  '{' field_list.'}' 
-	field_list:  field_list.',' field 
-
-	'}'  shift 141
-	','  shift 142
-	.  error
-
-
-state 127
-	field_list:  field.    (44)
-
-	.  reduce 44 (src line 267)
-
-
-state 128
-	field:  field_key.    (48)
-	field:  field_key.':' expr 
-
-	':'  shift 143
-	.  reduce 48 (src line 279)
-
-
-state 129
-	field:  spread_argument.    (50)
-
-	.  reduce 50 (src line 286)
-
-
-state 130
-	field_key:  SYMBOL.    (46)
-
-	.  reduce 46 (src line 276)
-
-
-state 131
-	field_key:  IDENT.    (47)
-
-	.  reduce 47 (src line 277)
-
-
-state 132
-	function_signature:  '(' argument_list ')'.    (62)
-
-	.  reduce 62 (src line 334)
-
-
-state 133
-	simple_function_body:  '{' stmt_list '}'.    (63)
-
-	.  reduce 63 (src line 338)
-
-
-state 134
-	match_function_body:  KW_OF '{' function_case_list.'}' 
-	function_case_list:  function_case_list.function_case 
-
-	KW_CASE  shift 136
-	'}'  shift 144
-	.  error
-
-	function_case  goto 145
-
-state 135
-	function_case_list:  function_case.    (66)
-
-	.  reduce 66 (src line 353)
-
-
-state 136
-	function_case:  KW_CASE.function_signature ':' stmt_list 
-
-	'('  shift 67
-	.  error
-
-	function_signature  goto 146
-
-state 137
-	argument_list:  argument_list ',' argument.    (75)
-
-	.  reduce 75 (src line 390)
-
-
-state 138
-	key_value_pair_list:  key_value_pair_list ',' key_value_pair.    (83)
-
-	.  reduce 83 (src line 422)
-
-
-state 139
-	match_construct:  KW_MATCH '(' expr ')'.KW_OF match_clauses_body 
-
-	KW_OF  shift 147
-	.  error
-
-
-state 140
-	when_construct:  KW_WHEN '(' expr ')'.when_body 
-
-	KW_OF  shift 152
-	'{'  shift 151
-	.  error
-
-	when_body  goto 148
-	when_then_body  goto 149
-	when_cases_body  goto 150
-
-state 141
-	defrecord_fields:  '{' field_list '}'.    (43)
-
-	.  reduce 43 (src line 263)
-
-
-state 142
-	field_list:  field_list ','.field 
-
-	IDENT  shift 131
-	SYMBOL  shift 130
-	OP_SPREAD  shift 75
-	.  error
-
-	field_key  goto 128
-	field  goto 153
-	spread_argument  goto 129
-
-state 143
-	field:  field_key ':'.expr 
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
-
-	expr  goto 154
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-
-state 144
-	match_function_body:  KW_OF '{' function_case_list '}'.    (64)
-
-	.  reduce 64 (src line 343)
-
-
-state 145
-	function_case_list:  function_case_list function_case.    (67)
-
-	.  reduce 67 (src line 357)
-
-
-state 146
-	function_case:  KW_CASE function_signature.':' stmt_list 
-
-	':'  shift 155
-	.  error
-
-
-state 147
-	match_construct:  KW_MATCH '(' expr ')' KW_OF.match_clauses_body 
-
-	'{'  shift 157
-	.  error
-
-	match_clauses_body  goto 156
-
-state 148
-	when_construct:  KW_WHEN '(' expr ')' when_body.    (89)
-
-	.  reduce 89 (src line 473)
-
-
-state 149
-	when_body:  when_then_body.    (90)
-
-	.  reduce 90 (src line 478)
-
-
-state 150
-	when_body:  when_cases_body.    (91)
-
-	.  reduce 91 (src line 479)
-
-
-state 151
-	when_then_body:  '{'.stmt_list '}' 
-	stmt: .    (107)
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
-
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 158
-
-state 152
-	when_cases_body:  KW_OF.'{' when_case_list '}' 
-
-	'{'  shift 159
-	.  error
-
-
-state 153
-	field_list:  field_list ',' field.    (45)
-
-	.  reduce 45 (src line 271)
-
-
-state 154
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	field:  field_key ':' expr.    (49)
-	shorthand_member_lookup:  expr.'.' IDENT 
-
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  reduce 49 (src line 283)
-
-
-state 155
-	function_case:  KW_CASE function_signature ':'.stmt_list 
-	stmt: .    (107)
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
-
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 160
-
-state 156
-	match_construct:  KW_MATCH '(' expr ')' KW_OF match_clauses_body.    (99)
-
-	.  reduce 99 (src line 515)
-
-
-state 157
-	match_clauses_body:  '{'.match_clause_list '}' 
-
-	KW_CASE  shift 164
-	.  error
-
-	match_case  goto 163
-	match_case_list  goto 162
-	match_clause_list  goto 161
-
-state 158
-	when_then_body:  '{' stmt_list.'}' 
-	stmt_list:  stmt_list.EOL stmt 
-
-	EOL  shift 41
-	'}'  shift 165
-	.  error
-
-
-state 159
-	when_cases_body:  KW_OF '{'.when_case_list '}' 
-
-	KW_THEN  shift 169
-	KW_ELSE  shift 170
-	.  error
-
-	when_then  goto 167
-	when_else  goto 168
-	when_case_list  goto 166
-
-state 160
-	function_case:  KW_CASE function_signature ':' stmt_list.    (65)
-	stmt_list:  stmt_list.EOL stmt 
-
-	EOL  shift 41
-	.  reduce 65 (src line 348)
-
-
-state 161
-	match_clauses_body:  '{' match_clause_list.'}' 
-
-	'}'  shift 171
-	.  error
-
-
-state 162
-	match_case_list:  match_case_list.match_case 
-	match_clause_list:  match_case_list.    (105)
-	match_clause_list:  match_case_list.match_else 
-
-	KW_CASE  shift 164
-	KW_ELSE  shift 174
-	.  reduce 105 (src line 542)
-
-	match_case  goto 172
-	match_else  goto 173
-
-state 163
-	match_case_list:  match_case.    (103)
-
-	.  reduce 103 (src line 533)
-
-
-state 164
-	match_case:  KW_CASE.expr ':' stmt_list 
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  error
-
-	expr  goto 175
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-
-state 165
-	when_then_body:  '{' stmt_list '}'.    (92)
-
-	.  reduce 92 (src line 481)
-
-
-state 166
-	when_cases_body:  KW_OF '{' when_case_list.'}' 
-
-	'}'  shift 176
-	.  error
-
-
-state 167
-	when_case_list:  when_then.    (96)
-	when_case_list:  when_then.when_else 
-
-	KW_ELSE  shift 170
-	.  reduce 96 (src line 499)
-
-	when_else  goto 177
-
-state 168
-	when_case_list:  when_else.    (97)
-
-	.  reduce 97 (src line 503)
-
-
-state 169
-	when_then:  KW_THEN.':' stmt_list 
-
-	':'  shift 178
-	.  error
-
-
-state 170
-	when_else:  KW_ELSE.':' stmt_list 
-
-	':'  shift 179
-	.  error
-
-
-state 171
-	match_clauses_body:  '{' match_clause_list '}'.    (100)
-
-	.  reduce 100 (src line 520)
-
-
-state 172
-	match_case_list:  match_case_list match_case.    (104)
-
-	.  reduce 104 (src line 537)
-
-
-state 173
-	match_clause_list:  match_case_list match_else.    (106)
-
-	.  reduce 106 (src line 544)
-
-
-state 174
-	match_else:  KW_ELSE.':' stmt_list 
-
-	':'  shift 180
-	.  error
-
-
-state 175
-	arithmetic:  expr.'*' expr 
-	arithmetic:  expr.'/' expr 
-	arithmetic:  expr.'+' expr 
-	arithmetic:  expr.'-' expr 
-	comparison:  expr.'>' expr 
-	comparison:  expr.'<' expr 
-	logical:  expr.OP_AND expr 
-	logical:  expr.OP_OR expr 
-	assignment:  expr.'=' expr 
-	shorthand_member_lookup:  expr.'.' IDENT 
-	match_case:  KW_CASE expr.':' stmt_list 
-
-	':'  shift 181
-	'.'  shift 51
-	'='  shift 50
-	'<'  shift 47
-	'>'  shift 46
-	OP_AND  shift 48
-	OP_OR  shift 49
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 42
-	'/'  shift 43
-	.  error
-
-
-state 176
-	when_cases_body:  KW_OF '{' when_case_list '}'.    (93)
-
-	.  reduce 93 (src line 486)
-
-
-state 177
-	when_case_list:  when_then when_else.    (98)
-
-	.  reduce 98 (src line 506)
-
-
-state 178
-	when_then:  KW_THEN ':'.stmt_list 
-	stmt: .    (107)
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
-
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 182
-
-state 179
-	when_else:  KW_ELSE ':'.stmt_list 
-	stmt: .    (107)
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
-
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 183
-
-state 180
-	match_else:  KW_ELSE ':'.stmt_list 
-	stmt: .    (107)
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
-
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 184
-
-state 181
-	match_case:  KW_CASE expr ':'.stmt_list 
-	stmt: .    (107)
-
-	IDENT  shift 25
-	INTEGER  shift 19
-	TRUE  shift 15
-	FALSE  shift 16
-	FLOAT  shift 20
-	SYMBOL  shift 17
-	STRING  shift 18
-	KW_IMPORT  shift 22
-	KW_RECORD  shift 24
-	KW_FUNC  shift 23
-	KW_MATCH  shift 39
-	KW_WHEN  shift 40
-	'{'  shift 38
-	'('  shift 11
-	'['  shift 37
-	'#'  shift 36
-	'+'  shift 35
-	'-'  shift 34
-	.  reduce 107 (src line 554)
-
-	expr  goto 5
-	arithmetic  goto 6
-	unary_expr  goto 21
-	comparison  goto 7
-	logical  goto 8
-	assignment  goto 9
-	import  goto 10
-	defrecord  goto 13
-	vector_literal  goto 27
-	map_literal  goto 28
-	record_literal  goto 29
-	shorthand_member_lookup  goto 31
-	deffunction  goto 12
-	lambda  goto 26
-	match_construct  goto 32
-	when_construct  goto 33
-	invocation  goto 30
-	invokable  goto 14
-	stmt  goto 4
-	stmt_list  goto 185
-
-state 182
-	when_then:  KW_THEN ':' stmt_list.    (94)
-	stmt_list:  stmt_list.EOL stmt 
-
-	EOL  shift 41
-	.  reduce 94 (src line 489)
-
-
-state 183
-	when_else:  KW_ELSE ':' stmt_list.    (95)
-	stmt_list:  stmt_list.EOL stmt 
-
-	EOL  shift 41
-	.  reduce 95 (src line 494)
-
-
-state 184
-	match_else:  KW_ELSE ':' stmt_list.    (102)
-	stmt_list:  stmt_list.EOL stmt 
-
-	EOL  shift 41
-	.  reduce 102 (src line 528)
-
-
-state 185
-	match_case:  KW_CASE expr ':' stmt_list.    (101)
-	stmt_list:  stmt_list.EOL stmt 
-
-	EOL  shift 41
-	.  reduce 101 (src line 523)
-
-
-48 terminals, 55 nonterminals
-111 grammar rules, 186/2000 states
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	pair:  expression DOUBLE_ARROW expression.    (52)
+
+	'='  shift 32
+	'<'  shift 34
+	'>'  shift 33
+	AND  shift 35
+	OR  shift 36
+	'+'  shift 28
+	'-'  shift 29
+	'*'  shift 30
+	'/'  shift 31
+	.  reduce 52 (src line 256)
+
+
+44 terminals, 20 nonterminals
+61 grammar rules, 97/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-104 working sets used
-memory: parser 1105/30000
-128 extra closures
-845 shift entries, 1 exceptions
-105 goto entries
-586 entries saved by goto default
-Optimizer space used: output 496/30000
-496 table entries, 91 zero
-maximum spread: 47, maximum offset: 181
+69 working sets used
+memory: parser 392/30000
+72 extra closures
+473 shift entries, 1 exceptions
+48 goto entries
+205 entries saved by goto default
+Optimizer space used: output 329/30000
+329 table entries, 80 zero
+maximum spread: 43, maximum offset: 90

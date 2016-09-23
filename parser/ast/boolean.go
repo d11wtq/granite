@@ -6,7 +6,7 @@ type BooleanNode struct {
 }
 
 func (node *BooleanNode) Accept(visitor ASTVisitor) {
-	visitor.VisitBooleanNode(node)
+	visitor.VisitBoolean(node)
 }
 
 var (

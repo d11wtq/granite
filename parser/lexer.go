@@ -138,9 +138,9 @@ Loop:
 		switch {
 		case (c == '\n'):
 			token = lexer.scanEOL(lval)
-			if lexer.state == ST_BLOCK {
-				break
-			}
+			//if lexer.state == ST_BLOCK {
+			//	break
+			//}
 			continue Loop
 		case (c == ';'):
 			lexer.skipComment()
@@ -150,8 +150,13 @@ Loop:
 			if unicode.Is(word, lexer.peek()) {
 				token = lexer.scanSymbol(lval)
 			}
-		case (c == '.'):
-			token = lexer.scanDots(lval)
+		case (c == '='):
+			token = int(lexer.read())
+			switch lexer.peek() {
+			case '>':
+				lexer.read()
+				token = DOUBLE_ARROW
+			}
 		case (c == '"'):
 			token = lexer.scanDoubleString(lval)
 		case (c == '\''):
@@ -167,7 +172,7 @@ Loop:
 		break
 	}
 
-	lexer.checkState(token)
+	//lexer.checkState(token)
 	return token
 }
 
@@ -187,7 +192,7 @@ func (lexer *BijouLex) checkState(token int) {
 		lexer.pushState(ST_VECTOR)
 	case ']':
 		lexer.popState(ST_VECTOR)
-	case KW_FUNC, '#', KW_WHEN, KW_MATCH:
+	case KW_FUNC, '#':
 		lexer.pushState(ST_BLOCK_START)
 	case KW_OF:
 		lexer.swapState(ST_BLOCK_START, ST_MATCH_START)
@@ -379,7 +384,7 @@ func (lexer *BijouLex) scanString(lval *BijouSymType, quote rune, specials bool)
 		}
 		str = append(str, c)
 	}
-	lval.node = &ast.StringNode{string(str)}
+	lval.node = ast.NewString(string(str))
 	return tok
 }
 
@@ -427,7 +432,7 @@ func (lexer *BijouLex) scanInteger(lval *BijouSymType, str string) int {
 		return INVALID_NUMBER
 	}
 
-	lval.node = ast.NewIntegerNode(num)
+	lval.node = ast.NewInteger(num)
 	return INTEGER
 }
 
@@ -454,7 +459,7 @@ func (lexer *BijouLex) scanFloat(lval *BijouSymType, str string) int {
 		return INVALID_NUMBER
 	}
 
-	lval.node = ast.NewFloatNode(num)
+	lval.node = ast.NewFloat(num)
 	return FLOAT
 }
 
@@ -484,7 +489,7 @@ func (lexer *BijouLex) scanExponent(lval *BijouSymType, str string) int {
 		return INVALID_NUMBER
 	}
 
-	lval.node = ast.NewFloatNode(num)
+	lval.node = ast.NewFloat(num)
 	return FLOAT
 }
 
@@ -530,31 +535,27 @@ func (lexer *BijouLex) readWord() string {
 func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 	str := lexer.readWord()
 	tok := IDENT
-	lval.node = ast.NewIdentifierNode(str)
+	lval.node = ast.NewIdentifier(str)
 
 	switch str {
-	case "import":
-		tok = KW_IMPORT
-	case "record":
-		tok = KW_RECORD
+	case "$":
+		tok = EOL
 	case "func":
 		tok = KW_FUNC
-	case "of":
-		tok = KW_OF
-	case "match":
-		tok = KW_MATCH
-	case "when":
-		tok = KW_WHEN
 	case "case":
 		tok = KW_CASE
+	case "of":
+		tok = KW_OF
 	case "then":
 		tok = KW_THEN
+	case "if":
+		tok = KW_IF
 	case "else":
 		tok = KW_ELSE
 	case "and":
-		tok = OP_AND
+		tok = AND
 	case "or":
-		tok = OP_OR
+		tok = OR
 	case "true":
 		tok = TRUE
 		lval.node = ast.TrueNode
@@ -568,29 +569,6 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 // Scan a :symbol
 func (lexer *BijouLex) scanSymbol(lval *BijouSymType) int {
 	str := lexer.readWord()
-	lval.node = ast.NewSymbolNode(str)
+	lval.node = ast.NewSymbol(str)
 	return SYMBOL
-}
-
-// Scan '.' or '...'
-func (lexer *BijouLex) scanDots(lval *BijouSymType) int {
-	if lexer.read() != '.' {
-		panic("Attempted to read non-'.' as '.'")
-	}
-
-	var c rune
-
-	c = lexer.read()
-	if c != '.' {
-		lexer.backup(c)
-		return int('.')
-	}
-
-	c = lexer.read()
-	if c != '.' {
-		lexer.backup(c)
-		return OP_INVALID
-	}
-
-	return OP_SPREAD
 }

@@ -5,30 +5,25 @@ type ASTNode interface {
 	Accept(visitor ASTVisitor)
 }
 
+// TODO: case ... of ... then ... else
+// TODO: if ... then ... else
+// TODO: begin ... end (?)
+// TODO: Guards
+
 // Visitor that can traverse an AST
 type ASTVisitor interface {
-	VisitCollection(node *Collection)
-	VisitIntegerNode(node *IntegerNode)
-	VisitBooleanNode(node *BooleanNode)
-	VisitFloatNode(node *FloatNode)
-	VisitStringNode(node *StringNode)
-	VisitSymbolNode(node *SymbolNode)
-	VisitIdentifierNode(node *IdentifierNode)
-	VisitPairNode(node *PairNode)
-	VisitComparisonNode(node *ComparisonNode)
-	VisitUnaryNode(node *UnaryNode)
-	VisitArithmeticNode(node *ArithmeticNode)
-	VisitLogicalNode(node *LogicalNode)
-	VisitDefNode(node *DefNode)
-	VisitAssignNode(node *AssignNode)
-	VisitImportNode(node *ImportNode)
-	VisitVectorNode(node *VectorNode)
-	VisitMapNode(node *MapNode)
-	VisitRecordPrototypeNode(node *RecordPrototypeNode)
-	VisitFunctionPrototypeNode(node *FunctionPrototypeNode)
-	VisitInvocationNode(node *InvocationNode)
-	VisitMemberLookupNode(node *MemberLookupNode)
-	VisitMatchNode(node *MatchNode)
-	VisitSpreadNode(node *SpreadNode)
-	VisitRecordNode(node *RecordNode)
+	VisitInteger(node *IntegerNode)
+	VisitBoolean(node *BooleanNode)
+	VisitFloat(node *FloatNode)
+	VisitString(node *StringNode)
+	VisitSymbol(node *SymbolNode)
+	VisitIdentifier(node *IdentifierNode)
+	VisitExpressionList(node *ExpressionList)
+	VisitBinaryExpression(node *BinaryExpressionNode)
+	VisitUnaryExpression(node *UnaryExpressionNode)
+	VisitVector(node *VectorNode)
+	VisitMap(node *MapNode)
+	VisitPair(node *PairNode)
+	VisitFunctionApplication(node *FunctionApplicationNode)
+	VisitKeyAccess(node *KeyAccessNode)
 }

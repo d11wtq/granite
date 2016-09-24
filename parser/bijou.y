@@ -42,7 +42,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	<node> UNTERMINATED_STRING
 %token	<node> INVALID_NUMBER
 
-%token	KW_FUNC
+%token	KW_DO
+%token	KW_END
 %token	KW_CASE
 %token	KW_OF
 %token	KW_IF
@@ -78,6 +79,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> applicable_expression
 %type	<node> expression_or_empty
 %type	<node> expression_lines
+%type	<node> do_list
 %type	<node> ident
 %type	<node> binary_expression
 %type	<node> unary_expression
@@ -118,6 +120,7 @@ expression: /* Abribtrary expressions */
 |	binary_expression
 |	unary_expression
 |	applicable_expression
+|	do_list
 
 applicable_expression: /* Expressions that can be invoked as functions */
 	SYMBOL
@@ -154,6 +157,16 @@ expression_lines: /* expr $ expr */
 		if $3 != nil {
 			$1.(*ast.ExpressionList).Append($3)
 		}
+	}
+
+
+/**
+ * Do blocks.
+ */
+
+do_list: /* do a,b end */
+	KW_DO expression_lines KW_END {
+		$$ = $2
 	}
 
 

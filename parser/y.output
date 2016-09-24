@@ -1,22 +1,23 @@
 
 state 0
 	$accept: .start $end 
-	expression_or_empty: .    (26)
+	expression_or_empty: .    (27)
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  reduce 26 (src line 142)
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  reduce 27 (src line 145)
 
 	start  goto 1
 	program  goto 2
@@ -24,13 +25,14 @@ state 0
 	applicable_expression  goto 12
 	expression_or_empty  goto 4
 	expression_lines  goto 3
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 1
 	$accept:  start.$end 
@@ -42,25 +44,25 @@ state 1
 state 2
 	start:  program.    (1)
 
-	.  reduce 1 (src line 105)
+	.  reduce 1 (src line 107)
 
 
 state 3
 	program:  expression_lines.    (2)
 	expression_lines:  expression_lines.EOL expression_or_empty 
 
-	EOL  shift 27
-	.  reduce 2 (src line 110)
+	EOL  shift 29
+	.  reduce 2 (src line 112)
 
 
 state 4
-	expression_lines:  expression_or_empty.    (28)
+	expression_lines:  expression_or_empty.    (29)
 
-	.  reduce 28 (src line 146)
+	.  reduce 29 (src line 149)
 
 
 state 5
-	expression_or_empty:  expression.    (27)
+	expression_or_empty:  expression.    (28)
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
@@ -71,52 +73,52 @@ state 5
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	'='  shift 32
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 27 (src line 144)
+	'='  shift 34
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 28 (src line 147)
 
 
 state 6
 	expression:  TRUE.    (3)
 
-	.  reduce 3 (src line 113)
+	.  reduce 3 (src line 115)
 
 
 state 7
 	expression:  FALSE.    (4)
 
-	.  reduce 4 (src line 115)
+	.  reduce 4 (src line 117)
 
 
 state 8
 	expression:  STRING.    (5)
 
-	.  reduce 5 (src line 116)
+	.  reduce 5 (src line 118)
 
 
 state 9
 	expression:  FLOAT.    (6)
 
-	.  reduce 6 (src line 117)
+	.  reduce 6 (src line 119)
 
 
 state 10
 	expression:  binary_expression.    (7)
 
-	.  reduce 7 (src line 118)
+	.  reduce 7 (src line 120)
 
 
 state 11
 	expression:  unary_expression.    (8)
 
-	.  reduce 8 (src line 119)
+	.  reduce 8 (src line 121)
 
 
 state 12
@@ -125,139 +127,151 @@ state 12
 	key_access:  applicable_expression.'.' IDENT 
 	key_access:  applicable_expression.'[' expression ']' 
 
-	'('  shift 37
-	'['  shift 39
-	'.'  shift 38
-	.  reduce 9 (src line 120)
+	'('  shift 39
+	'['  shift 41
+	'.'  shift 40
+	.  reduce 9 (src line 122)
 
 
 state 13
-	unary_expression:  '-'.expression 
+	expression:  do_list.    (10)
 
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  error
+	.  reduce 10 (src line 123)
 
-	expression  goto 40
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
 
 state 14
-	unary_expression:  '+'.expression 
+	unary_expression:  '-'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  error
-
-	expression  goto 41
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 15
-	unary_expression:  '!'.expression 
-
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
 	expression  goto 42
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 15
+	unary_expression:  '+'.expression 
+
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
+
+	expression  goto 43
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 16
-	applicable_expression:  SYMBOL.    (10)
+	unary_expression:  '!'.expression 
 
-	.  reduce 10 (src line 122)
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
 
+	expression  goto 44
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 17
-	applicable_expression:  INTEGER.    (11)
+	applicable_expression:  SYMBOL.    (11)
 
-	.  reduce 11 (src line 124)
+	.  reduce 11 (src line 125)
 
 
 state 18
-	applicable_expression:  ident.    (12)
+	applicable_expression:  INTEGER.    (12)
 
-	.  reduce 12 (src line 125)
+	.  reduce 12 (src line 127)
 
 
 state 19
-	applicable_expression:  vector_literal.    (13)
+	applicable_expression:  ident.    (13)
 
-	.  reduce 13 (src line 126)
+	.  reduce 13 (src line 128)
 
 
 state 20
-	applicable_expression:  map_literal.    (14)
+	applicable_expression:  vector_literal.    (14)
 
-	.  reduce 14 (src line 127)
+	.  reduce 14 (src line 129)
 
 
 state 21
-	applicable_expression:  function_application.    (15)
+	applicable_expression:  map_literal.    (15)
 
-	.  reduce 15 (src line 128)
+	.  reduce 15 (src line 130)
 
 
 state 22
-	applicable_expression:  key_access.    (16)
+	applicable_expression:  function_application.    (16)
 
-	.  reduce 16 (src line 129)
+	.  reduce 16 (src line 131)
 
 
 state 23
+	applicable_expression:  key_access.    (17)
+
+	.  reduce 17 (src line 132)
+
+
+state 24
 	applicable_expression:  '('.expression ')' 
 	ident:  '('.'+' ')' 
 	ident:  '('.'-' ')' 
@@ -267,490 +281,523 @@ state 23
 	ident:  '('.'<' ')' 
 	ident:  '('.'!' ')' 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'<'  shift 49
-	'>'  shift 48
-	'!'  shift 50
-	'+'  shift 44
-	'-'  shift 45
-	'*'  shift 46
-	'/'  shift 47
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'<'  shift 51
+	'>'  shift 50
+	'!'  shift 52
+	'+'  shift 46
+	'-'  shift 47
+	'*'  shift 48
+	'/'  shift 49
 	.  error
 
-	expression  goto 43
+	expression  goto 45
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 24
-	ident:  IDENT.    (18)
-
-	.  reduce 18 (src line 132)
-
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 25
-	vector_literal:  '['.']' 
-	vector_literal:  '['.arguments ']' 
+	do_list:  KW_DO.expression_lines KW_END 
+	expression_or_empty: .    (27)
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	']'  shift 51
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	'*'  shift 56
-	.  error
-
-	expression  goto 54
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	argument  goto 53
-	splat_argument  goto 55
-	arguments  goto 52
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 26
-	map_literal:  '{'.'}' 
-	map_literal:  '{'.associative_arguments '}' 
-
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'}'  shift 57
-	'('  shift 23
-	'['  shift 25
-	'.'  shift 62
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	'*'  shift 56
-	.  error
-
-	expression  goto 61
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	splat_argument  goto 60
-	associative_arguments  goto 58
-	pair  goto 59
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 27
-	expression_lines:  expression_lines EOL.expression_or_empty 
-	expression_or_empty: .    (26)
-
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  reduce 26 (src line 142)
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  reduce 27 (src line 145)
 
 	expression  goto 5
 	applicable_expression  goto 12
-	expression_or_empty  goto 63
-	ident  goto 18
+	expression_or_empty  goto 4
+	expression_lines  goto 53
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
-state 28
-	binary_expression:  expression '+'.expression 
+state 26
+	ident:  IDENT.    (19)
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	.  reduce 19 (src line 135)
+
+
+state 27
+	vector_literal:  '['.']' 
+	vector_literal:  '['.arguments ']' 
+
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	']'  shift 54
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	'*'  shift 59
+	.  error
+
+	expression  goto 57
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	argument  goto 56
+	splat_argument  goto 58
+	arguments  goto 55
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 28
+	map_literal:  '{'.'}' 
+	map_literal:  '{'.associative_arguments '}' 
+
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'}'  shift 60
+	'('  shift 24
+	'['  shift 27
+	'.'  shift 65
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	'*'  shift 59
 	.  error
 
 	expression  goto 64
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	splat_argument  goto 63
+	associative_arguments  goto 61
+	pair  goto 62
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 29
-	binary_expression:  expression '-'.expression 
+	expression_lines:  expression_lines EOL.expression_or_empty 
+	expression_or_empty: .    (27)
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  error
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  reduce 27 (src line 145)
 
-	expression  goto 65
+	expression  goto 5
 	applicable_expression  goto 12
-	ident  goto 18
+	expression_or_empty  goto 66
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 30
-	binary_expression:  expression '*'.expression 
+	binary_expression:  expression '+'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  error
-
-	expression  goto 66
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 31
-	binary_expression:  expression '/'.expression 
-
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
 	expression  goto 67
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
-state 32
-	binary_expression:  expression '='.expression 
+state 31
+	binary_expression:  expression '-'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
 	expression  goto 68
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
-state 33
-	binary_expression:  expression '>'.expression 
+state 32
+	binary_expression:  expression '*'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
 	expression  goto 69
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
-state 34
-	binary_expression:  expression '<'.expression 
+state 33
+	binary_expression:  expression '/'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
 	expression  goto 70
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
-state 35
-	binary_expression:  expression AND.expression 
+state 34
+	binary_expression:  expression '='.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
 	expression  goto 71
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
-state 36
-	binary_expression:  expression OR.expression 
+state 35
+	binary_expression:  expression '>'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
 	expression  goto 72
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 36
+	binary_expression:  expression '<'.expression 
+
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
+
+	expression  goto 73
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 37
-	function_application:  applicable_expression '('.application_arguments ')' 
-	application_arguments: .    (58)
+	binary_expression:  expression AND.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	'*'  shift 56
-	.  reduce 58 (src line 286)
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
 
-	expression  goto 54
+	expression  goto 74
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	argument  goto 53
-	splat_argument  goto 55
-	arguments  goto 74
-	application_arguments  goto 73
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 38
-	key_access:  applicable_expression '.'.IDENT 
+	binary_expression:  expression OR.expression 
 
-	IDENT  shift 75
-	.  error
-
-
-state 39
-	key_access:  applicable_expression '['.expression ']' 
-
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
-	expression  goto 76
+	expression  goto 75
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 39
+	function_application:  applicable_expression '('.application_arguments ')' 
+	application_arguments: .    (60)
+
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	'*'  shift 59
+	.  reduce 60 (src line 299)
+
+	expression  goto 57
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	argument  goto 56
+	splat_argument  goto 58
+	arguments  goto 77
+	application_arguments  goto 76
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 40
-	binary_expression:  expression.'+' expression 
-	binary_expression:  expression.'-' expression 
-	binary_expression:  expression.'*' expression 
-	binary_expression:  expression.'/' expression 
-	binary_expression:  expression.'=' expression 
-	binary_expression:  expression.'>' expression 
-	binary_expression:  expression.'<' expression 
-	binary_expression:  expression.AND expression 
-	binary_expression:  expression.OR expression 
-	unary_expression:  '-' expression.    (39)
+	key_access:  applicable_expression '.'.IDENT 
 
-	.  reduce 39 (src line 193)
+	IDENT  shift 78
+	.  error
 
 
 state 41
-	binary_expression:  expression.'+' expression 
-	binary_expression:  expression.'-' expression 
-	binary_expression:  expression.'*' expression 
-	binary_expression:  expression.'/' expression 
-	binary_expression:  expression.'=' expression 
-	binary_expression:  expression.'>' expression 
-	binary_expression:  expression.'<' expression 
-	binary_expression:  expression.AND expression 
-	binary_expression:  expression.OR expression 
-	unary_expression:  '+' expression.    (40)
+	key_access:  applicable_expression '['.expression ']' 
 
-	.  reduce 40 (src line 197)
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
 
+	expression  goto 79
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 42
 	binary_expression:  expression.'+' expression 
@@ -762,12 +809,42 @@ state 42
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
-	unary_expression:  '!' expression.    (41)
+	unary_expression:  '-' expression.    (41)
 
-	.  reduce 41 (src line 200)
+	.  reduce 41 (src line 206)
 
 
 state 43
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	unary_expression:  '+' expression.    (42)
+
+	.  reduce 42 (src line 210)
+
+
+state 44
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	unary_expression:  '!' expression.    (43)
+
+	.  reduce 43 (src line 213)
+
+
+state 45
 	applicable_expression:  '(' expression.')' 
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
@@ -779,159 +856,174 @@ state 43
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	')'  shift 77
-	'='  shift 32
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
+	')'  shift 80
+	'='  shift 34
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
 	.  error
 
 
-state 44
+state 46
 	ident:  '(' '+'.')' 
 	unary_expression:  '+'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	')'  shift 78
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	')'  shift 81
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
-	expression  goto 41
+	expression  goto 43
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
-state 45
+state 47
 	ident:  '(' '-'.')' 
 	unary_expression:  '-'.expression 
 
-	IDENT  shift 24
-	INTEGER  shift 17
+	IDENT  shift 26
+	INTEGER  shift 18
 	TRUE  shift 6
 	FALSE  shift 7
 	FLOAT  shift 9
-	SYMBOL  shift 16
+	SYMBOL  shift 17
 	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	')'  shift 79
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	')'  shift 82
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
 	.  error
 
-	expression  goto 40
+	expression  goto 42
 	applicable_expression  goto 12
-	ident  goto 18
+	do_list  goto 13
+	ident  goto 19
 	binary_expression  goto 10
 	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 46
-	ident:  '(' '*'.')' 
-
-	')'  shift 80
-	.  error
-
-
-state 47
-	ident:  '(' '/'.')' 
-
-	')'  shift 81
-	.  error
-
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 48
-	ident:  '(' '>'.')' 
-
-	')'  shift 82
-	.  error
-
-
-state 49
-	ident:  '(' '<'.')' 
+	ident:  '(' '*'.')' 
 
 	')'  shift 83
 	.  error
 
 
-state 50
-	ident:  '(' '!'.')' 
-	unary_expression:  '!'.expression 
+state 49
+	ident:  '(' '/'.')' 
 
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
 	')'  shift 84
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
 	.  error
 
-	expression  goto 42
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
+
+state 50
+	ident:  '(' '>'.')' 
+
+	')'  shift 85
+	.  error
+
 
 state 51
-	vector_literal:  '[' ']'.    (47)
+	ident:  '(' '<'.')' 
 
-	.  reduce 47 (src line 231)
+	')'  shift 86
+	.  error
 
 
 state 52
-	arguments:  arguments.',' argument 
-	vector_literal:  '[' arguments.']' 
+	ident:  '(' '!'.')' 
+	unary_expression:  '!'.expression 
 
-	']'  shift 86
-	','  shift 85
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	')'  shift 87
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
+
+	expression  goto 44
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 53
+	expression_lines:  expression_lines.EOL expression_or_empty 
+	do_list:  KW_DO expression_lines.KW_END 
+
+	EOL  shift 29
+	KW_END  shift 88
 	.  error
 
 
-state 53
-	arguments:  argument.    (44)
-
-	.  reduce 44 (src line 213)
-
-
 state 54
+	vector_literal:  '[' ']'.    (49)
+
+	.  reduce 49 (src line 244)
+
+
+state 55
+	arguments:  arguments.',' argument 
+	vector_literal:  '[' arguments.']' 
+
+	']'  shift 90
+	','  shift 89
+	.  error
+
+
+state 56
+	arguments:  argument.    (46)
+
+	.  reduce 46 (src line 226)
+
+
+state 57
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
@@ -941,82 +1033,84 @@ state 54
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
-	argument:  expression.    (42)
+	argument:  expression.    (44)
 
-	'='  shift 32
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 42 (src line 209)
-
-
-state 55
-	argument:  splat_argument.    (43)
-
-	.  reduce 43 (src line 211)
-
-
-state 56
-	splat_argument:  '*'.expression 
-
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  error
-
-	expression  goto 87
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 57
-	map_literal:  '{' '}'.    (49)
-
-	.  reduce 49 (src line 244)
+	'='  shift 34
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 44 (src line 222)
 
 
 state 58
-	map_literal:  '{' associative_arguments.'}' 
-	associative_arguments:  associative_arguments.',' pair 
+	argument:  splat_argument.    (45)
 
-	'}'  shift 88
-	','  shift 89
-	.  error
+	.  reduce 45 (src line 224)
 
 
 state 59
-	associative_arguments:  pair.    (54)
+	splat_argument:  '*'.expression 
 
-	.  reduce 54 (src line 266)
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
 
+	expression  goto 91
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
 
 state 60
-	pair:  splat_argument.    (51)
+	map_literal:  '{' '}'.    (51)
 
-	.  reduce 51 (src line 252)
+	.  reduce 51 (src line 257)
 
 
 state 61
+	map_literal:  '{' associative_arguments.'}' 
+	associative_arguments:  associative_arguments.',' pair 
+
+	'}'  shift 92
+	','  shift 93
+	.  error
+
+
+state 62
+	associative_arguments:  pair.    (56)
+
+	.  reduce 56 (src line 279)
+
+
+state 63
+	pair:  splat_argument.    (53)
+
+	.  reduce 53 (src line 265)
+
+
+state 64
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
@@ -1028,141 +1122,79 @@ state 61
 	binary_expression:  expression.OR expression 
 	pair:  expression.DOUBLE_ARROW expression 
 
-	'='  shift 32
-	DOUBLE_ARROW  shift 90
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
+	'='  shift 34
+	DOUBLE_ARROW  shift 94
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
 	.  error
-
-
-state 62
-	pair:  '.'.IDENT 
-
-	IDENT  shift 91
-	.  error
-
-
-state 63
-	expression_lines:  expression_lines EOL expression_or_empty.    (29)
-
-	.  reduce 29 (src line 153)
-
-
-state 64
-	binary_expression:  expression.'+' expression 
-	binary_expression:  expression '+' expression.    (30)
-	binary_expression:  expression.'-' expression 
-	binary_expression:  expression.'*' expression 
-	binary_expression:  expression.'/' expression 
-	binary_expression:  expression.'=' expression 
-	binary_expression:  expression.'>' expression 
-	binary_expression:  expression.'<' expression 
-	binary_expression:  expression.AND expression 
-	binary_expression:  expression.OR expression 
-
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 30 (src line 164)
 
 
 state 65
-	binary_expression:  expression.'+' expression 
-	binary_expression:  expression.'-' expression 
-	binary_expression:  expression '-' expression.    (31)
-	binary_expression:  expression.'*' expression 
-	binary_expression:  expression.'/' expression 
-	binary_expression:  expression.'=' expression 
-	binary_expression:  expression.'>' expression 
-	binary_expression:  expression.'<' expression 
-	binary_expression:  expression.AND expression 
-	binary_expression:  expression.OR expression 
+	pair:  '.'.IDENT 
 
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 31 (src line 168)
+	IDENT  shift 95
+	.  error
 
 
 state 66
-	binary_expression:  expression.'+' expression 
-	binary_expression:  expression.'-' expression 
-	binary_expression:  expression.'*' expression 
-	binary_expression:  expression '*' expression.    (32)
-	binary_expression:  expression.'/' expression 
-	binary_expression:  expression.'=' expression 
-	binary_expression:  expression.'>' expression 
-	binary_expression:  expression.'<' expression 
-	binary_expression:  expression.AND expression 
-	binary_expression:  expression.OR expression 
+	expression_lines:  expression_lines EOL expression_or_empty.    (30)
 
-	.  reduce 32 (src line 171)
+	.  reduce 30 (src line 156)
 
 
 state 67
 	binary_expression:  expression.'+' expression 
+	binary_expression:  expression '+' expression.    (32)
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
 	binary_expression:  expression.'/' expression 
-	binary_expression:  expression '/' expression.    (33)
 	binary_expression:  expression.'=' expression 
 	binary_expression:  expression.'>' expression 
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	.  reduce 33 (src line 174)
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 32 (src line 177)
 
 
 state 68
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
+	binary_expression:  expression '-' expression.    (33)
 	binary_expression:  expression.'*' expression 
 	binary_expression:  expression.'/' expression 
 	binary_expression:  expression.'=' expression 
-	binary_expression:  expression '=' expression.    (34)
 	binary_expression:  expression.'>' expression 
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	'='  shift 32
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 34 (src line 177)
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 33 (src line 181)
 
 
 state 69
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
+	binary_expression:  expression '*' expression.    (34)
 	binary_expression:  expression.'/' expression 
 	binary_expression:  expression.'=' expression 
 	binary_expression:  expression.'>' expression 
-	binary_expression:  expression '>' expression.    (35)
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 35 (src line 180)
+	.  reduce 34 (src line 184)
 
 
 state 70
@@ -1170,22 +1202,14 @@ state 70
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
 	binary_expression:  expression.'/' expression 
+	binary_expression:  expression '/' expression.    (35)
 	binary_expression:  expression.'=' expression 
 	binary_expression:  expression.'>' expression 
 	binary_expression:  expression.'<' expression 
-	binary_expression:  expression '<' expression.    (36)
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 36 (src line 183)
+	.  reduce 35 (src line 187)
 
 
 state 71
@@ -1194,17 +1218,22 @@ state 71
 	binary_expression:  expression.'*' expression 
 	binary_expression:  expression.'/' expression 
 	binary_expression:  expression.'=' expression 
+	binary_expression:  expression '=' expression.    (36)
 	binary_expression:  expression.'>' expression 
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
-	binary_expression:  expression AND expression.    (37)
 	binary_expression:  expression.OR expression 
 
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 37 (src line 186)
+	'='  shift 34
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 36 (src line 190)
 
 
 state 72
@@ -1214,40 +1243,105 @@ state 72
 	binary_expression:  expression.'/' expression 
 	binary_expression:  expression.'=' expression 
 	binary_expression:  expression.'>' expression 
+	binary_expression:  expression '>' expression.    (37)
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
-	binary_expression:  expression OR expression.    (38)
 
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 38 (src line 189)
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 37 (src line 193)
 
 
 state 73
-	function_application:  applicable_expression '(' application_arguments.')' 
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression '<' expression.    (38)
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
 
-	')'  shift 92
-	.  error
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 38 (src line 196)
 
 
 state 74
-	arguments:  arguments.',' argument 
-	application_arguments:  arguments.    (57)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression AND expression.    (39)
+	binary_expression:  expression.OR expression 
 
-	','  shift 85
-	.  reduce 57 (src line 284)
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 39 (src line 199)
 
 
 state 75
-	key_access:  applicable_expression '.' IDENT.    (59)
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	binary_expression:  expression OR expression.    (40)
 
-	.  reduce 59 (src line 293)
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 40 (src line 202)
 
 
 state 76
+	function_application:  applicable_expression '(' application_arguments.')' 
+
+	')'  shift 96
+	.  error
+
+
+state 77
+	arguments:  arguments.',' argument 
+	application_arguments:  arguments.    (59)
+
+	','  shift 89
+	.  reduce 59 (src line 297)
+
+
+state 78
+	key_access:  applicable_expression '.' IDENT.    (61)
+
+	.  reduce 61 (src line 306)
+
+
+state 79
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
@@ -1259,225 +1353,113 @@ state 76
 	binary_expression:  expression.OR expression 
 	key_access:  applicable_expression '[' expression.']' 
 
-	']'  shift 93
-	'='  shift 32
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
+	']'  shift 97
+	'='  shift 34
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
 	.  error
-
-
-state 77
-	applicable_expression:  '(' expression ')'.    (17)
-
-	.  reduce 17 (src line 130)
-
-
-state 78
-	ident:  '(' '+' ')'.    (19)
-
-	.  reduce 19 (src line 134)
-
-
-state 79
-	ident:  '(' '-' ')'.    (20)
-
-	.  reduce 20 (src line 135)
 
 
 state 80
-	ident:  '(' '*' ')'.    (21)
+	applicable_expression:  '(' expression ')'.    (18)
 
-	.  reduce 21 (src line 136)
+	.  reduce 18 (src line 133)
 
 
 state 81
-	ident:  '(' '/' ')'.    (22)
+	ident:  '(' '+' ')'.    (20)
 
-	.  reduce 22 (src line 137)
+	.  reduce 20 (src line 137)
 
 
 state 82
-	ident:  '(' '>' ')'.    (23)
+	ident:  '(' '-' ')'.    (21)
 
-	.  reduce 23 (src line 138)
+	.  reduce 21 (src line 138)
 
 
 state 83
-	ident:  '(' '<' ')'.    (24)
+	ident:  '(' '*' ')'.    (22)
 
-	.  reduce 24 (src line 139)
+	.  reduce 22 (src line 139)
 
 
 state 84
-	ident:  '(' '!' ')'.    (25)
+	ident:  '(' '/' ')'.    (23)
 
-	.  reduce 25 (src line 140)
+	.  reduce 23 (src line 140)
 
 
 state 85
-	arguments:  arguments ','.argument 
+	ident:  '(' '>' ')'.    (24)
 
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	'*'  shift 56
-	.  error
+	.  reduce 24 (src line 141)
 
-	expression  goto 54
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	argument  goto 94
-	splat_argument  goto 55
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
 
 state 86
-	vector_literal:  '[' arguments ']'.    (48)
+	ident:  '(' '<' ')'.    (25)
 
-	.  reduce 48 (src line 235)
+	.  reduce 25 (src line 142)
 
 
 state 87
-	binary_expression:  expression.'+' expression 
-	binary_expression:  expression.'-' expression 
-	binary_expression:  expression.'*' expression 
-	binary_expression:  expression.'/' expression 
-	binary_expression:  expression.'=' expression 
-	binary_expression:  expression.'>' expression 
-	binary_expression:  expression.'<' expression 
-	binary_expression:  expression.AND expression 
-	binary_expression:  expression.OR expression 
-	splat_argument:  '*' expression.    (46)
+	ident:  '(' '!' ')'.    (26)
 
-	'='  shift 32
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 46 (src line 221)
+	.  reduce 26 (src line 143)
 
 
 state 88
-	map_literal:  '{' associative_arguments '}'.    (50)
+	do_list:  KW_DO expression_lines KW_END.    (31)
+
+	.  reduce 31 (src line 167)
+
+
+state 89
+	arguments:  arguments ','.argument 
+
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	'*'  shift 59
+	.  error
+
+	expression  goto 57
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	argument  goto 98
+	splat_argument  goto 58
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 90
+	vector_literal:  '[' arguments ']'.    (50)
 
 	.  reduce 50 (src line 248)
 
 
-state 89
-	associative_arguments:  associative_arguments ','.pair 
-
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'.'  shift 62
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	'*'  shift 56
-	.  error
-
-	expression  goto 61
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	splat_argument  goto 60
-	pair  goto 95
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
-state 90
-	pair:  expression DOUBLE_ARROW.expression 
-
-	IDENT  shift 24
-	INTEGER  shift 17
-	TRUE  shift 6
-	FALSE  shift 7
-	FLOAT  shift 9
-	SYMBOL  shift 16
-	STRING  shift 8
-	'{'  shift 26
-	'('  shift 23
-	'['  shift 25
-	'!'  shift 15
-	'+'  shift 14
-	'-'  shift 13
-	.  error
-
-	expression  goto 96
-	applicable_expression  goto 12
-	ident  goto 18
-	binary_expression  goto 10
-	unary_expression  goto 11
-	vector_literal  goto 19
-	map_literal  goto 20
-	function_application  goto 21
-	key_access  goto 22
-
 state 91
-	pair:  '.' IDENT.    (53)
-
-	.  reduce 53 (src line 259)
-
-
-state 92
-	function_application:  applicable_expression '(' application_arguments ')'.    (56)
-
-	.  reduce 56 (src line 279)
-
-
-state 93
-	key_access:  applicable_expression '[' expression ']'.    (60)
-
-	.  reduce 60 (src line 300)
-
-
-state 94
-	arguments:  arguments ',' argument.    (45)
-
-	.  reduce 45 (src line 217)
-
-
-state 95
-	associative_arguments:  associative_arguments ',' pair.    (55)
-
-	.  reduce 55 (src line 270)
-
-
-state 96
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
@@ -1487,29 +1469,153 @@ state 96
 	binary_expression:  expression.'<' expression 
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
-	pair:  expression DOUBLE_ARROW expression.    (52)
+	splat_argument:  '*' expression.    (48)
 
-	'='  shift 32
-	'<'  shift 34
-	'>'  shift 33
-	AND  shift 35
-	OR  shift 36
-	'+'  shift 28
-	'-'  shift 29
-	'*'  shift 30
-	'/'  shift 31
-	.  reduce 52 (src line 256)
+	'='  shift 34
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 48 (src line 234)
 
 
-44 terminals, 20 nonterminals
-61 grammar rules, 97/2000 states
+state 92
+	map_literal:  '{' associative_arguments '}'.    (52)
+
+	.  reduce 52 (src line 261)
+
+
+state 93
+	associative_arguments:  associative_arguments ','.pair 
+
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'.'  shift 65
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	'*'  shift 59
+	.  error
+
+	expression  goto 64
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	splat_argument  goto 63
+	pair  goto 99
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 94
+	pair:  expression DOUBLE_ARROW.expression 
+
+	IDENT  shift 26
+	INTEGER  shift 18
+	TRUE  shift 6
+	FALSE  shift 7
+	FLOAT  shift 9
+	SYMBOL  shift 17
+	STRING  shift 8
+	KW_DO  shift 25
+	'{'  shift 28
+	'('  shift 24
+	'['  shift 27
+	'!'  shift 16
+	'+'  shift 15
+	'-'  shift 14
+	.  error
+
+	expression  goto 100
+	applicable_expression  goto 12
+	do_list  goto 13
+	ident  goto 19
+	binary_expression  goto 10
+	unary_expression  goto 11
+	vector_literal  goto 20
+	map_literal  goto 21
+	function_application  goto 22
+	key_access  goto 23
+
+state 95
+	pair:  '.' IDENT.    (55)
+
+	.  reduce 55 (src line 272)
+
+
+state 96
+	function_application:  applicable_expression '(' application_arguments ')'.    (58)
+
+	.  reduce 58 (src line 292)
+
+
+state 97
+	key_access:  applicable_expression '[' expression ']'.    (62)
+
+	.  reduce 62 (src line 313)
+
+
+state 98
+	arguments:  arguments ',' argument.    (47)
+
+	.  reduce 47 (src line 230)
+
+
+state 99
+	associative_arguments:  associative_arguments ',' pair.    (57)
+
+	.  reduce 57 (src line 283)
+
+
+state 100
+	binary_expression:  expression.'+' expression 
+	binary_expression:  expression.'-' expression 
+	binary_expression:  expression.'*' expression 
+	binary_expression:  expression.'/' expression 
+	binary_expression:  expression.'=' expression 
+	binary_expression:  expression.'>' expression 
+	binary_expression:  expression.'<' expression 
+	binary_expression:  expression.AND expression 
+	binary_expression:  expression.OR expression 
+	pair:  expression DOUBLE_ARROW expression.    (54)
+
+	'='  shift 34
+	'<'  shift 36
+	'>'  shift 35
+	AND  shift 37
+	OR  shift 38
+	'+'  shift 30
+	'-'  shift 31
+	'*'  shift 32
+	'/'  shift 33
+	.  reduce 54 (src line 269)
+
+
+45 terminals, 21 nonterminals
+63 grammar rules, 101/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
-69 working sets used
-memory: parser 392/30000
-72 extra closures
-473 shift entries, 1 exceptions
-48 goto entries
-205 entries saved by goto default
-Optimizer space used: output 329/30000
-329 table entries, 80 zero
-maximum spread: 43, maximum offset: 90
+70 working sets used
+memory: parser 433/30000
+80 extra closures
+515 shift entries, 1 exceptions
+51 goto entries
+240 entries saved by goto default
+Optimizer space used: output 361/30000
+361 table entries, 98 zero
+maximum spread: 44, maximum offset: 94

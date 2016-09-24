@@ -63,21 +63,14 @@ var word = &unicode.RangeTable{
 	},
 }
 
+// Lexer states
 const (
 	// Block where statements are executed
-	ST_BLOCK = iota
-	// Inside parentheses
-	ST_PAREN
-	// Inside a Map
-	ST_DATA_LIST
-	// Inside a Vector
-	ST_VECTOR
-	// Introducing a func
-	ST_BLOCK_START
-	// Introducing a match (x) { }
-	ST_MATCH_START
-	// Cases for a match
-	ST_MATCH_BODY
+	ST_CODE = iota
+	// Inside data structures
+	ST_DATA
+	// In the middle of an expression
+	ST_EXPR
 )
 
 // Lexer for reading Bijou code
@@ -112,7 +105,7 @@ func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
 		lineBuffer: make([]rune, 0),
 		source:     source,
 		stack:      make([]int, 0),
-		state:      ST_BLOCK,
+		state:      ST_CODE,
 	}
 }
 
@@ -138,9 +131,9 @@ Loop:
 		switch {
 		case (c == '\n'):
 			token = lexer.scanEOL(lval)
-			//if lexer.state == ST_BLOCK {
-			//	break
-			//}
+			if lexer.state == ST_CODE {
+				break
+			}
 			continue Loop
 		case (c == ';'):
 			lexer.skipComment()
@@ -172,7 +165,7 @@ Loop:
 		break
 	}
 
-	//lexer.checkState(token)
+	lexer.checkState(token)
 	return token
 }
 
@@ -184,35 +177,20 @@ func (lexer *BijouLex) Error(err string) {
 // Manage the state of the lexer to aid with ASI procedure
 func (lexer *BijouLex) checkState(token int) {
 	switch token {
-	case '(':
-		lexer.pushState(ST_PAREN)
-	case ')':
-		lexer.popState(ST_PAREN)
-	case '[':
-		lexer.pushState(ST_VECTOR)
-	case ']':
-		lexer.popState(ST_VECTOR)
-	case KW_FUNC, '#':
-		lexer.pushState(ST_BLOCK_START)
-	case KW_OF:
-		lexer.swapState(ST_BLOCK_START, ST_MATCH_START)
-	case KW_CASE, KW_THEN, KW_ELSE:
-		lexer.keepState(ST_BLOCK)
-	case '{':
-		switch lexer.state {
-		case ST_BLOCK_START:
-			lexer.swapState(ST_BLOCK_START, ST_BLOCK)
-		case ST_MATCH_START:
-			lexer.swapState(ST_MATCH_START, ST_MATCH_BODY)
-		default:
-			lexer.pushState(ST_DATA_LIST)
+	case '=', '+', '-', '*', '/', '.', '>', '<':
+		lexer.pushState(ST_EXPR)
+	default:
+		lexer.popState(ST_EXPR)
+		switch token {
+		case KW_DO:
+			lexer.pushState(ST_CODE)
+		case KW_END:
+			lexer.popState(ST_CODE)
+		case '(', '[', '{':
+			lexer.pushState(ST_DATA)
+		case ')', ']', '}':
+			lexer.popState(ST_DATA)
 		}
-	case '}':
-		switch lexer.state {
-		case ST_BLOCK, ST_DATA_LIST:
-			lexer.popState(lexer.state)
-		}
-		lexer.popState(ST_MATCH_BODY)
 	}
 
 	lexer.token = token
@@ -540,8 +518,10 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 	switch str {
 	case "$":
 		tok = EOL
-	case "func":
-		tok = KW_FUNC
+	case "do":
+		tok = KW_DO
+	case "end":
+		tok = KW_END
 	case "case":
 		tok = KW_CASE
 	case "of":

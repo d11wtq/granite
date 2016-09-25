@@ -16,6 +16,7 @@ const eof = 0
 var space = &unicode.RangeTable{
 	R16: []unicode.Range16{
 		{'\t', '\t', 1},
+		{'\n', '\n', 1},
 		{'\r', '\r', 1},
 		{' ', ' ', 1},
 	},
@@ -84,9 +85,15 @@ type BijouLex struct {
 	// The current line contents
 	lineBuffer []rune
 	// The state stack
-	stack []int
-	// Th current state
+	stateStack []int
+	// The current state
 	state int
+	// The indentation levels encountered at this point
+	indentStack []int
+	// The current indentation level
+	indent int
+	// The line at which the indent was detected
+	indentLine int
 	// The input source to analyze
 	source io.RuneScanner
 	// The result AST, put here by BijouParse
@@ -100,12 +107,15 @@ type BijouLex struct {
 // Return a lexer for source, used by BijouParse
 func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
 	return &BijouLex{
-		filename:   filename,
-		lineNo:     1,
-		lineBuffer: make([]rune, 0),
-		source:     source,
-		stack:      make([]int, 0),
-		state:      ST_CODE,
+		filename:    filename,
+		lineNo:      1,
+		lineBuffer:  make([]rune, 0),
+		source:      source,
+		stateStack:  make([]int, 0),
+		state:       ST_CODE,
+		indentStack: make([]int, 0),
+		indent:      0,
+		indentLine:  1,
 	}
 }
 
@@ -123,21 +133,34 @@ func (lexer *BijouLex) Result() ast.ASTNode {
 // Return the next lexical token from the input stream
 func (lexer *BijouLex) Lex(lval *BijouSymType) int {
 	token := eof
+
 Loop:
 	for {
-		lexer.skipWhiteSpace()
 		c := lexer.peek()
 
-		switch {
-		case (c == '\n'):
-			token = lexer.scanEOL(lval)
+		if unicode.Is(space, c) {
+			lexer.skipWhiteSpace()
+
 			if lexer.state == ST_CODE {
-				break
+				switch {
+				case (lexer.columnNo < lexer.indent):
+					lexer.popState(ST_CODE)
+					lexer.popIndent()
+					fallthrough
+				case (lexer.columnNo == lexer.indent):
+					lexer.indentLine = lexer.lineNo
+					return EOL
+				default:
+					if lexer.indentLine < lexer.lineNo {
+						lexer.indent = lexer.columnNo
+						lexer.indentLine = lexer.lineNo
+					}
+				}
 			}
 			continue Loop
-		case (c == ';'):
-			lexer.skipComment()
-			continue Loop
+		}
+
+		switch {
 		case (c == ':'):
 			token = int(lexer.read())
 			if unicode.Is(word, lexer.peek()) {
@@ -177,15 +200,16 @@ func (lexer *BijouLex) Error(err string) {
 // Manage the state of the lexer to aid with ASI procedure
 func (lexer *BijouLex) checkState(token int) {
 	switch token {
-	case '=', '+', '-', '*', '/', '.', '>', '<':
+	case '=', '+', '-', '*', '/', '.', '>', '<', AND, OR:
+		fallthrough
+	case DOUBLE_ARROW, KW_OF, KW_THEN, KW_ELSE:
 		lexer.pushState(ST_EXPR)
 	default:
 		lexer.popState(ST_EXPR)
 		switch token {
 		case KW_DO:
 			lexer.pushState(ST_CODE)
-		case KW_END:
-			lexer.popState(ST_CODE)
+			lexer.pushIndent()
 		case '(', '[', '{':
 			lexer.pushState(ST_DATA)
 		case ')', ']', '}':
@@ -198,26 +222,30 @@ func (lexer *BijouLex) checkState(token int) {
 
 // Push the current state to the stack and switch to newState
 func (lexer *BijouLex) pushState(newState int) {
-	lexer.stack = append(lexer.stack, lexer.state)
+	lexer.stateStack = append(lexer.stateStack, lexer.state)
 	lexer.state = newState
 }
 
 // If the current state is oldState, pop it off the stack
 func (lexer *BijouLex) popState(oldState int) {
-	if lexer.state == oldState && len(lexer.stack) > 0 {
-		lexer.state = lexer.stack[len(lexer.stack)-1]
-		lexer.stack = lexer.stack[:len(lexer.stack)-1]
+	if lexer.state == oldState && len(lexer.stateStack) > 0 {
+		lexer.state = lexer.stateStack[len(lexer.stateStack)-1]
+		lexer.stateStack = lexer.stateStack[:len(lexer.stateStack)-1]
 	}
 }
 
-// Performs popState() and pushState()
-func (lexer *BijouLex) swapState(oldState, newState int) {
-	lexer.popState(oldState)
-	lexer.pushState(newState)
+// Push the current indent to the stack and switch to a new block
+func (lexer *BijouLex) pushIndent() {
+	lexer.indentStack = append(lexer.indentStack, lexer.indent)
+	lexer.indentLine = 0
 }
 
-func (lexer *BijouLex) keepState(newState int) {
-	lexer.swapState(newState, newState)
+// Pop the current indent off the stack
+func (lexer *BijouLex) popIndent() {
+	if len(lexer.indentStack) > 0 {
+		lexer.indent = lexer.indentStack[len(lexer.indentStack)-1]
+		lexer.indentStack = lexer.indentStack[:len(lexer.indentStack)-1]
+	}
 }
 
 // Get the next character in the source, without consuming it
@@ -279,7 +307,10 @@ func (lexer *BijouLex) skipWhiteSpace() {
 		}
 		if !unicode.Is(space, c) {
 			lexer.backup(c)
-			break
+			if c != ';' {
+				break
+			}
+			lexer.skipComment()
 		}
 	}
 }

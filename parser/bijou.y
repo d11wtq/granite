@@ -45,10 +45,10 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	KW_DO
 %token	KW_END
 %token	KW_CASE
-%token	KW_OF
 %token	KW_IF
-%token	KW_THEN
-%token	KW_ELSE
+%right	KW_OF
+%right	KW_THEN
+%right	KW_ELSE
 
 %token	'{' '}'
 %token	'(' ')'
@@ -77,7 +77,6 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> program
 %type	<node> expression
 %type	<node> applicable_expression
-%type	<node> expression_or_empty
 %type	<node> expression_lines
 %type	<node> do_list
 %type	<node> ident
@@ -110,7 +109,10 @@ start: /* Initial rule */
 	}
 
 program: /* Entire program (top) */
-	expression_lines
+	/* empty */ {
+		$$ = ast.NewExpressionList()
+	}
+|	expression_lines
 
 expression: /* Abribtrary expressions */
 	TRUE
@@ -120,7 +122,6 @@ expression: /* Abribtrary expressions */
 |	binary_expression
 |	unary_expression
 |	applicable_expression
-|	do_list
 
 applicable_expression: /* Expressions that can be invoked as functions */
 	SYMBOL
@@ -130,6 +131,7 @@ applicable_expression: /* Expressions that can be invoked as functions */
 |	map_literal
 |	function_application
 |	key_access
+|	do_list
 |	'(' expression ')' { $$ = $2 }
 
 ident: /* Identifiers */
@@ -142,21 +144,12 @@ ident: /* Identifiers */
 |	'(' '<' ')' { $$ = ast.NewIdentifier("<") }
 |	'(' '!' ')' { $$ = ast.NewIdentifier("!") }
 
-expression_or_empty: /* A line of input, effectively */
-	/* empty */ { $$ = nil }
-|	expression
-
 expression_lines: /* expr $ expr */
-	expression_or_empty {
-		$$ = ast.NewExpressionList()
-		if $1 != nil {
-			$$.(*ast.ExpressionList).Append($1)
-		}
+	expression EOL {
+		$$ = ast.NewExpressionList($1)
 	}
-|	expression_lines EOL expression_or_empty {
-		if $3 != nil {
-			$1.(*ast.ExpressionList).Append($3)
-		}
+|	expression_lines expression EOL {
+		$1.(*ast.ExpressionList).Append($3)
 	}
 
 
@@ -165,7 +158,7 @@ expression_lines: /* expr $ expr */
  */
 
 do_list: /* do a,b end */
-	KW_DO expression_lines KW_END {
+	KW_DO expression_lines EOL {
 		$$ = $2
 	}
 

@@ -17,7 +17,7 @@ state 0
 	'!'  shift 14
 	'+'  shift 13
 	'-'  shift 12
-	.  reduce 2 (src line 111)
+	.  reduce 2 (src line 110)
 
 	start  goto 1
 	program  goto 2
@@ -43,12 +43,12 @@ state 1
 state 2
 	start:  program.    (1)
 
-	.  reduce 1 (src line 106)
+	.  reduce 1 (src line 105)
 
 
 state 3
 	program:  expression_lines.    (3)
-	expression_lines:  expression_lines.expression EOL 
+	expression_lines:  expression_lines.expression END 
 
 	IDENT  shift 24
 	INTEGER  shift 16
@@ -64,7 +64,7 @@ state 3
 	'!'  shift 14
 	'+'  shift 13
 	'-'  shift 12
-	.  reduce 3 (src line 115)
+	.  reduce 3 (src line 114)
 
 	expression  goto 28
 	applicable_expression  goto 11
@@ -78,7 +78,7 @@ state 3
 	key_access  goto 21
 
 state 4
-	expression_lines:  expression.EOL 
+	expression_lines:  expression.END 
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
@@ -89,7 +89,7 @@ state 4
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	EOL  shift 29
+	END  shift 29
 	'='  shift 34
 	'<'  shift 36
 	'>'  shift 35
@@ -105,37 +105,37 @@ state 4
 state 5
 	expression:  TRUE.    (4)
 
-	.  reduce 4 (src line 117)
+	.  reduce 4 (src line 116)
 
 
 state 6
 	expression:  FALSE.    (5)
 
-	.  reduce 5 (src line 119)
+	.  reduce 5 (src line 118)
 
 
 state 7
 	expression:  STRING.    (6)
 
-	.  reduce 6 (src line 120)
+	.  reduce 6 (src line 119)
 
 
 state 8
 	expression:  FLOAT.    (7)
 
-	.  reduce 7 (src line 121)
+	.  reduce 7 (src line 120)
 
 
 state 9
 	expression:  binary_expression.    (8)
 
-	.  reduce 8 (src line 122)
+	.  reduce 8 (src line 121)
 
 
 state 10
 	expression:  unary_expression.    (9)
 
-	.  reduce 9 (src line 123)
+	.  reduce 9 (src line 122)
 
 
 state 11
@@ -147,7 +147,7 @@ state 11
 	'('  shift 39
 	'['  shift 41
 	'.'  shift 40
-	.  reduce 10 (src line 124)
+	.  reduce 10 (src line 123)
 
 
 state 12
@@ -243,49 +243,49 @@ state 14
 state 15
 	applicable_expression:  SYMBOL.    (11)
 
-	.  reduce 11 (src line 126)
+	.  reduce 11 (src line 125)
 
 
 state 16
 	applicable_expression:  INTEGER.    (12)
 
-	.  reduce 12 (src line 128)
+	.  reduce 12 (src line 127)
 
 
 state 17
 	applicable_expression:  ident.    (13)
 
-	.  reduce 13 (src line 129)
+	.  reduce 13 (src line 128)
 
 
 state 18
 	applicable_expression:  vector_literal.    (14)
 
-	.  reduce 14 (src line 130)
+	.  reduce 14 (src line 129)
 
 
 state 19
 	applicable_expression:  map_literal.    (15)
 
-	.  reduce 15 (src line 131)
+	.  reduce 15 (src line 130)
 
 
 state 20
 	applicable_expression:  function_application.    (16)
 
-	.  reduce 16 (src line 132)
+	.  reduce 16 (src line 131)
 
 
 state 21
 	applicable_expression:  key_access.    (17)
 
-	.  reduce 17 (src line 133)
+	.  reduce 17 (src line 132)
 
 
 state 22
 	applicable_expression:  do_list.    (18)
 
-	.  reduce 18 (src line 134)
+	.  reduce 18 (src line 133)
 
 
 state 23
@@ -332,7 +332,7 @@ state 23
 state 24
 	ident:  IDENT.    (20)
 
-	.  reduce 20 (src line 137)
+	.  reduce 20 (src line 136)
 
 
 state 25
@@ -409,7 +409,7 @@ state 26
 	key_access  goto 21
 
 state 27
-	do_list:  KW_DO.expression_lines EOL 
+	do_list:  KW_DO.expression_lines END 
 
 	IDENT  shift 24
 	INTEGER  shift 16
@@ -440,7 +440,7 @@ state 27
 	key_access  goto 21
 
 state 28
-	expression_lines:  expression_lines expression.EOL 
+	expression_lines:  expression_lines expression.END 
 	binary_expression:  expression.'+' expression 
 	binary_expression:  expression.'-' expression 
 	binary_expression:  expression.'*' expression 
@@ -451,7 +451,7 @@ state 28
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	EOL  shift 66
+	END  shift 66
 	'='  shift 34
 	'<'  shift 36
 	'>'  shift 35
@@ -465,9 +465,9 @@ state 28
 
 
 state 29
-	expression_lines:  expression EOL.    (28)
+	expression_lines:  expression END.    (28)
 
-	.  reduce 28 (src line 147)
+	.  reduce 28 (src line 146)
 
 
 state 30
@@ -759,7 +759,7 @@ state 39
 	'+'  shift 13
 	'-'  shift 12
 	'*'  shift 58
-	.  reduce 59 (src line 292)
+	.  reduce 59 (src line 291)
 
 	expression  goto 56
 	applicable_expression  goto 11
@@ -825,7 +825,7 @@ state 42
 	binary_expression:  expression.OR expression 
 	unary_expression:  '-' expression.    (40)
 
-	.  reduce 40 (src line 199)
+	.  reduce 40 (src line 198)
 
 
 state 43
@@ -840,7 +840,7 @@ state 43
 	binary_expression:  expression.OR expression 
 	unary_expression:  '+' expression.    (41)
 
-	.  reduce 41 (src line 203)
+	.  reduce 41 (src line 202)
 
 
 state 44
@@ -855,7 +855,7 @@ state 44
 	binary_expression:  expression.OR expression 
 	unary_expression:  '!' expression.    (42)
 
-	.  reduce 42 (src line 206)
+	.  reduce 42 (src line 205)
 
 
 state 45
@@ -1010,7 +1010,7 @@ state 52
 state 53
 	vector_literal:  '[' ']'.    (48)
 
-	.  reduce 48 (src line 237)
+	.  reduce 48 (src line 236)
 
 
 state 54
@@ -1025,7 +1025,7 @@ state 54
 state 55
 	arguments:  argument.    (45)
 
-	.  reduce 45 (src line 219)
+	.  reduce 45 (src line 218)
 
 
 state 56
@@ -1049,13 +1049,13 @@ state 56
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 43 (src line 215)
+	.  reduce 43 (src line 214)
 
 
 state 57
 	argument:  splat_argument.    (44)
 
-	.  reduce 44 (src line 217)
+	.  reduce 44 (src line 216)
 
 
 state 58
@@ -1091,7 +1091,7 @@ state 58
 state 59
 	map_literal:  '{' '}'.    (50)
 
-	.  reduce 50 (src line 250)
+	.  reduce 50 (src line 249)
 
 
 state 60
@@ -1106,13 +1106,13 @@ state 60
 state 61
 	associative_arguments:  pair.    (55)
 
-	.  reduce 55 (src line 272)
+	.  reduce 55 (src line 271)
 
 
 state 62
 	pair:  splat_argument.    (52)
 
-	.  reduce 52 (src line 258)
+	.  reduce 52 (src line 257)
 
 
 state 63
@@ -1148,10 +1148,10 @@ state 64
 
 
 state 65
-	expression_lines:  expression_lines.expression EOL 
-	do_list:  KW_DO expression_lines.EOL 
+	expression_lines:  expression_lines.expression END 
+	do_list:  KW_DO expression_lines.END 
 
-	EOL  shift 95
+	END  shift 95
 	IDENT  shift 24
 	INTEGER  shift 16
 	TRUE  shift 5
@@ -1180,9 +1180,9 @@ state 65
 	key_access  goto 21
 
 state 66
-	expression_lines:  expression_lines expression EOL.    (29)
+	expression_lines:  expression_lines expression END.    (29)
 
-	.  reduce 29 (src line 151)
+	.  reduce 29 (src line 150)
 
 
 state 67
@@ -1199,7 +1199,7 @@ state 67
 
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 31 (src line 170)
+	.  reduce 31 (src line 169)
 
 
 state 68
@@ -1216,7 +1216,7 @@ state 68
 
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 32 (src line 174)
+	.  reduce 32 (src line 173)
 
 
 state 69
@@ -1231,7 +1231,7 @@ state 69
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	.  reduce 33 (src line 177)
+	.  reduce 33 (src line 176)
 
 
 state 70
@@ -1246,7 +1246,7 @@ state 70
 	binary_expression:  expression.AND expression 
 	binary_expression:  expression.OR expression 
 
-	.  reduce 34 (src line 180)
+	.  reduce 34 (src line 179)
 
 
 state 71
@@ -1270,7 +1270,7 @@ state 71
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 35 (src line 183)
+	.  reduce 35 (src line 182)
 
 
 state 72
@@ -1293,7 +1293,7 @@ state 72
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 36 (src line 186)
+	.  reduce 36 (src line 185)
 
 
 state 73
@@ -1316,7 +1316,7 @@ state 73
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 37 (src line 189)
+	.  reduce 37 (src line 188)
 
 
 state 74
@@ -1335,7 +1335,7 @@ state 74
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 38 (src line 192)
+	.  reduce 38 (src line 191)
 
 
 state 75
@@ -1354,7 +1354,7 @@ state 75
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 39 (src line 195)
+	.  reduce 39 (src line 194)
 
 
 state 76
@@ -1369,13 +1369,13 @@ state 77
 	application_arguments:  arguments.    (58)
 
 	','  shift 88
-	.  reduce 58 (src line 290)
+	.  reduce 58 (src line 289)
 
 
 state 78
 	key_access:  applicable_expression '.' IDENT.    (60)
 
-	.  reduce 60 (src line 299)
+	.  reduce 60 (src line 298)
 
 
 state 79
@@ -1406,49 +1406,49 @@ state 79
 state 80
 	applicable_expression:  '(' expression ')'.    (19)
 
-	.  reduce 19 (src line 135)
+	.  reduce 19 (src line 134)
 
 
 state 81
 	ident:  '(' '+' ')'.    (21)
 
-	.  reduce 21 (src line 139)
+	.  reduce 21 (src line 138)
 
 
 state 82
 	ident:  '(' '-' ')'.    (22)
 
-	.  reduce 22 (src line 140)
+	.  reduce 22 (src line 139)
 
 
 state 83
 	ident:  '(' '*' ')'.    (23)
 
-	.  reduce 23 (src line 141)
+	.  reduce 23 (src line 140)
 
 
 state 84
 	ident:  '(' '/' ')'.    (24)
 
-	.  reduce 24 (src line 142)
+	.  reduce 24 (src line 141)
 
 
 state 85
 	ident:  '(' '>' ')'.    (25)
 
-	.  reduce 25 (src line 143)
+	.  reduce 25 (src line 142)
 
 
 state 86
 	ident:  '(' '<' ')'.    (26)
 
-	.  reduce 26 (src line 144)
+	.  reduce 26 (src line 143)
 
 
 state 87
 	ident:  '(' '!' ')'.    (27)
 
-	.  reduce 27 (src line 145)
+	.  reduce 27 (src line 144)
 
 
 state 88
@@ -1487,7 +1487,7 @@ state 88
 state 89
 	vector_literal:  '[' arguments ']'.    (49)
 
-	.  reduce 49 (src line 241)
+	.  reduce 49 (src line 240)
 
 
 state 90
@@ -1511,13 +1511,13 @@ state 90
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 47 (src line 227)
+	.  reduce 47 (src line 226)
 
 
 state 91
 	map_literal:  '{' associative_arguments '}'.    (51)
 
-	.  reduce 51 (src line 254)
+	.  reduce 51 (src line 253)
 
 
 state 92
@@ -1587,37 +1587,37 @@ state 93
 state 94
 	pair:  '.' IDENT.    (54)
 
-	.  reduce 54 (src line 265)
+	.  reduce 54 (src line 264)
 
 
 state 95
-	do_list:  KW_DO expression_lines EOL.    (30)
+	do_list:  KW_DO expression_lines END.    (30)
 
-	.  reduce 30 (src line 160)
+	.  reduce 30 (src line 159)
 
 
 state 96
 	function_application:  applicable_expression '(' application_arguments ')'.    (57)
 
-	.  reduce 57 (src line 285)
+	.  reduce 57 (src line 284)
 
 
 state 97
 	key_access:  applicable_expression '[' expression ']'.    (61)
 
-	.  reduce 61 (src line 306)
+	.  reduce 61 (src line 305)
 
 
 state 98
 	arguments:  arguments ',' argument.    (46)
 
-	.  reduce 46 (src line 223)
+	.  reduce 46 (src line 222)
 
 
 state 99
 	associative_arguments:  associative_arguments ',' pair.    (56)
 
-	.  reduce 56 (src line 276)
+	.  reduce 56 (src line 275)
 
 
 state 100
@@ -1641,10 +1641,10 @@ state 100
 	'-'  shift 31
 	'*'  shift 32
 	'/'  shift 33
-	.  reduce 53 (src line 262)
+	.  reduce 53 (src line 261)
 
 
-45 terminals, 20 nonterminals
+44 terminals, 20 nonterminals
 62 grammar rules, 101/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
 69 working sets used
@@ -1653,6 +1653,6 @@ memory: parser 409/30000
 538 shift entries, 1 exceptions
 50 goto entries
 248 entries saved by goto default
-Optimizer space used: output 409/30000
-409 table entries, 115 zero
-maximum spread: 44, maximum offset: 93
+Optimizer space used: output 416/30000
+416 table entries, 122 zero
+maximum spread: 43, maximum offset: 93

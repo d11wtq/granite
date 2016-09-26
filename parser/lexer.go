@@ -70,8 +70,6 @@ const (
 	ST_CODE = iota
 	// Inside data structures
 	ST_DATA
-	// In the middle of an expression
-	ST_EXPR
 )
 
 // Lexer for reading Bijou code
@@ -91,8 +89,8 @@ type BijouLex struct {
 	// The indentation levels encountered at this point
 	indentStack []int
 	// The current indentation level
-	indent int
-	// The line at which the indent was detected
+	indentColumn int
+	// The line at which the last correct indentation was found
 	indentLine int
 	// The input source to analyze
 	source io.RuneScanner
@@ -100,23 +98,26 @@ type BijouLex struct {
 	result ast.ASTNode
 	// The last error encountered
 	error string
-	// The previously read token
-	token int
+	// The number of finished blocks to complete
+	endBlocks int
 }
 
 // Return a lexer for source, used by BijouParse
 func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
-	return &BijouLex{
-		filename:    filename,
-		lineNo:      1,
-		lineBuffer:  make([]rune, 0),
-		source:      source,
-		stateStack:  make([]int, 0),
-		state:       ST_CODE,
-		indentStack: make([]int, 0),
-		indent:      0,
-		indentLine:  1,
+	lexer := &BijouLex{
+		filename:     filename,
+		lineNo:       1,
+		lineBuffer:   make([]rune, 0),
+		source:       source,
+		stateStack:   make([]int, 0),
+		state:        ST_CODE,
+		indentStack:  make([]int, 0),
+		indentColumn: 0,
 	}
+
+	lexer.beginBlock()
+
+	return lexer
 }
 
 // Set the AST from the finished parse.
@@ -132,60 +133,38 @@ func (lexer *BijouLex) Result() ast.ASTNode {
 
 // Return the next lexical token from the input stream
 func (lexer *BijouLex) Lex(lval *BijouSymType) int {
-	token := eof
+	if lexer.handleASI() {
+		return END
+	}
 
-Loop:
-	for {
-		c := lexer.peek()
+	var (
+		token = eof
+		c     = lexer.peek()
+	)
 
-		if unicode.Is(space, c) {
-			lexer.skipWhiteSpace()
-
-			if lexer.state == ST_CODE {
-				switch {
-				case (lexer.columnNo < lexer.indent):
-					lexer.popState(ST_CODE)
-					lexer.popIndent()
-					fallthrough
-				case (lexer.columnNo == lexer.indent):
-					lexer.indentLine = lexer.lineNo
-					return EOL
-				default:
-					if lexer.indentLine < lexer.lineNo {
-						lexer.indent = lexer.columnNo
-						lexer.indentLine = lexer.lineNo
-					}
-				}
-			}
-			continue Loop
+	switch {
+	case (c == ':'):
+		token = int(lexer.read())
+		if unicode.Is(word, lexer.peek()) {
+			token = lexer.scanSymbol(lval)
 		}
-
-		switch {
-		case (c == ':'):
-			token = int(lexer.read())
-			if unicode.Is(word, lexer.peek()) {
-				token = lexer.scanSymbol(lval)
-			}
-		case (c == '='):
-			token = int(lexer.read())
-			switch lexer.peek() {
-			case '>':
-				lexer.read()
-				token = DOUBLE_ARROW
-			}
-		case (c == '"'):
-			token = lexer.scanDoubleString(lval)
-		case (c == '\''):
-			token = lexer.scanSingleString(lval)
-		case unicode.Is(digit, c):
-			token = lexer.scanNumber(lval)
-		case unicode.Is(word, c):
-			token = lexer.scanWord(lval)
-		default:
-			token = int(lexer.read())
+	case (c == '='):
+		token = int(lexer.read())
+		switch lexer.peek() {
+		case '>':
+			lexer.read()
+			token = DOUBLE_ARROW
 		}
-
-		break
+	case (c == '"'):
+		token = lexer.scanDoubleString(lval)
+	case (c == '\''):
+		token = lexer.scanSingleString(lval)
+	case unicode.Is(digit, c):
+		token = lexer.scanNumber(lval)
+	case unicode.Is(word, c):
+		token = lexer.scanWord(lval)
+	default:
+		token = int(lexer.read())
 	}
 
 	lexer.checkState(token)
@@ -197,27 +176,66 @@ func (lexer *BijouLex) Error(err string) {
 	lexer.error = err
 }
 
-// Manage the state of the lexer to aid with ASI procedure
-func (lexer *BijouLex) checkState(token int) {
-	switch token {
-	case '=', '+', '-', '*', '/', '.', '>', '<', AND, OR:
-		fallthrough
-	case DOUBLE_ARROW, KW_OF, KW_THEN, KW_ELSE:
-		lexer.pushState(ST_EXPR)
-	default:
-		lexer.popState(ST_EXPR)
-		switch token {
-		case KW_DO:
-			lexer.pushState(ST_CODE)
-			lexer.pushIndent()
-		case '(', '[', '{':
-			lexer.pushState(ST_DATA)
-		case ')', ']', '}':
-			lexer.popState(ST_DATA)
+// Automatic semicolon insertion handling
+func (lexer *BijouLex) handleASI() bool {
+	lexer.skipWhiteSpace()
+
+	if lexer.endBlocks > 0 {
+		lexer.endBlocks -= 1
+		return true
+	}
+
+	if lexer.state == ST_CODE {
+		c := lexer.peek()
+
+		switch {
+		case (lexer.columnNo < lexer.indentColumn):
+			fallthrough
+		case (c == ')' || c == ']' || c == '}' || c == ',' || c == ':'):
+			// End the previous line, end the current block
+			lexer.popState(ST_CODE)
+			lexer.endBlock()
+			return true
+		case (lexer.indentColumn == lexer.columnNo):
+			// End the previous line
+			if lexer.lineNo > lexer.indentLine {
+				lexer.indentLine = lexer.lineNo
+				return true
+			}
 		}
 	}
 
-	lexer.token = token
+	return false
+}
+
+// Manage the state of the lexer to aid with ASI procedure
+func (lexer *BijouLex) checkState(token int) {
+	switch token {
+	case KW_DO:
+		lexer.pushState(ST_CODE)
+		lexer.beginBlock()
+	case '(', '[', '{':
+		lexer.pushState(ST_DATA)
+	case ')', ']', '}':
+		lexer.popState(ST_DATA)
+	}
+}
+
+// Start a new code block and compute the indent of it
+func (lexer *BijouLex) beginBlock() {
+	lexer.skipWhiteSpace()
+	lexer.indentStack = append(lexer.indentStack, lexer.indentColumn)
+	lexer.indentColumn = lexer.columnNo
+	lexer.indentLine = lexer.lineNo
+}
+
+// Finish the current code block and restore the previous indent
+func (lexer *BijouLex) endBlock() {
+	if len(lexer.indentStack) > 0 {
+		lexer.indentColumn = lexer.indentStack[len(lexer.indentStack)-1]
+		lexer.indentStack = lexer.indentStack[:len(lexer.indentStack)-1]
+		lexer.endBlocks += 1
+	}
 }
 
 // Push the current state to the stack and switch to newState
@@ -231,20 +249,6 @@ func (lexer *BijouLex) popState(oldState int) {
 	if lexer.state == oldState && len(lexer.stateStack) > 0 {
 		lexer.state = lexer.stateStack[len(lexer.stateStack)-1]
 		lexer.stateStack = lexer.stateStack[:len(lexer.stateStack)-1]
-	}
-}
-
-// Push the current indent to the stack and switch to a new block
-func (lexer *BijouLex) pushIndent() {
-	lexer.indentStack = append(lexer.indentStack, lexer.indent)
-	lexer.indentLine = 0
-}
-
-// Pop the current indent off the stack
-func (lexer *BijouLex) popIndent() {
-	if len(lexer.indentStack) > 0 {
-		lexer.indent = lexer.indentStack[len(lexer.indentStack)-1]
-		lexer.indentStack = lexer.indentStack[:len(lexer.indentStack)-1]
 	}
 }
 
@@ -307,10 +311,11 @@ func (lexer *BijouLex) skipWhiteSpace() {
 		}
 		if !unicode.Is(space, c) {
 			lexer.backup(c)
-			if c != ';' {
-				break
+			if c == ';' {
+				lexer.skipComment()
+				continue
 			}
-			lexer.skipComment()
+			break
 		}
 	}
 }
@@ -331,13 +336,6 @@ func (lexer *BijouLex) skipComment() {
 			break
 		}
 	}
-}
-
-func (lexer *BijouLex) scanEOL(lval *BijouSymType) int {
-	if lexer.read() != '\n' {
-		panic("Attempt to read non-EOL as EOL")
-	}
-	return EOL
 }
 
 // Scan a double-quoted string
@@ -547,12 +545,8 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 	lval.node = ast.NewIdentifier(str)
 
 	switch str {
-	case "$":
-		tok = EOL
 	case "do":
 		tok = KW_DO
-	case "end":
-		tok = KW_END
 	case "case":
 		tok = KW_CASE
 	case "of":

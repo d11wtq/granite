@@ -31,7 +31,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 	node ast.ASTNode
 }
 
-%token	<node> EOL
+%token	<node> END
 %token	<node> IDENT
 %token	<node> INTEGER
 %token	<node> TRUE
@@ -43,7 +43,6 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	<node> INVALID_NUMBER
 
 %token	KW_DO
-%token	KW_END
 %token	KW_CASE
 %token	KW_IF
 %right	KW_OF
@@ -144,12 +143,12 @@ ident: /* Identifiers */
 |	'(' '<' ')' { $$ = ast.NewIdentifier("<") }
 |	'(' '!' ')' { $$ = ast.NewIdentifier("!") }
 
-expression_lines: /* expr $ expr */
-	expression EOL {
+expression_lines: /* expr END expr END */
+	expression END {
 		$$ = ast.NewExpressionList($1)
 	}
-|	expression_lines expression EOL {
-		$1.(*ast.ExpressionList).Append($3)
+|	expression_lines expression END {
+		$1.(*ast.ExpressionList).Append($2)
 	}
 
 
@@ -158,7 +157,7 @@ expression_lines: /* expr $ expr */
  */
 
 do_list: /* do a,b end */
-	KW_DO expression_lines EOL {
+	KW_DO expression_lines END {
 		$$ = $2
 	}
 

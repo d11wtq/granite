@@ -32,6 +32,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 }
 
 %token	<node> END
+
 %token	<node> IDENT
 %token	<node> INTEGER
 %token	<node> TRUE
@@ -45,7 +46,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	KW_DO
 %token	KW_CASE
 %token	KW_IF
-%right	KW_OF
+%token	KW_OF
 %right	KW_THEN
 %right	KW_ELSE
 
@@ -77,7 +78,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> expression
 %type	<node> applicable_expression
 %type	<node> expression_lines
-%type	<node> do_list
+%type	<node> do_expression
 %type	<node> ident
 %type	<node> binary_expression
 %type	<node> unary_expression
@@ -91,6 +92,14 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> map_literal
 %type	<node> function_application
 %type	<node> key_access
+%type	<node> if_expression
+%type	<node> if_guard
+%type	<node> then_condition
+%type	<node> else_condition
+%type	<node> case_expression
+%type	<node> case_then_line
+%type	<node> case_then_lines
+%type	<node> case_lines
 
 %start start
 
@@ -121,6 +130,9 @@ expression: /* Abribtrary expressions */
 |	binary_expression
 |	unary_expression
 |	applicable_expression
+|	do_expression
+|	if_expression
+|	case_expression
 
 applicable_expression: /* Expressions that can be invoked as functions */
 	SYMBOL
@@ -130,7 +142,6 @@ applicable_expression: /* Expressions that can be invoked as functions */
 |	map_literal
 |	function_application
 |	key_access
-|	do_list
 |	'(' expression ')' { $$ = $2 }
 
 ident: /* Identifiers */
@@ -156,7 +167,7 @@ expression_lines: /* expr END expr END */
  * Do blocks.
  */
 
-do_list: /* do a,b end */
+do_expression: /* do a,b end */
 	KW_DO expression_lines END {
 		$$ = $2
 	}
@@ -224,7 +235,10 @@ arguments: /* a, b, c */
 	}
 
 splat_argument: /* *x */
-	'*' expression {
+	'*' {
+		$$ = ast.NewUnaryExpression(ast.OP_MUL, ast.Underscore)
+	}
+|	'*' expression {
 		$$ = ast.NewUnaryExpression(ast.OP_MUL, $2)
 	}
 
@@ -304,4 +318,61 @@ key_access: /* a.b, a[:b] */
 	}
 |	applicable_expression '[' expression ']' {
 		$$ = ast.NewKeyAccess($1, $3)
+	}
+
+
+/**
+ * If conditions.
+ */
+
+if_expression: /* if x then y else z */
+	if_guard then_condition %prec KW_THEN {
+		$$ = ast.NewIfThenElseExpression($1, $2, ast.Nil)
+	}
+|	if_guard then_condition else_condition {
+		$$ = ast.NewIfThenElseExpression($1, $2, $3)
+	}
+
+if_guard: /* if x > y */
+	KW_IF expression {
+		$$ = $2
+	}
+
+then_condition: /* then y */
+	KW_THEN expression {
+		$$ = $2
+	}
+
+else_condition: /* else z */
+	KW_ELSE expression {
+		$$ = $2
+	}
+
+
+/**
+ * Case expressions.
+ */
+
+case_expression: /* case x of y then z */
+	KW_CASE expression KW_OF case_lines END {
+		$$ = ast.NewCaseExpression($2, $4.(*ast.MapNode).Elements...)
+	}
+
+case_lines: /* x then y else z */
+	case_then_lines
+|	case_then_lines else_condition END {
+		$1.(*ast.MapNode).Append(ast.NewPair(ast.Underscore, $2))
+	}
+
+case_then_line: /* x then y */
+	expression KW_THEN expression END {
+		$$ = ast.NewPair($1, $3)
+	}
+
+case_then_lines: /* x then y END a then b */
+	case_then_line {
+		$$ = ast.NewMap($1.(*ast.PairNode))
+	}
+|	case_then_lines case_then_line {
+		$1.(*ast.MapNode).Append($2.(*ast.PairNode))
 	}

@@ -12,6 +12,7 @@ type ASTNode interface {
 
 // Visitor that can traverse an AST
 type ASTVisitor interface {
+	VisitNil(node *NilNode)
 	VisitInteger(node *IntegerNode)
 	VisitBoolean(node *BooleanNode)
 	VisitFloat(node *FloatNode)
@@ -26,4 +27,6 @@ type ASTVisitor interface {
 	VisitPair(node *PairNode)
 	VisitFunctionApplication(node *FunctionApplicationNode)
 	VisitKeyAccess(node *KeyAccessNode)
+	VisitIfThenElse(node *IfThenElseNode)
+	VisitCaseExpression(node *CaseExpressionNode)
 }

@@ -13,3 +13,6 @@ func NewIdentifier(name string) *IdentifierNode {
 func (node *IdentifierNode) Accept(visitor ASTVisitor) {
 	visitor.VisitIdentifier(node)
 }
+
+// The special "blank" value
+var Underscore = &IdentifierNode{"_"}

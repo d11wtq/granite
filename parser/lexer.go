@@ -191,7 +191,7 @@ func (lexer *BijouLex) handleASI() bool {
 		switch {
 		case (lexer.columnNo < lexer.indentColumn):
 			fallthrough
-		case (c == ')' || c == ']' || c == '}' || c == ',' || c == ':'):
+		case (c == ')' || c == ']' || c == '}' || c == ','):
 			// End the previous line, end the current block
 			lexer.popState(ST_CODE)
 			lexer.endBlock()
@@ -211,7 +211,7 @@ func (lexer *BijouLex) handleASI() bool {
 // Manage the state of the lexer to aid with ASI procedure
 func (lexer *BijouLex) checkState(token int) {
 	switch token {
-	case KW_DO:
+	case KW_DO, KW_OF:
 		lexer.pushState(ST_CODE)
 		lexer.beginBlock()
 	case '(', '[', '{':

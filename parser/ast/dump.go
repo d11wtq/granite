@@ -49,6 +49,10 @@ func (d *Dumper) Visit(node ASTNode) {
 	node.Accept(d)
 }
 
+func (d *Dumper) VisitNil(node *NilNode) {
+	d.render("NIL")
+}
+
 func (d *Dumper) VisitInteger(node *IntegerNode) {
 	d.render(fmt.Sprintf("INTEGER (%d)", node.Value))
 }
@@ -124,6 +128,14 @@ func (d *Dumper) VisitFunctionApplication(node *FunctionApplicationNode) {
 
 func (d *Dumper) VisitKeyAccess(node *KeyAccessNode) {
 	d.render("key access", node.Target, node.Key)
+}
+
+func (d *Dumper) VisitIfThenElse(node *IfThenElseNode) {
+	d.render("if-then-else", node.Expression, node.Then, node.Else)
+}
+
+func (d *Dumper) VisitCaseExpression(node *CaseExpressionNode) {
+	d.render("case of", node.Expression, NewMap(node.Cases...))
 }
 
 func (d *Dumper) visitSlice(node *sliceNode) {

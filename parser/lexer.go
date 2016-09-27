@@ -100,6 +100,8 @@ type BijouLex struct {
 	error string
 	// The number of finished blocks to complete
 	endBlocks int
+	// Set to true once the lexer has reached eof
+	done bool
 }
 
 // Return a lexer for source, used by BijouParse
@@ -189,6 +191,12 @@ func (lexer *BijouLex) handleASI() bool {
 		c := lexer.peek()
 
 		switch {
+		case (lexer.indentColumn == lexer.columnNo):
+			// End the previous line
+			if lexer.lineNo > lexer.indentLine {
+				lexer.indentLine = lexer.lineNo
+				return true
+			}
 		case (lexer.columnNo < lexer.indentColumn):
 			fallthrough
 		case (c == ')' || c == ']' || c == '}' || c == ','):
@@ -196,10 +204,13 @@ func (lexer *BijouLex) handleASI() bool {
 			lexer.popState(ST_CODE)
 			lexer.endBlock()
 			return true
-		case (lexer.indentColumn == lexer.columnNo):
-			// End the previous line
-			if lexer.lineNo > lexer.indentLine {
-				lexer.indentLine = lexer.lineNo
+		case (c == eof):
+			// End the document
+			if !lexer.done {
+				for range lexer.indentStack {
+					lexer.endBlock()
+				}
+				lexer.done = true
 				return true
 			}
 		}

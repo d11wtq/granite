@@ -121,6 +121,7 @@ program: /* Entire program (top) */
 		$$ = ast.NewExpressionList()
 	}
 |	expression_lines
+|	program END /* ignore too many END */
 
 expression: /* Abribtrary expressions */
 	TRUE

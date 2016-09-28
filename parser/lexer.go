@@ -107,14 +107,13 @@ type BijouLex struct {
 // Return a lexer for source, used by BijouParse
 func BijouNewLexer(source io.RuneScanner, filename string) *BijouLex {
 	lexer := &BijouLex{
-		filename:     filename,
-		lineNo:       1,
-		lineBuffer:   make([]rune, 0),
-		source:       source,
-		stateStack:   make([]int, 0),
-		state:        ST_CODE,
-		indentStack:  make([]int, 0),
-		indentColumn: 0,
+		filename:    filename,
+		lineNo:      1,
+		lineBuffer:  make([]rune, 0),
+		source:      source,
+		stateStack:  make([]int, 0),
+		state:       ST_CODE,
+		indentStack: make([]int, 0),
 	}
 
 	lexer.beginBlock()
@@ -178,9 +177,19 @@ func (lexer *BijouLex) Error(err string) {
 	lexer.error = err
 }
 
+// Mark the current indent location
+func (lexer *BijouLex) trackIndent() {
+	lexer.indentColumn = lexer.columnNo
+	lexer.indentLine = lexer.lineNo
+}
+
 // Automatic semicolon insertion handling
 func (lexer *BijouLex) handleASI() bool {
 	lexer.skipWhiteSpace()
+
+	if lexer.indentColumn < 0 {
+		lexer.trackIndent()
+	}
 
 	if lexer.endBlocks > 0 {
 		lexer.endBlocks -= 1
@@ -194,7 +203,7 @@ func (lexer *BijouLex) handleASI() bool {
 		case (lexer.indentColumn == lexer.columnNo):
 			// End the previous line
 			if lexer.lineNo > lexer.indentLine {
-				lexer.indentLine = lexer.lineNo
+				lexer.trackIndent()
 				return true
 			}
 		case (lexer.columnNo < lexer.indentColumn):
@@ -234,10 +243,8 @@ func (lexer *BijouLex) checkState(token int) {
 
 // Start a new code block and compute the indent of it
 func (lexer *BijouLex) beginBlock() {
-	lexer.skipWhiteSpace()
 	lexer.indentStack = append(lexer.indentStack, lexer.indentColumn)
-	lexer.indentColumn = lexer.columnNo
-	lexer.indentLine = lexer.lineNo
+	lexer.indentColumn = -1
 }
 
 // Finish the current code block and restore the previous indent

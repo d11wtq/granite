@@ -358,6 +358,10 @@ case_expression: /* case x of y then z */
 	KW_CASE expression KW_OF case_lines END {
 		$$ = ast.NewCaseExpression($2, $4.(*ast.MapNode).Elements...)
 	}
+|	KW_CASE KW_OF case_lines END {
+		/* case of x < y then z */
+		$$ = ast.NewCaseExpression(nil, $3.(*ast.MapNode).Elements...)
+	}
 
 case_lines: /* x then y else z */
 	case_then_lines

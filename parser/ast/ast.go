@@ -5,11 +5,6 @@ type ASTNode interface {
 	Accept(visitor ASTVisitor)
 }
 
-// TODO: case ... of ... then ... else
-// TODO: if ... then ... else
-// TODO: begin ... end (?)
-// TODO: Guards
-
 // Visitor that can traverse an AST
 type ASTVisitor interface {
 	VisitNil(node *NilNode)
@@ -24,6 +19,7 @@ type ASTVisitor interface {
 	VisitUnaryExpression(node *UnaryExpressionNode)
 	VisitVector(node *VectorNode)
 	VisitMap(node *MapNode)
+	VisitRecord(node *RecordNode)
 	VisitPair(node *PairNode)
 	VisitFunctionApplication(node *FunctionApplicationNode)
 	VisitKeyAccess(node *KeyAccessNode)

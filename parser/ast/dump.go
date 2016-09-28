@@ -17,22 +17,6 @@ var opNames = map[int]string{
 	OP_NOT: "not",
 }
 
-// Internal use only
-type sliceNode struct {
-	Name     string
-	Elements []ASTNode
-}
-
-// Create a new slice node for rendering in the AST
-func newSlice(name string, elements []ASTNode) *sliceNode {
-	return &sliceNode{name, elements}
-}
-
-// Dangerously asserts visitor as a *Dumper and invokes visitSliceNode()
-func (node *sliceNode) Accept(visitor ASTVisitor) {
-	visitor.(*Dumper).visitSlice(node)
-}
-
 // The Dumper can render an AST.
 type Dumper struct {
 	margin string
@@ -118,6 +102,10 @@ func (d *Dumper) VisitMap(node *MapNode) {
 	)
 }
 
+func (d *Dumper) VisitRecord(node *RecordNode) {
+	d.render("record", node.Type, NewMap(node.Elements...))
+}
+
 func (d *Dumper) VisitPair(node *PairNode) {
 	d.render("pair of", node.Key, node.Value)
 }
@@ -136,10 +124,6 @@ func (d *Dumper) VisitIfThenElse(node *IfThenElseNode) {
 
 func (d *Dumper) VisitCaseExpression(node *CaseExpressionNode) {
 	d.render("case of", node.Expression, NewMap(node.Cases...))
-}
-
-func (d *Dumper) visitSlice(node *sliceNode) {
-	d.render(node.Name, node.Elements...)
 }
 
 func (d *Dumper) render(name string, children ...ASTNode) {

@@ -90,6 +90,7 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> pair
 %type	<node> vector_literal
 %type	<node> map_literal
+%type	<node> record_literal
 %type	<node> function_application
 %type	<node> key_access
 %type	<node> if_expression
@@ -141,6 +142,7 @@ applicable_expression: /* Expressions that can be invoked as functions */
 |	ident
 |	vector_literal
 |	map_literal
+|	record_literal
 |	function_application
 |	key_access
 |	'(' expression ')' { $$ = $2 }
@@ -271,7 +273,7 @@ map_literal: /* { a => b, c => d, *x } */
 
 pair: /* a => b */
 	splat_argument {
-		$$ = ast.NewPair($1, $1)
+		$$ = ast.NewPair($1, nil)
 	}
 |	expression DOUBLE_ARROW expression {
 		$$ = ast.NewPair($1, $3)
@@ -289,6 +291,19 @@ associative_arguments: /* a => b, c => d */
 	}
 |	associative_arguments ',' pair {
 		$1.(*ast.MapNode).Append($3.(*ast.PairNode))
+	}
+
+
+/**
+ * Records.
+ */
+
+record_literal: /* { Name, a => b } */
+	'{' expression /* empty */ '}' {
+		$$ = ast.NewRecord($2)
+	}
+|	'{' expression ',' associative_arguments '}' {
+		$$ = ast.NewRecord($2, $4.(*ast.MapNode).Elements...)
 	}
 
 

@@ -31,8 +31,6 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 	node ast.ASTNode
 }
 
-%token	<node> END
-
 %token	<node> IDENT
 %token	<node> INTEGER
 %token	<node> TRUE
@@ -42,6 +40,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	<node> STRING
 %token	<node> UNTERMINATED_STRING
 %token	<node> INVALID_NUMBER
+
+%token	END
 
 %token	KW_DO
 %token	KW_CASE
@@ -326,7 +326,7 @@ application_arguments: /* a, b, c */
  */
 
 key_access: /* a.b, a[:b] */
-	applicable_expression '.' IDENT {
+	applicable_expression '.' ident {
 		$$ = ast.NewKeyAccess(
 			$1,
 			ast.NewSymbol($3.(*ast.IdentifierNode).Name),

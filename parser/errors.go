@@ -30,10 +30,18 @@ func (e *BijouParseError) currentFile() string {
 }
 
 func (e *BijouParseError) currentLine() int {
+	if e.lexer.columnNo == 0 && e.lexer.lineNo > 1 {
+		return e.lexer.lineNo - 1
+	}
+
 	return e.lexer.lineNo
 }
 
 func (e *BijouParseError) currentColumn() int {
+	if e.lexer.columnNo == 0 {
+		return len(e.lexer.lineBuffer)
+	}
+
 	return e.lexer.columnNo
 }
 
@@ -41,19 +49,23 @@ func (e *BijouParseError) locationMarker() string {
 	var before = e.lexer.lineBuffer
 	var after = make([]rune, 0)
 	var marker = make([]rune, 0, len(before))
+	var lastIdx = len(before) - 1
 
 	// Produce marker by replacing non-space chars with ' ', then adding '^'
-	for _, c := range before {
+	for idx, c := range before {
 		if c != ' ' && c != '\t' {
 			c = ' '
 		}
 
+		if idx == lastIdx {
+			c = '^'
+		}
+
 		marker = append(marker, c)
 	}
-	marker[len(marker)-1] = '^'
 
 	// This happens when we just read a new line
-	if e.currentColumn() != 0 {
+	if e.lexer.columnNo != 0 {
 		for {
 			c, _, err := e.lexer.source.ReadRune()
 			if err != nil || c == '\n' {

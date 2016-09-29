@@ -10,6 +10,7 @@ import (
 
 func init() {
 	tokenNames := map[string]string{
+		"END":          "end-of-expression",
 		"EQL":          "'=='",
 		"GTE":          "'>='",
 		"LTE":          "'<='",
@@ -364,18 +365,18 @@ func (lexer *BijouLex) backup(c rune) {
 // Read all source characters while white space
 func (lexer *BijouLex) skipWhiteSpace() {
 	for {
-		c := lexer.read()
+		c := lexer.peek()
 		if c == eof {
 			break
 		}
 		if !unicode.Is(space, c) {
-			lexer.backup(c)
 			if c == ';' {
 				lexer.skipComment()
 				continue
 			}
 			break
 		}
+		lexer.read()
 	}
 }
 

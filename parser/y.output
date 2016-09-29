@@ -13,14 +13,14 @@ state 0
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
-	.  reduce 2 (src line 125)
+	.  reduce 2 (src line 135)
 
 	start  goto 1
 	program  goto 2
@@ -52,7 +52,7 @@ state 2
 	program:  program.END 
 
 	END  shift 35
-	.  reduce 1 (src line 120)
+	.  reduce 1 (src line 130)
 
 
 state 3
@@ -69,14 +69,14 @@ state 3
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
-	.  reduce 3 (src line 129)
+	.  reduce 3 (src line 139)
 
 	expression  goto 36
 	applicable_expression  goto 11
@@ -111,65 +111,65 @@ state 4
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
 	END  shift 37
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
 	.  error
 
 
 state 5
 	expression:  TRUE.    (5)
 
-	.  reduce 5 (src line 132)
+	.  reduce 5 (src line 142)
 
 
 state 6
 	expression:  FALSE.    (6)
 
-	.  reduce 6 (src line 134)
+	.  reduce 6 (src line 144)
 
 
 state 7
 	expression:  STRING.    (7)
 
-	.  reduce 7 (src line 135)
+	.  reduce 7 (src line 145)
 
 
 state 8
 	expression:  FLOAT.    (8)
 
-	.  reduce 8 (src line 136)
+	.  reduce 8 (src line 146)
 
 
 state 9
 	expression:  binary_expression.    (9)
 
-	.  reduce 9 (src line 137)
+	.  reduce 9 (src line 147)
 
 
 state 10
 	expression:  unary_expression.    (10)
 
-	.  reduce 10 (src line 138)
+	.  reduce 10 (src line 148)
 
 
 state 11
@@ -178,28 +178,28 @@ state 11
 	key_access:  applicable_expression.'.' ident 
 	key_access:  applicable_expression.'[' expression ']' 
 
+	'.'  shift 57
 	'('  shift 56
 	'['  shift 58
-	'.'  shift 57
-	.  reduce 11 (src line 139)
+	.  reduce 11 (src line 149)
 
 
 state 12
 	expression:  do_expression.    (12)
 
-	.  reduce 12 (src line 140)
+	.  reduce 12 (src line 150)
 
 
 state 13
 	expression:  if_expression.    (13)
 
-	.  reduce 13 (src line 141)
+	.  reduce 13 (src line 151)
 
 
 state 14
 	expression:  case_expression.    (14)
 
-	.  reduce 14 (src line 142)
+	.  reduce 14 (src line 152)
 
 
 state 15
@@ -215,13 +215,13 @@ state 15
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 59
@@ -252,13 +252,13 @@ state 16
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 60
@@ -289,13 +289,13 @@ state 17
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 61
@@ -326,13 +326,13 @@ state 18
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 62
@@ -353,49 +353,49 @@ state 18
 state 19
 	applicable_expression:  SYMBOL.    (15)
 
-	.  reduce 15 (src line 144)
+	.  reduce 15 (src line 154)
 
 
 state 20
 	applicable_expression:  INTEGER.    (16)
 
-	.  reduce 16 (src line 146)
+	.  reduce 16 (src line 156)
 
 
 state 21
 	applicable_expression:  ident.    (17)
 
-	.  reduce 17 (src line 147)
+	.  reduce 17 (src line 157)
 
 
 state 22
 	applicable_expression:  vector_literal.    (18)
 
-	.  reduce 18 (src line 148)
+	.  reduce 18 (src line 158)
 
 
 state 23
 	applicable_expression:  map_literal.    (19)
 
-	.  reduce 19 (src line 149)
+	.  reduce 19 (src line 159)
 
 
 state 24
 	applicable_expression:  record_literal.    (20)
 
-	.  reduce 20 (src line 150)
+	.  reduce 20 (src line 160)
 
 
 state 25
 	applicable_expression:  function_application.    (21)
 
-	.  reduce 21 (src line 151)
+	.  reduce 21 (src line 161)
 
 
 state 26
 	applicable_expression:  key_access.    (22)
 
-	.  reduce 22 (src line 152)
+	.  reduce 22 (src line 162)
 
 
 state 27
@@ -415,8 +415,8 @@ state 27
 	ident:  '('.EQL ')' 
 	ident:  '('.GTE ')' 
 	ident:  '('.LTE ')' 
-	ident:  '('.BSR ')' 
-	ident:  '('.BSL ')' 
+	ident:  '('.BIT_SR ')' 
+	ident:  '('.BIT_SL ')' 
 
 	IDENT  shift 31
 	INTEGER  shift 20
@@ -428,26 +428,26 @@ state 27
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
-	'{'  shift 33
-	'('  shift 27
-	'['  shift 32
+	'|'  shift 73
+	'^'  shift 74
+	'&'  shift 72
 	EQL  shift 76
 	GTE  shift 77
 	LTE  shift 78
 	'<'  shift 70
 	'>'  shift 69
-	'&'  shift 72
-	'|'  shift 73
-	'^'  shift 74
-	'!'  shift 71
-	'~'  shift 75
+	BIT_SR  shift 79
+	BIT_SL  shift 80
 	'+'  shift 64
 	'-'  shift 65
 	'*'  shift 66
 	'/'  shift 67
 	'%'  shift 68
-	BSR  shift 79
-	BSL  shift 80
+	'!'  shift 71
+	'~'  shift 75
+	'{'  shift 33
+	'('  shift 27
+	'['  shift 32
 	.  error
 
 	expression  goto 63
@@ -478,13 +478,13 @@ state 28
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 4
@@ -527,13 +527,13 @@ state 30
 	KW_CASE  shift 30
 	KW_IF  shift 34
 	KW_OF  shift 85
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 84
@@ -554,7 +554,7 @@ state 30
 state 31
 	ident:  IDENT.    (24)
 
-	.  reduce 24 (src line 155)
+	.  reduce 24 (src line 165)
 
 
 state 32
@@ -571,15 +571,15 @@ state 32
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'*'  shift 91
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
 	']'  shift 86
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
-	'*'  shift 91
 	.  error
 
 	expression  goto 89
@@ -616,16 +616,16 @@ state 33
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'.'  shift 97
+	'+'  shift 16
+	'-'  shift 15
+	'*'  shift 91
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'}'  shift 92
 	'('  shift 27
 	'['  shift 32
-	'.'  shift 97
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
-	'*'  shift 91
 	.  error
 
 	expression  goto 94
@@ -659,13 +659,13 @@ state 34
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 98
@@ -686,7 +686,7 @@ state 34
 state 35
 	program:  program END.    (4)
 
-	.  reduce 4 (src line 130)
+	.  reduce 4 (src line 140)
 
 
 state 36
@@ -707,35 +707,35 @@ state 36
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
 	END  shift 99
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
 	.  error
 
 
 state 37
 	expression_lines:  expression END.    (42)
 
-	.  reduce 42 (src line 175)
+	.  reduce 42 (src line 185)
 
 
 state 38
@@ -751,13 +751,13 @@ state 38
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 100
@@ -788,13 +788,13 @@ state 39
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 101
@@ -825,13 +825,13 @@ state 40
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 102
@@ -862,13 +862,13 @@ state 41
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 103
@@ -899,13 +899,13 @@ state 42
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 104
@@ -936,13 +936,13 @@ state 43
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 105
@@ -973,13 +973,13 @@ state 44
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 106
@@ -1010,13 +1010,13 @@ state 45
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 107
@@ -1047,13 +1047,13 @@ state 46
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 108
@@ -1084,13 +1084,13 @@ state 47
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 109
@@ -1121,13 +1121,13 @@ state 48
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 110
@@ -1158,13 +1158,13 @@ state 49
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 111
@@ -1195,13 +1195,13 @@ state 50
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 112
@@ -1232,13 +1232,13 @@ state 51
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 113
@@ -1269,13 +1269,13 @@ state 52
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 114
@@ -1306,13 +1306,13 @@ state 53
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 115
@@ -1331,7 +1331,7 @@ state 53
 	case_expression  goto 14
 
 state 54
-	binary_expression:  expression BSR.expression 
+	binary_expression:  expression BIT_SR.expression 
 
 	IDENT  shift 31
 	INTEGER  shift 20
@@ -1343,13 +1343,13 @@ state 54
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 116
@@ -1368,7 +1368,7 @@ state 54
 	case_expression  goto 14
 
 state 55
-	binary_expression:  expression BSL.expression 
+	binary_expression:  expression BIT_SL.expression 
 
 	IDENT  shift 31
 	INTEGER  shift 20
@@ -1380,13 +1380,13 @@ state 55
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 117
@@ -1418,15 +1418,15 @@ state 56
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
-	'{'  shift 33
-	'('  shift 27
-	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
 	'+'  shift 16
 	'-'  shift 15
 	'*'  shift 91
-	.  reduce 86 (src line 366)
+	'!'  shift 17
+	'~'  shift 18
+	'{'  shift 33
+	'('  shift 27
+	'['  shift 32
+	.  reduce 86 (src line 376)
 
 	expression  goto 89
 	applicable_expression  goto 11
@@ -1469,13 +1469,13 @@ state 58
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 122
@@ -1510,11 +1510,11 @@ state 59
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	unary_expression:  '-' expression.    (63)
 
-	.  reduce 63 (src line 254)
+	.  reduce 63 (src line 264)
 
 
 state 60
@@ -1534,11 +1534,11 @@ state 60
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	unary_expression:  '+' expression.    (64)
 
-	.  reduce 64 (src line 258)
+	.  reduce 64 (src line 268)
 
 
 state 61
@@ -1558,11 +1558,11 @@ state 61
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	unary_expression:  '!' expression.    (65)
 
-	.  reduce 65 (src line 261)
+	.  reduce 65 (src line 271)
 
 
 state 62
@@ -1582,11 +1582,11 @@ state 62
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	unary_expression:  '~' expression.    (66)
 
-	.  reduce 66 (src line 264)
+	.  reduce 66 (src line 274)
 
 
 state 63
@@ -1607,28 +1607,28 @@ state 63
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	')'  shift 123
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
+	')'  shift 123
 	.  error
 
 
@@ -1646,14 +1646,14 @@ state 64
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	')'  shift 124
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 60
@@ -1685,14 +1685,14 @@ state 65
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	')'  shift 125
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 59
@@ -1759,14 +1759,14 @@ state 71
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	')'  shift 131
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 61
@@ -1819,14 +1819,14 @@ state 75
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	')'  shift 135
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 62
@@ -1866,14 +1866,14 @@ state 78
 
 
 state 79
-	ident:  '(' BSR.')' 
+	ident:  '(' BIT_SR.')' 
 
 	')'  shift 139
 	.  error
 
 
 state 80
-	ident:  '(' BSL.')' 
+	ident:  '(' BIT_SL.')' 
 
 	')'  shift 140
 	.  error
@@ -1894,13 +1894,13 @@ state 81
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 36
@@ -1923,7 +1923,7 @@ state 82
 	if_expression:  if_guard then_condition.else_condition 
 
 	KW_ELSE  shift 143
-	.  reduce 89 (src line 389)
+	.  reduce 89 (src line 399)
 
 	else_condition  goto 142
 
@@ -1940,13 +1940,13 @@ state 83
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 144
@@ -1981,29 +1981,29 @@ state 84
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	case_expression:  KW_CASE expression.KW_OF case_lines END 
 
 	KW_OF  shift 145
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
 	.  error
 
 
@@ -2020,13 +2020,13 @@ state 85
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 149
@@ -2050,22 +2050,22 @@ state 85
 state 86
 	vector_literal:  '[' ']'.    (73)
 
-	.  reduce 73 (src line 298)
+	.  reduce 73 (src line 308)
 
 
 state 87
 	arguments:  arguments.',' argument 
 	vector_literal:  '[' arguments.']' 
 
-	']'  shift 151
 	','  shift 150
+	']'  shift 151
 	.  error
 
 
 state 88
 	arguments:  argument.    (69)
 
-	.  reduce 69 (src line 277)
+	.  reduce 69 (src line 287)
 
 
 state 89
@@ -2085,35 +2085,35 @@ state 89
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	argument:  expression.    (67)
 
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 67 (src line 273)
+	.  reduce 67 (src line 283)
 
 
 state 90
 	argument:  splat_argument.    (68)
 
-	.  reduce 68 (src line 275)
+	.  reduce 68 (src line 285)
 
 
 state 91
@@ -2130,14 +2130,14 @@ state 91
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
-	.  reduce 71 (src line 285)
+	.  reduce 71 (src line 295)
 
 	expression  goto 152
 	applicable_expression  goto 11
@@ -2157,15 +2157,15 @@ state 91
 state 92
 	map_literal:  '{' '}'.    (75)
 
-	.  reduce 75 (src line 311)
+	.  reduce 75 (src line 321)
 
 
 state 93
 	map_literal:  '{' associative_arguments.'}' 
 	associative_arguments:  associative_arguments.',' pair 
 
-	'}'  shift 153
 	','  shift 154
+	'}'  shift 153
 	.  error
 
 
@@ -2186,46 +2186,46 @@ state 94
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	pair:  expression.DOUBLE_ARROW expression 
 	record_literal:  '{' expression.'}' 
 	record_literal:  '{' expression.',' associative_arguments '}' 
 
-	'}'  shift 156
 	','  shift 157
-	'='  shift 43
 	DOUBLE_ARROW  shift 155
+	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
+	'}'  shift 156
 	.  error
 
 
 state 95
 	associative_arguments:  pair.    (80)
 
-	.  reduce 80 (src line 333)
+	.  reduce 80 (src line 343)
 
 
 state 96
 	pair:  splat_argument.    (77)
 
-	.  reduce 77 (src line 319)
+	.  reduce 77 (src line 329)
 
 
 state 97
@@ -2252,35 +2252,35 @@ state 98
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	if_guard:  KW_IF expression.    (91)
 
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 91 (src line 397)
+	.  reduce 91 (src line 407)
 
 
 state 99
 	expression_lines:  expression_lines expression END.    (43)
 
-	.  reduce 43 (src line 179)
+	.  reduce 43 (src line 189)
 
 
 state 100
@@ -2301,15 +2301,13 @@ state 100
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 45 (src line 198)
+	.  reduce 45 (src line 208)
 
 
 state 101
@@ -2330,15 +2328,13 @@ state 101
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 46 (src line 202)
+	.  reduce 46 (src line 212)
 
 
 state 102
@@ -2359,13 +2355,10 @@ state 102
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 47 (src line 205)
+	.  reduce 47 (src line 215)
 
 
 state 103
@@ -2386,13 +2379,10 @@ state 103
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 48 (src line 208)
+	.  reduce 48 (src line 218)
 
 
 state 104
@@ -2413,12 +2403,10 @@ state 104
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 49 (src line 211)
+	.  reduce 49 (src line 221)
 
 
 state 105
@@ -2439,28 +2427,28 @@ state 105
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 50 (src line 214)
+	.  reduce 50 (src line 224)
 
 
 state 106
@@ -2481,27 +2469,22 @@ state 106
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	EQL  shift 44
+	EQL  error
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 51 (src line 217)
+	.  reduce 51 (src line 227)
 
 
 state 107
@@ -2522,24 +2505,19 @@ state 107
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	'<'  shift 46
-	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	'<'  error
+	'>'  error
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 52 (src line 220)
+	.  reduce 52 (src line 230)
 
 
 state 108
@@ -2560,24 +2538,19 @@ state 108
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	'<'  shift 46
-	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	'<'  error
+	'>'  error
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 53 (src line 223)
+	.  reduce 53 (src line 233)
 
 
 state 109
@@ -2598,26 +2571,21 @@ state 109
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	GTE  shift 47
-	LTE  shift 48
+	GTE  error
+	LTE  error
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 54 (src line 226)
+	.  reduce 54 (src line 236)
 
 
 state 110
@@ -2638,26 +2606,21 @@ state 110
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	GTE  shift 47
-	LTE  shift 48
+	GTE  error
+	LTE  error
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 55 (src line 229)
+	.  reduce 55 (src line 239)
 
 
 state 111
@@ -2678,17 +2641,25 @@ state 111
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
+	EQL  shift 44
+	GTE  shift 47
+	LTE  shift 48
+	'<'  shift 46
+	'>'  shift 45
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 56 (src line 232)
+	.  reduce 56 (src line 242)
 
 
 state 112
@@ -2709,17 +2680,26 @@ state 112
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
+	EQL  shift 44
+	GTE  shift 47
+	LTE  shift 48
+	'<'  shift 46
+	'>'  shift 45
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 57 (src line 235)
+	.  reduce 57 (src line 245)
 
 
 state 113
@@ -2740,22 +2720,22 @@ state 113
 	binary_expression:  expression '&' expression.    (58)
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	EQL  shift 44
+	GTE  shift 47
+	LTE  shift 48
+	'<'  shift 46
+	'>'  shift 45
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 58 (src line 238)
+	.  reduce 58 (src line 248)
 
 
 state 114
@@ -2776,22 +2756,24 @@ state 114
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression '|' expression.    (59)
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
-	'&'  shift 51
-	'|'  shift 52
 	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	'&'  shift 51
+	EQL  shift 44
+	GTE  shift 47
+	LTE  shift 48
+	'<'  shift 46
+	'>'  shift 45
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 59 (src line 241)
+	.  reduce 59 (src line 251)
 
 
 state 115
@@ -2812,22 +2794,23 @@ state 115
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
 	binary_expression:  expression '^' expression.    (60)
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 
 	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	EQL  shift 44
+	GTE  shift 47
+	LTE  shift 48
+	'<'  shift 46
+	'>'  shift 45
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 60 (src line 244)
+	.  reduce 60 (src line 254)
 
 
 state 116
@@ -2847,11 +2830,16 @@ state 116
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression BSR expression.    (61)
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression BIT_SR expression.    (61)
+	binary_expression:  expression.BIT_SL expression 
 
-	.  reduce 61 (src line 247)
+	'+'  shift 38
+	'-'  shift 39
+	'*'  shift 40
+	'/'  shift 41
+	'%'  shift 42
+	.  reduce 61 (src line 257)
 
 
 state 117
@@ -2871,11 +2859,16 @@ state 117
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
-	binary_expression:  expression BSL expression.    (62)
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
+	binary_expression:  expression BIT_SL expression.    (62)
 
-	.  reduce 62 (src line 250)
+	'+'  shift 38
+	'-'  shift 39
+	'*'  shift 40
+	'/'  shift 41
+	'%'  shift 42
+	.  reduce 62 (src line 260)
 
 
 state 118
@@ -2890,13 +2883,13 @@ state 119
 	application_arguments:  arguments.    (85)
 
 	','  shift 150
-	.  reduce 85 (src line 364)
+	.  reduce 85 (src line 374)
 
 
 state 120
 	key_access:  applicable_expression '.' ident.    (87)
 
-	.  reduce 87 (src line 373)
+	.  reduce 87 (src line 383)
 
 
 state 121
@@ -2915,26 +2908,26 @@ state 121
 	ident:  '('.EQL ')' 
 	ident:  '('.GTE ')' 
 	ident:  '('.LTE ')' 
-	ident:  '('.BSR ')' 
-	ident:  '('.BSL ')' 
+	ident:  '('.BIT_SR ')' 
+	ident:  '('.BIT_SL ')' 
 
+	'|'  shift 73
+	'^'  shift 74
+	'&'  shift 72
 	EQL  shift 76
 	GTE  shift 77
 	LTE  shift 78
 	'<'  shift 70
 	'>'  shift 69
-	'&'  shift 72
-	'|'  shift 73
-	'^'  shift 74
-	'!'  shift 162
-	'~'  shift 163
+	BIT_SR  shift 79
+	BIT_SL  shift 80
 	'+'  shift 160
 	'-'  shift 161
 	'*'  shift 66
 	'/'  shift 67
 	'%'  shift 68
-	BSR  shift 79
-	BSL  shift 80
+	'!'  shift 162
+	'~'  shift 163
 	.  error
 
 
@@ -2955,150 +2948,150 @@ state 122
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	key_access:  applicable_expression '[' expression.']' 
 
-	']'  shift 164
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
+	']'  shift 164
 	.  error
 
 
 state 123
 	applicable_expression:  '(' expression ')'.    (23)
 
-	.  reduce 23 (src line 153)
+	.  reduce 23 (src line 163)
 
 
 state 124
 	ident:  '(' '+' ')'.    (25)
 
-	.  reduce 25 (src line 157)
+	.  reduce 25 (src line 167)
 
 
 state 125
 	ident:  '(' '-' ')'.    (26)
 
-	.  reduce 26 (src line 158)
+	.  reduce 26 (src line 168)
 
 
 state 126
 	ident:  '(' '*' ')'.    (27)
 
-	.  reduce 27 (src line 159)
+	.  reduce 27 (src line 169)
 
 
 state 127
 	ident:  '(' '/' ')'.    (28)
 
-	.  reduce 28 (src line 160)
+	.  reduce 28 (src line 170)
 
 
 state 128
 	ident:  '(' '%' ')'.    (29)
 
-	.  reduce 29 (src line 161)
+	.  reduce 29 (src line 171)
 
 
 state 129
 	ident:  '(' '>' ')'.    (30)
 
-	.  reduce 30 (src line 162)
+	.  reduce 30 (src line 172)
 
 
 state 130
 	ident:  '(' '<' ')'.    (31)
 
-	.  reduce 31 (src line 163)
+	.  reduce 31 (src line 173)
 
 
 state 131
 	ident:  '(' '!' ')'.    (32)
 
-	.  reduce 32 (src line 164)
+	.  reduce 32 (src line 174)
 
 
 state 132
 	ident:  '(' '&' ')'.    (33)
 
-	.  reduce 33 (src line 165)
+	.  reduce 33 (src line 175)
 
 
 state 133
 	ident:  '(' '|' ')'.    (34)
 
-	.  reduce 34 (src line 166)
+	.  reduce 34 (src line 176)
 
 
 state 134
 	ident:  '(' '^' ')'.    (35)
 
-	.  reduce 35 (src line 167)
+	.  reduce 35 (src line 177)
 
 
 state 135
 	ident:  '(' '~' ')'.    (36)
 
-	.  reduce 36 (src line 168)
+	.  reduce 36 (src line 178)
 
 
 state 136
 	ident:  '(' EQL ')'.    (37)
 
-	.  reduce 37 (src line 169)
+	.  reduce 37 (src line 179)
 
 
 state 137
 	ident:  '(' GTE ')'.    (38)
 
-	.  reduce 38 (src line 170)
+	.  reduce 38 (src line 180)
 
 
 state 138
 	ident:  '(' LTE ')'.    (39)
 
-	.  reduce 39 (src line 171)
+	.  reduce 39 (src line 181)
 
 
 state 139
-	ident:  '(' BSR ')'.    (40)
+	ident:  '(' BIT_SR ')'.    (40)
 
-	.  reduce 40 (src line 172)
+	.  reduce 40 (src line 182)
 
 
 state 140
-	ident:  '(' BSL ')'.    (41)
+	ident:  '(' BIT_SL ')'.    (41)
 
-	.  reduce 41 (src line 173)
+	.  reduce 41 (src line 183)
 
 
 state 141
 	do_expression:  KW_DO expression_lines END.    (44)
 
-	.  reduce 44 (src line 188)
+	.  reduce 44 (src line 198)
 
 
 state 142
 	if_expression:  if_guard then_condition else_condition.    (90)
 
-	.  reduce 90 (src line 393)
+	.  reduce 90 (src line 403)
 
 
 state 143
@@ -3114,13 +3107,13 @@ state 143
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 165
@@ -3155,29 +3148,29 @@ state 144
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	then_condition:  KW_THEN expression.    (92)
 
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 92 (src line 402)
+	.  reduce 92 (src line 412)
 
 
 state 145
@@ -3193,13 +3186,13 @@ state 145
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 149
@@ -3243,14 +3236,14 @@ state 147
 	KW_CASE  shift 30
 	KW_IF  shift 34
 	KW_ELSE  shift 143
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
-	.  reduce 96 (src line 425)
+	.  reduce 96 (src line 435)
 
 	expression  goto 149
 	applicable_expression  goto 11
@@ -3272,7 +3265,7 @@ state 147
 state 148
 	case_then_lines:  case_then_line.    (99)
 
-	.  reduce 99 (src line 436)
+	.  reduce 99 (src line 446)
 
 
 state 149
@@ -3292,29 +3285,29 @@ state 149
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	case_then_line:  expression.KW_THEN expression END 
 
 	KW_THEN  shift 170
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
 	.  error
 
 
@@ -3331,14 +3324,14 @@ state 150
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
-	'{'  shift 33
-	'('  shift 27
-	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
 	'+'  shift 16
 	'-'  shift 15
 	'*'  shift 91
+	'!'  shift 17
+	'~'  shift 18
+	'{'  shift 33
+	'('  shift 27
+	'['  shift 32
 	.  error
 
 	expression  goto 89
@@ -3361,7 +3354,7 @@ state 150
 state 151
 	vector_literal:  '[' arguments ']'.    (74)
 
-	.  reduce 74 (src line 302)
+	.  reduce 74 (src line 312)
 
 
 state 152
@@ -3381,35 +3374,35 @@ state 152
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	splat_argument:  '*' expression.    (72)
 
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 72 (src line 289)
+	.  reduce 72 (src line 299)
 
 
 state 153
 	map_literal:  '{' associative_arguments '}'.    (76)
 
-	.  reduce 76 (src line 315)
+	.  reduce 76 (src line 325)
 
 
 state 154
@@ -3425,15 +3418,15 @@ state 154
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
-	'{'  shift 33
-	'('  shift 27
-	'['  shift 32
 	'.'  shift 97
-	'!'  shift 17
-	'~'  shift 18
 	'+'  shift 16
 	'-'  shift 15
 	'*'  shift 91
+	'!'  shift 17
+	'~'  shift 18
+	'{'  shift 33
+	'('  shift 27
+	'['  shift 32
 	.  error
 
 	expression  goto 173
@@ -3466,13 +3459,13 @@ state 155
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 174
@@ -3493,7 +3486,7 @@ state 155
 state 156
 	record_literal:  '{' expression '}'.    (82)
 
-	.  reduce 82 (src line 346)
+	.  reduce 82 (src line 356)
 
 
 state 157
@@ -3509,15 +3502,15 @@ state 157
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
-	'{'  shift 33
-	'('  shift 27
-	'['  shift 32
 	'.'  shift 97
-	'!'  shift 17
-	'~'  shift 18
 	'+'  shift 16
 	'-'  shift 15
 	'*'  shift 91
+	'!'  shift 17
+	'~'  shift 18
+	'{'  shift 33
+	'('  shift 27
+	'['  shift 32
 	.  error
 
 	expression  goto 173
@@ -3541,13 +3534,13 @@ state 157
 state 158
 	pair:  '.' IDENT.    (79)
 
-	.  reduce 79 (src line 326)
+	.  reduce 79 (src line 336)
 
 
 state 159
 	function_application:  applicable_expression '(' application_arguments ')'.    (84)
 
-	.  reduce 84 (src line 359)
+	.  reduce 84 (src line 369)
 
 
 state 160
@@ -3581,7 +3574,7 @@ state 163
 state 164
 	key_access:  applicable_expression '[' expression ']'.    (88)
 
-	.  reduce 88 (src line 380)
+	.  reduce 88 (src line 390)
 
 
 state 165
@@ -3601,29 +3594,29 @@ state 165
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	else_condition:  KW_ELSE expression.    (93)
 
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 93 (src line 407)
+	.  reduce 93 (src line 417)
 
 
 state 166
@@ -3636,7 +3629,7 @@ state 166
 state 167
 	case_expression:  KW_CASE KW_OF case_lines END.    (95)
 
-	.  reduce 95 (src line 421)
+	.  reduce 95 (src line 431)
 
 
 state 168
@@ -3649,7 +3642,7 @@ state 168
 state 169
 	case_then_lines:  case_then_lines case_then_line.    (100)
 
-	.  reduce 100 (src line 440)
+	.  reduce 100 (src line 450)
 
 
 state 170
@@ -3665,13 +3658,13 @@ state 170
 	KW_DO  shift 28
 	KW_CASE  shift 30
 	KW_IF  shift 34
+	'+'  shift 16
+	'-'  shift 15
+	'!'  shift 17
+	'~'  shift 18
 	'{'  shift 33
 	'('  shift 27
 	'['  shift 32
-	'!'  shift 17
-	'~'  shift 18
-	'+'  shift 16
-	'-'  shift 15
 	.  error
 
 	expression  goto 178
@@ -3692,13 +3685,13 @@ state 170
 state 171
 	arguments:  arguments ',' argument.    (70)
 
-	.  reduce 70 (src line 281)
+	.  reduce 70 (src line 291)
 
 
 state 172
 	associative_arguments:  associative_arguments ',' pair.    (81)
 
-	.  reduce 81 (src line 337)
+	.  reduce 81 (src line 347)
 
 
 state 173
@@ -3718,29 +3711,29 @@ state 173
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	pair:  expression.DOUBLE_ARROW expression 
 
-	'='  shift 43
 	DOUBLE_ARROW  shift 155
+	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
 	.  error
 
 
@@ -3761,50 +3754,50 @@ state 174
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	pair:  expression DOUBLE_ARROW expression.    (78)
 
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
-	.  reduce 78 (src line 323)
+	.  reduce 78 (src line 333)
 
 
 state 175
 	associative_arguments:  associative_arguments.',' pair 
 	record_literal:  '{' expression ',' associative_arguments.'}' 
 
-	'}'  shift 179
 	','  shift 154
+	'}'  shift 179
 	.  error
 
 
 state 176
 	case_expression:  KW_CASE expression KW_OF case_lines END.    (94)
 
-	.  reduce 94 (src line 417)
+	.  reduce 94 (src line 427)
 
 
 state 177
 	case_lines:  case_then_lines else_condition END.    (97)
 
-	.  reduce 97 (src line 427)
+	.  reduce 97 (src line 437)
 
 
 state 178
@@ -3824,42 +3817,42 @@ state 178
 	binary_expression:  expression.'&' expression 
 	binary_expression:  expression.'|' expression 
 	binary_expression:  expression.'^' expression 
-	binary_expression:  expression.BSR expression 
-	binary_expression:  expression.BSL expression 
+	binary_expression:  expression.BIT_SR expression 
+	binary_expression:  expression.BIT_SL expression 
 	case_then_line:  expression KW_THEN expression.END 
 
 	END  shift 180
 	'='  shift 43
+	OR  shift 50
+	AND  shift 49
+	'|'  shift 52
+	'^'  shift 53
+	'&'  shift 51
 	EQL  shift 44
 	GTE  shift 47
 	LTE  shift 48
 	'<'  shift 46
 	'>'  shift 45
-	'&'  shift 51
-	'|'  shift 52
-	'^'  shift 53
-	AND  shift 49
-	OR  shift 50
+	BIT_SR  shift 54
+	BIT_SL  shift 55
 	'+'  shift 38
 	'-'  shift 39
 	'*'  shift 40
 	'/'  shift 41
 	'%'  shift 42
-	BSR  shift 54
-	BSL  shift 55
 	.  error
 
 
 state 179
 	record_literal:  '{' expression ',' associative_arguments '}'.    (83)
 
-	.  reduce 83 (src line 350)
+	.  reduce 83 (src line 360)
 
 
 state 180
 	case_then_line:  expression KW_THEN expression END.    (98)
 
-	.  reduce 98 (src line 431)
+	.  reduce 98 (src line 441)
 
 
 54 terminals, 29 nonterminals
@@ -3868,9 +3861,9 @@ state 180
 128 working sets used
 memory: parser 883/30000
 144 extra closures
-1345 shift entries, 1 exceptions
+1329 shift entries, 10 exceptions
 85 goto entries
 619 entries saved by goto default
-Optimizer space used: output 1011/30000
-1011 table entries, 356 zero
-maximum spread: 53, maximum offset: 170
+Optimizer space used: output 825/30000
+825 table entries, 141 zero
+maximum spread: 54, maximum offset: 170

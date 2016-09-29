@@ -8,6 +8,24 @@ import (
 	"unicode"
 )
 
+func init() {
+	tokenNames := map[string]string{
+		"EQL":          "'=='",
+		"GTE":          "'>='",
+		"LTE":          "'<='",
+		"DOUBLE_ARROW": "'=>'",
+		"BIT_SR":       "'>>'",
+		"BIT_SL":       "'<<'",
+	}
+
+	// tweak the generated token names to be friendlier
+	for idx, name := range BijouToknames {
+		if alias, ok := tokenNames[name]; ok == true {
+			BijouToknames[idx] = alias
+		}
+	}
+}
+
 // value of the EOF indicator used by BijouParse
 const eof = 0
 
@@ -164,7 +182,7 @@ func (lexer *BijouLex) Lex(lval *BijouSymType) int {
 		switch lexer.peek() {
 		case '>':
 			lexer.read()
-			token = BSR
+			token = BIT_SR
 		case '=':
 			lexer.read()
 			token = GTE
@@ -174,7 +192,7 @@ func (lexer *BijouLex) Lex(lval *BijouSymType) int {
 		switch lexer.peek() {
 		case '<':
 			lexer.read()
-			token = BSL
+			token = BIT_SL
 		case '=':
 			lexer.read()
 			token = LTE

@@ -50,10 +50,6 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %right	KW_THEN
 %right	KW_ELSE
 
-%token	'{' '}'
-%token	'(' ')'
-%token	'[' ']'
-
 %token	"'"
 %token	'"'
 %token	','
@@ -62,21 +58,35 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	'?'
 
 %right	'.'
-%right	'='
 %right	DOUBLE_ARROW
-%right	EQL
-%right	GTE LTE
-%right	'<' '>'
-%right	'&' '|' '^'
-%right	'!' '~'
 
-%left	AND  OR
+%right	'='
+
+%left	OR
+%left	AND
+
+%left	'|'
+%left	'^'
+%left	'&'
+
+%nonassoc EQL
+
+%nonassoc GTE LTE
+%nonassoc '<' '>'
+
+%left	BIT_SR BIT_SL
+
 %left	'+' '-'
-%left	'*' '/'
-%left	'%'
-%left	BSR BSL
+%left	'*' '/' '%'
+
+%right	'!'
+%right	'~'
 
 %right	UNARY
+
+%left	'{' '}'
+%left	'(' ')'
+%left	'[' ']'
 
 %type	<node> start
 %type	<node> program
@@ -169,8 +179,8 @@ ident: /* Identifiers */
 |	'(' EQL ')' { $$ = ast.NewIdentifier("==") }
 |	'(' GTE ')' { $$ = ast.NewIdentifier(">=") }
 |	'(' LTE ')' { $$ = ast.NewIdentifier("<=") }
-|	'(' BSR ')' { $$ = ast.NewIdentifier(">>") }
-|	'(' BSL ')' { $$ = ast.NewIdentifier("<<") }
+|	'(' BIT_SR ')' { $$ = ast.NewIdentifier(">>") }
+|	'(' BIT_SL ')' { $$ = ast.NewIdentifier("<<") }
 
 expression_lines: /* expr END expr END */
 	expression END {
@@ -236,19 +246,19 @@ binary_expression: /* a + b, y > z, x = y */
 		$$ = ast.NewBinaryExpression(ast.OP_OR, $1, $3)
 	}
 |	expression '&' expression {
-		$$ = ast.NewBinaryExpression(ast.OP_BAND, $1, $3)
+		$$ = ast.NewBinaryExpression(ast.OP_BIT_AND, $1, $3)
 	}
 |	expression '|' expression {
-		$$ = ast.NewBinaryExpression(ast.OP_BOR, $1, $3)
+		$$ = ast.NewBinaryExpression(ast.OP_BIT_OR, $1, $3)
 	}
 |	expression '^' expression {
-		$$ = ast.NewBinaryExpression(ast.OP_BXOR, $1, $3)
+		$$ = ast.NewBinaryExpression(ast.OP_BIT_XOR, $1, $3)
 	}
-|	expression BSR expression {
-		$$ = ast.NewBinaryExpression(ast.OP_BSR, $1, $3)
+|	expression BIT_SR expression {
+		$$ = ast.NewBinaryExpression(ast.OP_BIT_SR, $1, $3)
 	}
-|	expression BSL expression {
-		$$ = ast.NewBinaryExpression(ast.OP_BSL, $1, $3)
+|	expression BIT_SL expression {
+		$$ = ast.NewBinaryExpression(ast.OP_BIT_SL, $1, $3)
 	}
 
 unary_expression: /* -42, !ok */
@@ -262,7 +272,7 @@ unary_expression: /* -42, !ok */
 		$$ = ast.NewUnaryExpression(ast.OP_NOT, $2)
 	}
 |	'~' expression %prec UNARY {
-		$$ = ast.NewUnaryExpression(ast.OP_BNOT, $2)
+		$$ = ast.NewUnaryExpression(ast.OP_BIT_NOT, $2)
 	}
 
 

@@ -48,9 +48,14 @@ const KW_OF = 57359
 const KW_THEN = 57360
 const KW_ELSE = 57361
 const DOUBLE_ARROW = 57362
-const AND = 57363
-const OR = 57364
-const UNARY = 57365
+const EQL = 57363
+const GTE = 57364
+const LTE = 57365
+const AND = 57366
+const OR = 57367
+const BSR = 57368
+const BSL = 57369
+const UNARY = 57370
 
 var BijouToknames = [...]string{
 	"$end",
@@ -87,15 +92,25 @@ var BijouToknames = [...]string{
 	"'.'",
 	"'='",
 	"DOUBLE_ARROW",
+	"EQL",
+	"GTE",
+	"LTE",
 	"'<'",
 	"'>'",
+	"'&'",
+	"'|'",
+	"'^'",
 	"'!'",
+	"'~'",
 	"AND",
 	"OR",
 	"'+'",
 	"'-'",
 	"'*'",
 	"'/'",
+	"'%'",
+	"BSR",
+	"BSL",
 	"UNARY",
 }
 var BijouStatenames = [...]string{}
@@ -111,110 +126,156 @@ var BijouExca = [...]int{
 	-2, 0,
 }
 
-const BijouNprod = 81
+const BijouNprod = 101
 const BijouPrivate = 57344
 
 var BijouTokenNames []string
 var BijouStates []string
 
-const BijouLast = 625
+const BijouLast = 1011
 
 var BijouAct = [...]int{
 
-	68, 4, 69, 72, 35, 108, 102, 74, 67, 37,
-	38, 39, 40, 46, 20, 48, 49, 50, 51, 106,
-	66, 39, 40, 47, 138, 113, 111, 52, 4, 110,
-	63, 114, 114, 73, 77, 75, 110, 100, 79, 80,
-	81, 82, 83, 84, 85, 86, 87, 95, 94, 92,
-	119, 58, 57, 122, 50, 49, 120, 121, 55, 56,
-	51, 35, 90, 104, 99, 109, 98, 89, 3, 97,
-	96, 112, 103, 62, 30, 19, 5, 6, 8, 18,
-	7, 30, 136, 118, 27, 29, 33, 135, 126, 34,
-	32, 71, 26, 107, 31, 14, 60, 61, 28, 91,
-	13, 25, 76, 24, 124, 23, 109, 17, 109, 22,
-	16, 15, 70, 128, 127, 132, 133, 75, 132, 130,
-	75, 134, 131, 21, 88, 125, 10, 9, 12, 11,
-	137, 30, 19, 5, 6, 8, 18, 7, 2, 1,
-	93, 27, 29, 33, 0, 0, 0, 32, 0, 26,
-	41, 31, 43, 42, 0, 44, 45, 37, 38, 39,
-	40, 0, 58, 57, 59, 0, 0, 53, 54, 55,
-	56, 30, 19, 5, 6, 8, 18, 7, 0, 0,
-	0, 27, 29, 33, 0, 0, 0, 32, 0, 26,
-	0, 31, 0, 0, 0, 0, 0, 0, 0, 76,
-	0, 0, 0, 0, 17, 0, 0, 16, 15, 70,
-	30, 19, 5, 6, 8, 18, 7, 0, 0, 0,
-	27, 29, 33, 0, 0, 0, 32, 0, 26, 0,
-	31, 65, 41, 115, 43, 42, 0, 44, 45, 37,
-	38, 39, 40, 17, 0, 0, 16, 15, 70, 30,
-	19, 5, 6, 8, 18, 7, 129, 0, 0, 27,
-	29, 33, 0, 0, 0, 32, 0, 26, 0, 31,
-	0, 41, 0, 43, 42, 0, 44, 45, 37, 38,
-	39, 40, 17, 0, 0, 16, 15, 70, 30, 19,
-	5, 6, 8, 18, 7, 0, 0, 0, 27, 29,
-	33, 123, 0, 103, 32, 0, 26, 0, 31, 41,
-	0, 43, 42, 0, 44, 45, 37, 38, 39, 40,
-	0, 17, 0, 0, 16, 15, 30, 19, 5, 6,
-	8, 18, 7, 0, 0, 101, 27, 29, 33, 0,
-	0, 0, 32, 0, 26, 41, 31, 43, 42, 0,
-	44, 45, 37, 38, 39, 40, 0, 0, 0, 17,
-	0, 0, 16, 15, 30, 19, 5, 6, 8, 18,
-	7, 0, 0, 0, 27, 29, 33, 0, 0, 0,
-	32, 0, 26, 100, 31, 43, 42, 0, 44, 45,
-	37, 38, 39, 40, 0, 0, 0, 17, 0, 0,
-	16, 15, 30, 19, 5, 6, 8, 18, 7, 0,
-	0, 0, 27, 29, 33, 0, 0, 0, 32, 0,
-	26, 95, 31, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 17, 0, 0, 16, 15,
-	30, 19, 5, 6, 8, 18, 7, 0, 0, 0,
-	27, 29, 33, 0, 0, 0, 32, 0, 26, 94,
-	31, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 17, 0, 0, 16, 15, 30, 19,
-	5, 6, 8, 18, 7, 0, 0, 0, 27, 29,
-	33, 64, 0, 0, 32, 0, 26, 0, 31, 0,
+	89, 4, 90, 93, 36, 148, 142, 95, 88, 38,
+	39, 40, 41, 42, 54, 55, 59, 60, 61, 62,
+	146, 21, 40, 41, 42, 54, 55, 150, 63, 4,
+	87, 84, 54, 55, 94, 98, 96, 135, 131, 100,
+	101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+	111, 112, 113, 114, 115, 116, 117, 179, 125, 122,
+	42, 54, 55, 153, 154, 60, 59, 56, 151, 58,
+	154, 150, 61, 3, 124, 159, 62, 57, 140, 120,
+	139, 138, 36, 137, 144, 136, 149, 119, 134, 133,
+	132, 130, 152, 31, 20, 5, 6, 8, 19, 7,
+	129, 128, 81, 28, 30, 34, 127, 126, 83, 33,
+	143, 27, 177, 32, 176, 167, 31, 35, 158, 147,
+	14, 82, 29, 13, 76, 77, 78, 70, 69, 72,
+	73, 74, 71, 75, 121, 26, 64, 65, 66, 67,
+	68, 79, 80, 25, 165, 24, 149, 23, 149, 22,
+	118, 10, 9, 169, 168, 173, 174, 96, 173, 171,
+	96, 175, 172, 156, 12, 11, 166, 2, 1, 0,
+	157, 178, 0, 0, 0, 43, 155, 44, 47, 48,
+	46, 45, 51, 52, 53, 180, 0, 49, 50, 38,
+	39, 40, 41, 42, 54, 55, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 43, 0, 44, 47, 48,
+	46, 45, 51, 52, 53, 0, 0, 49, 50, 38,
+	39, 40, 41, 42, 54, 55, 43, 155, 44, 47,
+	48, 46, 45, 51, 52, 53, 170, 0, 49, 50,
+	38, 39, 40, 41, 42, 54, 55, 0, 0, 0,
+	0, 43, 0, 44, 47, 48, 46, 45, 51, 52,
+	53, 0, 0, 49, 50, 38, 39, 40, 41, 42,
+	54, 55, 164, 0, 0, 0, 0, 0, 0, 0,
+	43, 0, 44, 47, 48, 46, 45, 51, 52, 53,
+	145, 0, 49, 50, 38, 39, 40, 41, 42, 54,
+	55, 0, 0, 0, 0, 0, 43, 0, 44, 47,
+	48, 46, 45, 51, 52, 53, 0, 123, 49, 50,
+	38, 39, 40, 41, 42, 54, 55, 43, 99, 44,
+	47, 48, 46, 45, 51, 52, 53, 0, 0, 49,
+	50, 38, 39, 40, 41, 42, 54, 55, 43, 37,
+	44, 47, 48, 46, 45, 51, 52, 53, 0, 0,
+	49, 50, 38, 39, 40, 41, 42, 54, 55, 43,
+	0, 44, 47, 48, 46, 45, 51, 52, 53, 0,
+	0, 49, 50, 38, 39, 40, 41, 42, 54, 55,
+	43, 0, 44, 47, 48, 46, 45, 51, 52, 53,
+	0, 0, 49, 50, 38, 39, 40, 41, 42, 54,
+	55, 76, 77, 78, 70, 69, 72, 73, 74, 162,
+	163, 0, 0, 160, 161, 66, 67, 68, 79, 80,
+	44, 47, 48, 46, 45, 51, 52, 53, 0, 0,
+	49, 50, 38, 39, 40, 41, 42, 54, 55, 47,
+	48, 46, 45, 51, 52, 53, 0, 0, 49, 50,
+	38, 39, 40, 41, 42, 54, 55, 31, 20, 5,
+	6, 8, 19, 7, 0, 0, 0, 28, 30, 34,
+	0, 0, 0, 33, 92, 27, 0, 32, 0, 46,
+	45, 51, 52, 53, 0, 97, 49, 50, 38, 39,
+	40, 41, 42, 54, 55, 0, 17, 18, 0, 0,
+	16, 15, 91, 31, 20, 5, 6, 8, 19, 7,
+	0, 0, 0, 28, 30, 34, 0, 0, 0, 33,
+	0, 27, 0, 32, 0, 0, 0, 51, 52, 53,
+	0, 97, 49, 50, 38, 39, 40, 41, 42, 54,
+	55, 0, 17, 18, 0, 0, 16, 15, 91, 31,
+	20, 5, 6, 8, 19, 7, 0, 0, 0, 28,
+	30, 34, 0, 0, 0, 33, 0, 27, 0, 32,
+	86, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 17, 18,
+	0, 0, 16, 15, 91, 31, 20, 5, 6, 8,
+	19, 7, 0, 0, 0, 28, 30, 34, 0, 0,
+	0, 33, 0, 27, 0, 32, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 17, 0, 0, 16, 15, 30, 19, 5, 6,
-	8, 18, 7, 0, 0, 0, 27, 29, 33, 0,
-	0, 0, 32, 0, 26, 0, 31, 0, 0, 0,
-	0, 0, 0, 116, 0, 0, 139, 0, 0, 17,
-	117, 0, 16, 15, 0, 41, 115, 43, 42, 0,
-	44, 45, 37, 38, 39, 40, 41, 105, 43, 42,
-	0, 44, 45, 37, 38, 39, 40, 78, 0, 0,
-	0, 0, 0, 41, 0, 43, 42, 0, 44, 45,
-	37, 38, 39, 40, 36, 0, 0, 41, 0, 43,
-	42, 0, 44, 45, 37, 38, 39, 40, 0, 0,
-	0, 0, 0, 0, 41, 0, 43, 42, 0, 44,
-	45, 37, 38, 39, 40,
+	0, 0, 0, 0, 17, 18, 0, 0, 16, 15,
+	91, 31, 20, 5, 6, 8, 19, 7, 0, 0,
+	0, 28, 30, 34, 0, 0, 143, 33, 0, 27,
+	0, 32, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	17, 18, 0, 0, 16, 15, 31, 20, 5, 6,
+	8, 19, 7, 0, 0, 141, 28, 30, 34, 0,
+	0, 0, 33, 0, 27, 0, 32, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 17, 18, 0, 0, 16,
+	15, 31, 20, 5, 6, 8, 19, 7, 0, 0,
+	0, 28, 30, 34, 0, 0, 0, 33, 0, 27,
+	135, 32, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	17, 18, 0, 0, 16, 15, 31, 20, 5, 6,
+	8, 19, 7, 0, 0, 0, 28, 30, 34, 0,
+	0, 0, 33, 0, 27, 131, 32, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 17, 18, 0, 0, 16,
+	15, 31, 20, 5, 6, 8, 19, 7, 0, 0,
+	0, 28, 30, 34, 0, 0, 0, 33, 0, 27,
+	125, 32, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	17, 18, 0, 0, 16, 15, 31, 20, 5, 6,
+	8, 19, 7, 0, 0, 0, 28, 30, 34, 0,
+	0, 0, 33, 0, 27, 124, 32, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 17, 18, 0, 0, 16,
+	15, 31, 20, 5, 6, 8, 19, 7, 0, 0,
+	0, 28, 30, 34, 85, 0, 0, 33, 0, 27,
+	0, 32, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	17, 18, 0, 0, 16, 15, 31, 20, 5, 6,
+	8, 19, 7, 0, 0, 0, 28, 30, 34, 0,
+	0, 0, 33, 0, 27, 0, 32, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 17, 18, 0, 0, 16,
+	15,
 }
 var BijouPact = [...]int{
 
-	512, -1000, 76, 512, 581, -1000, -1000, -1000, -1000, -1000,
-	-1000, -9, -1000, -1000, -1000, 512, 512, 512, -1000, -1000,
-	-1000, -1000, -1000, -1000, -1000, -1000, 127, 512, 55, 474,
-	-1000, 206, 70, 512, -1000, 564, -1000, 512, 512, 512,
-	512, 512, 512, 512, 512, 512, 245, 77, 512, -1000,
-	-1000, -1000, 117, 436, 398, 47, 46, 43, 41, 360,
-	322, 53, 512, 550, 512, -1000, 1, -1000, 312, -1000,
-	512, -1000, 4, 522, -1000, -1000, 79, 312, -1000, -21,
-	-21, -1000, -1000, 312, 350, 350, -31, -31, 27, 8,
-	-1000, 16, 276, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, 512, 312, 512, 75, 284, -1000, 238,
-	245, -1000, 312, -1000, 167, 512, -1000, 167, -1000, -1000,
-	25, 24, 14, -1000, 312, 74, -1000, 69, -1000, 512,
-	-1000, -1000, 199, 312, 3, -1000, -1000, 533, -1000, -1000,
+	962, -1000, 104, 962, 336, -1000, -1000, -1000, -1000, -1000,
+	-1000, 45, -1000, -1000, -1000, 962, 962, 962, 962, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, 89, 962, 90,
+	917, -1000, 555, 463, 962, -1000, 315, -1000, 962, 962,
+	962, 962, 962, 962, 962, 962, 962, 962, 962, 962,
+	962, 962, 962, 962, 962, 962, 601, 112, 962, -1000,
+	-1000, -1000, -1000, 294, 872, 827, 84, 83, 78, 77,
+	68, 782, 67, 66, 65, 737, 62, 60, 58, 57,
+	55, 692, 91, 962, 273, 962, -1000, 43, -1000, 357,
+	-1000, 962, -1000, 42, 142, -1000, -1000, 114, 357, -1000,
+	-27, -27, 9, 9, -20, 357, 395, 451, 451, 413,
+	413, -38, -38, 497, 497, 497, -1000, -1000, 52, -1,
+	-1000, 376, 247, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	-1000, -1000, -1000, 962, 357, 962, 102, 647, -1000, 218,
+	601, -1000, 357, -1000, 509, 962, -1000, 509, -1000, -1000,
+	51, 35, 15, 14, -1000, 357, 101, -1000, 99, -1000,
+	962, -1000, -1000, 193, 357, 36, -1000, -1000, 172, -1000,
+	-1000,
 }
 var BijouPgo = [...]int{
 
-	0, 139, 138, 0, 129, 68, 128, 14, 127, 126,
-	8, 2, 20, 3, 124, 7, 123, 109, 105, 103,
-	101, 100, 98, 97, 6, 95, 5, 93, 19,
+	0, 168, 167, 0, 165, 73, 164, 21, 152, 151,
+	8, 2, 30, 3, 150, 7, 149, 147, 145, 143,
+	135, 123, 122, 121, 6, 120, 5, 119, 20,
 }
 var BijouR1 = [...]int{
 
 	0, 1, 2, 2, 2, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 4, 4, 4, 4, 4,
 	4, 4, 4, 4, 7, 7, 7, 7, 7, 7,
+	7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
 	7, 7, 5, 5, 6, 8, 8, 8, 8, 8,
-	8, 8, 8, 8, 9, 9, 9, 10, 10, 12,
+	8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+	8, 8, 8, 9, 9, 9, 9, 10, 10, 12,
 	12, 11, 11, 16, 16, 17, 17, 15, 15, 15,
 	13, 13, 18, 18, 19, 14, 14, 20, 20, 21,
 	21, 22, 23, 24, 25, 25, 28, 28, 26, 27,
@@ -225,8 +286,10 @@ var BijouR2 = [...]int{
 	0, 1, 0, 1, 2, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 3, 1, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 2, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 2, 2, 2, 1, 1, 1,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 2, 2, 2, 2, 1, 1, 1,
 	3, 1, 2, 2, 3, 2, 3, 1, 3, 2,
 	1, 3, 3, 5, 4, 1, 0, 3, 4, 2,
 	3, 2, 2, 2, 5, 4, 1, 3, 4, 1,
@@ -235,58 +298,68 @@ var BijouR2 = [...]int{
 var BijouChk = [...]int{
 
 	-1000, -1, -2, -5, -3, 6, 7, 10, 8, -8,
-	-9, -4, -6, -21, -25, 41, 40, 37, 9, 5,
-	-7, -16, -17, -18, -19, -20, 22, 14, -22, 15,
-	4, 24, 20, 16, 13, -3, 13, 40, 41, 42,
-	43, 33, 36, 35, 38, 39, 22, 32, 24, -3,
-	-3, -3, -3, 40, 41, 42, 43, 36, 35, 37,
-	-5, -23, 18, -3, 17, 25, -12, -10, -3, -11,
-	42, 21, -13, -3, -15, -11, 32, -3, 13, -3,
+	-9, -4, -6, -21, -25, 48, 47, 43, 44, 9,
+	5, -7, -16, -17, -18, -19, -20, 22, 14, -22,
+	15, 4, 24, 20, 16, 13, -3, 13, 47, 48,
+	49, 50, 51, 33, 35, 39, 38, 36, 37, 45,
+	46, 40, 41, 42, 52, 53, 22, 32, 24, -3,
+	-3, -3, -3, -3, 47, 48, 49, 50, 51, 39,
+	38, 43, 40, 41, 42, 44, 35, 36, 37, 52,
+	53, -5, -23, 18, -3, 17, 25, -12, -10, -3,
+	-11, 49, 21, -13, -3, -15, -11, 32, -3, 13,
+	-3, -3, -3, -3, -3, -3, -3, -3, -3, -3,
 	-3, -3, -3, -3, -3, -3, -3, -3, -14, -12,
 	-7, 22, -3, 23, 23, 23, 23, 23, 23, 23,
+	23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
 	23, 13, -24, 19, -3, 17, -28, -27, -26, -3,
 	28, 25, -3, 21, 28, 34, 21, 28, 4, 23,
-	40, 41, 37, 25, -3, -28, 13, -24, -26, 18,
-	-10, -15, -3, -3, -13, 13, 13, -3, 21, 13,
+	47, 48, 43, 44, 25, -3, -28, 13, -24, -26,
+	18, -10, -15, -3, -3, -13, 13, 13, -3, 21,
+	13,
 }
 var BijouDef = [...]int{
 
 	2, -2, 1, 3, 0, 5, 6, 7, 8, 9,
-	10, 11, 12, 13, 14, 0, 0, 0, 15, 16,
-	17, 18, 19, 20, 21, 22, 0, 0, 0, 0,
-	24, 0, 0, 0, 4, 0, 32, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 66, 0, 0, 44,
-	45, 46, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 69, 0, 0, 0, 53, 0, 49, 47, 48,
-	51, 55, 0, 0, 60, 57, 0, 71, 33, 35,
-	36, 37, 38, 39, 40, 41, 42, 43, 0, 65,
-	67, 0, 0, 23, 25, 26, 27, 28, 29, 30,
-	31, 34, 70, 0, 72, 0, 0, 76, 79, 0,
-	0, 54, 52, 56, 0, 0, 62, 0, 59, 64,
-	0, 0, 0, 68, 73, 0, 75, 0, 80, 0,
-	50, 61, 0, 58, 0, 74, 77, 0, 63, 78,
+	10, 11, 12, 13, 14, 0, 0, 0, 0, 15,
+	16, 17, 18, 19, 20, 21, 22, 0, 0, 0,
+	0, 24, 0, 0, 0, 4, 0, 42, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 86, 0, 0, 63,
+	64, 65, 66, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 89, 0, 0, 0, 73, 0, 69, 67,
+	68, 71, 75, 0, 0, 80, 77, 0, 91, 43,
+	45, 46, 47, 48, 49, 50, 51, 52, 53, 54,
+	55, 56, 57, 58, 59, 60, 61, 62, 0, 85,
+	87, 0, 0, 23, 25, 26, 27, 28, 29, 30,
+	31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+	41, 44, 90, 0, 92, 0, 0, 96, 99, 0,
+	0, 74, 72, 76, 0, 0, 82, 0, 79, 84,
+	0, 0, 0, 0, 88, 93, 0, 95, 0, 100,
+	0, 70, 81, 0, 78, 0, 94, 97, 0, 83,
+	98,
 }
 var BijouTok1 = [...]int{
 
 	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 37, 27, 30, 3, 3, 3, 26,
-	22, 23, 42, 40, 28, 41, 32, 43, 3, 3,
+	3, 3, 3, 43, 27, 30, 3, 51, 40, 26,
+	22, 23, 49, 47, 28, 48, 32, 50, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 29, 3,
-	35, 33, 36, 31, 3, 3, 3, 3, 3, 3,
+	38, 33, 39, 31, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 24, 3, 25, 3, 3, 3, 3, 3, 3,
+	3, 24, 3, 25, 42, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 20, 3, 21,
+	3, 3, 3, 20, 41, 21, 44,
 }
 var BijouTok2 = [...]int{
 
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-	12, 13, 14, 15, 16, 17, 18, 19, 34, 38,
-	39, 44,
+	12, 13, 14, 15, 16, 17, 18, 19, 34, 35,
+	36, 37, 45, 46, 52, 53, 54,
 }
 var BijouTok3 = [...]int{
 	0,
@@ -631,338 +704,458 @@ Bijoudefault:
 
 	case 1:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:116
+		//line bijou.y:121
 		{
 			Bijoulex.(*BijouLex).SetResult(BijouDollar[1].node)
 		}
 	case 2:
 		BijouDollar = BijouS[Bijoupt-0 : Bijoupt+1]
-		//line bijou.y:121
+		//line bijou.y:126
 		{
 			BijouVAL.node = ast.NewExpressionList()
 		}
 	case 23:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:148
+		//line bijou.y:153
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
 	case 25:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:152
+		//line bijou.y:157
 		{
 			BijouVAL.node = ast.NewIdentifier("+")
 		}
 	case 26:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:153
+		//line bijou.y:158
 		{
 			BijouVAL.node = ast.NewIdentifier("-")
 		}
 	case 27:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:154
+		//line bijou.y:159
 		{
 			BijouVAL.node = ast.NewIdentifier("*")
 		}
 	case 28:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:155
+		//line bijou.y:160
 		{
 			BijouVAL.node = ast.NewIdentifier("/")
 		}
 	case 29:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:156
+		//line bijou.y:161
 		{
-			BijouVAL.node = ast.NewIdentifier(">")
+			BijouVAL.node = ast.NewIdentifier("%")
 		}
 	case 30:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:157
+		//line bijou.y:162
 		{
-			BijouVAL.node = ast.NewIdentifier("<")
+			BijouVAL.node = ast.NewIdentifier(">")
 		}
 	case 31:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:158
+		//line bijou.y:163
 		{
-			BijouVAL.node = ast.NewIdentifier("!")
+			BijouVAL.node = ast.NewIdentifier("<")
 		}
 	case 32:
-		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:161
-		{
-			BijouVAL.node = ast.NewExpressionList(BijouDollar[1].node)
-		}
-	case 33:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
 		//line bijou.y:164
 		{
-			BijouDollar[1].node.(*ast.ExpressionList).Append(BijouDollar[2].node)
+			BijouVAL.node = ast.NewIdentifier("!")
+		}
+	case 33:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:165
+		{
+			BijouVAL.node = ast.NewIdentifier("&")
 		}
 	case 34:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:174
+		//line bijou.y:166
 		{
-			BijouVAL.node = BijouDollar[2].node
+			BijouVAL.node = ast.NewIdentifier("|")
 		}
 	case 35:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:184
+		//line bijou.y:167
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_ADD, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewIdentifier("^")
 		}
 	case 36:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:187
+		//line bijou.y:168
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_MIN, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewIdentifier("~")
 		}
 	case 37:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:190
+		//line bijou.y:169
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_MUL, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewIdentifier("==")
 		}
 	case 38:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:193
+		//line bijou.y:170
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_DIV, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewIdentifier(">=")
 		}
 	case 39:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:196
+		//line bijou.y:171
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_ASS, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewIdentifier("<=")
 		}
 	case 40:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:199
+		//line bijou.y:172
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_GT, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewIdentifier(">>")
 		}
 	case 41:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:202
+		//line bijou.y:173
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_LT, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewIdentifier("<<")
 		}
 	case 42:
-		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:205
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:176
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_AND, BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewExpressionList(BijouDollar[1].node)
 		}
 	case 43:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:208
+		//line bijou.y:179
 		{
-			BijouVAL.node = ast.NewBinaryExpression(ast.OP_OR, BijouDollar[1].node, BijouDollar[3].node)
+			BijouDollar[1].node.(*ast.ExpressionList).Append(BijouDollar[2].node)
 		}
 	case 44:
-		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:213
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:189
 		{
-			BijouVAL.node = ast.NewUnaryExpression(ast.OP_MIN, BijouDollar[2].node)
+			BijouVAL.node = BijouDollar[2].node
 		}
 	case 45:
-		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:216
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:199
 		{
-			BijouVAL.node = ast.NewUnaryExpression(ast.OP_ADD, BijouDollar[2].node)
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_ADD, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 46:
-		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:219
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:202
 		{
-			BijouVAL.node = ast.NewUnaryExpression(ast.OP_NOT, BijouDollar[2].node)
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_MIN, BijouDollar[1].node, BijouDollar[3].node)
+		}
+	case 47:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:205
+		{
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_MUL, BijouDollar[1].node, BijouDollar[3].node)
+		}
+	case 48:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:208
+		{
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_DIV, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 49:
-		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:233
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:211
 		{
-			BijouVAL.node = ast.NewVector(BijouDollar[1].node)
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_MOD, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 50:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:236
+		//line bijou.y:214
 		{
-			BijouDollar[1].node.(*ast.VectorNode).Append(BijouDollar[3].node)
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_ASS, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 51:
-		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:241
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:217
 		{
-			BijouVAL.node = ast.NewUnaryExpression(ast.OP_MUL, ast.Underscore)
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_EQL, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 52:
-		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:244
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:220
 		{
-			BijouVAL.node = ast.NewUnaryExpression(ast.OP_MUL, BijouDollar[2].node)
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_GT, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 53:
-		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:254
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:223
 		{
-			BijouVAL.node = ast.NewVector()
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_LT, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 54:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:257
+		//line bijou.y:226
 		{
-			BijouVAL.node = BijouDollar[2].node
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_GTE, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 55:
-		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:267
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:229
 		{
-			BijouVAL.node = ast.NewMap()
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_LTE, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 56:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:270
+		//line bijou.y:232
 		{
-			BijouVAL.node = BijouDollar[2].node
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_AND, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 57:
-		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:275
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:235
 		{
-			BijouVAL.node = ast.NewPair(BijouDollar[1].node, nil)
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_OR, BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 58:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:238
+		{
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_BAND, BijouDollar[1].node, BijouDollar[3].node)
+		}
+	case 59:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:241
+		{
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_BOR, BijouDollar[1].node, BijouDollar[3].node)
+		}
+	case 60:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:244
+		{
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_BXOR, BijouDollar[1].node, BijouDollar[3].node)
+		}
+	case 61:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:247
+		{
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_BSR, BijouDollar[1].node, BijouDollar[3].node)
+		}
+	case 62:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:250
+		{
+			BijouVAL.node = ast.NewBinaryExpression(ast.OP_BSL, BijouDollar[1].node, BijouDollar[3].node)
+		}
+	case 63:
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:255
+		{
+			BijouVAL.node = ast.NewUnaryExpression(ast.OP_MIN, BijouDollar[2].node)
+		}
+	case 64:
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:258
+		{
+			BijouVAL.node = ast.NewUnaryExpression(ast.OP_ADD, BijouDollar[2].node)
+		}
+	case 65:
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:261
+		{
+			BijouVAL.node = ast.NewUnaryExpression(ast.OP_NOT, BijouDollar[2].node)
+		}
+	case 66:
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:264
+		{
+			BijouVAL.node = ast.NewUnaryExpression(ast.OP_BNOT, BijouDollar[2].node)
+		}
+	case 69:
+		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
 		//line bijou.y:278
+		{
+			BijouVAL.node = ast.NewVector(BijouDollar[1].node)
+		}
+	case 70:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:281
+		{
+			BijouDollar[1].node.(*ast.VectorNode).Append(BijouDollar[3].node)
+		}
+	case 71:
+		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
+		//line bijou.y:286
+		{
+			BijouVAL.node = ast.NewUnaryExpression(ast.OP_MUL, ast.Underscore)
+		}
+	case 72:
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:289
+		{
+			BijouVAL.node = ast.NewUnaryExpression(ast.OP_MUL, BijouDollar[2].node)
+		}
+	case 73:
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:299
+		{
+			BijouVAL.node = ast.NewVector()
+		}
+	case 74:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:302
+		{
+			BijouVAL.node = BijouDollar[2].node
+		}
+	case 75:
+		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
+		//line bijou.y:312
+		{
+			BijouVAL.node = ast.NewMap()
+		}
+	case 76:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:315
+		{
+			BijouVAL.node = BijouDollar[2].node
+		}
+	case 77:
+		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
+		//line bijou.y:320
+		{
+			BijouVAL.node = ast.NewPair(BijouDollar[1].node, nil)
+		}
+	case 78:
+		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
+		//line bijou.y:323
 		{
 			BijouVAL.node = ast.NewPair(BijouDollar[1].node, BijouDollar[3].node)
 		}
-	case 59:
+	case 79:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:281
+		//line bijou.y:326
 		{
 			BijouVAL.node = ast.NewPair(
 				ast.NewSymbol(BijouDollar[2].node.(*ast.IdentifierNode).Name),
 				BijouDollar[2].node,
 			)
 		}
-	case 60:
+	case 80:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:289
+		//line bijou.y:334
 		{
 			BijouVAL.node = ast.NewMap(BijouDollar[1].node.(*ast.PairNode))
 		}
-	case 61:
+	case 81:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:292
+		//line bijou.y:337
 		{
 			BijouDollar[1].node.(*ast.MapNode).Append(BijouDollar[3].node.(*ast.PairNode))
 		}
-	case 62:
+	case 82:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:302
+		//line bijou.y:347
 		{
 			BijouVAL.node = ast.NewRecord(BijouDollar[2].node)
 		}
-	case 63:
+	case 83:
 		BijouDollar = BijouS[Bijoupt-5 : Bijoupt+1]
-		//line bijou.y:305
+		//line bijou.y:350
 		{
 			BijouVAL.node = ast.NewRecord(BijouDollar[2].node, BijouDollar[4].node.(*ast.MapNode).Elements...)
 		}
-	case 64:
+	case 84:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:315
+		//line bijou.y:360
 		{
 			BijouVAL.node = ast.NewFunctionApplication(BijouDollar[1].node, BijouDollar[3].node)
 		}
-	case 66:
+	case 86:
 		BijouDollar = BijouS[Bijoupt-0 : Bijoupt+1]
-		//line bijou.y:321
+		//line bijou.y:366
 		{
 			BijouVAL.node = ast.NewVector()
 		}
-	case 67:
+	case 87:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:329
+		//line bijou.y:374
 		{
 			BijouVAL.node = ast.NewKeyAccess(
 				BijouDollar[1].node,
 				ast.NewSymbol(BijouDollar[3].node.(*ast.IdentifierNode).Name),
 			)
 		}
-	case 68:
+	case 88:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:335
+		//line bijou.y:380
 		{
 			BijouVAL.node = ast.NewKeyAccess(BijouDollar[1].node, BijouDollar[3].node)
 		}
-	case 69:
+	case 89:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:345
+		//line bijou.y:390
 		{
 			BijouVAL.node = ast.NewIfThenElseExpression(BijouDollar[1].node, BijouDollar[2].node, ast.Nil)
 		}
-	case 70:
+	case 90:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:348
+		//line bijou.y:393
 		{
 			BijouVAL.node = ast.NewIfThenElseExpression(BijouDollar[1].node, BijouDollar[2].node, BijouDollar[3].node)
 		}
-	case 71:
+	case 91:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:353
+		//line bijou.y:398
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
-	case 72:
+	case 92:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:358
+		//line bijou.y:403
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
-	case 73:
+	case 93:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:363
+		//line bijou.y:408
 		{
 			BijouVAL.node = BijouDollar[2].node
 		}
-	case 74:
+	case 94:
 		BijouDollar = BijouS[Bijoupt-5 : Bijoupt+1]
-		//line bijou.y:373
+		//line bijou.y:418
 		{
 			BijouVAL.node = ast.NewCaseExpression(BijouDollar[2].node, BijouDollar[4].node.(*ast.MapNode).Elements...)
 		}
-	case 75:
+	case 95:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:376
+		//line bijou.y:421
 		{
 			/* case of x < y then z */
 			BijouVAL.node = ast.NewCaseExpression(nil, BijouDollar[3].node.(*ast.MapNode).Elements...)
 		}
-	case 77:
+	case 97:
 		BijouDollar = BijouS[Bijoupt-3 : Bijoupt+1]
-		//line bijou.y:382
+		//line bijou.y:427
 		{
 			BijouDollar[1].node.(*ast.MapNode).Append(ast.NewPair(ast.Underscore, BijouDollar[2].node))
 		}
-	case 78:
+	case 98:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
-		//line bijou.y:387
+		//line bijou.y:432
 		{
 			BijouVAL.node = ast.NewPair(BijouDollar[1].node, BijouDollar[3].node)
 		}
-	case 79:
+	case 99:
 		BijouDollar = BijouS[Bijoupt-1 : Bijoupt+1]
-		//line bijou.y:392
+		//line bijou.y:437
 		{
 			BijouVAL.node = ast.NewMap(BijouDollar[1].node.(*ast.PairNode))
 		}
-	case 80:
+	case 100:
 		BijouDollar = BijouS[Bijoupt-2 : Bijoupt+1]
-		//line bijou.y:395
+		//line bijou.y:440
 		{
 			BijouDollar[1].node.(*ast.MapNode).Append(BijouDollar[2].node.(*ast.PairNode))
 		}

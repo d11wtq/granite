@@ -5,16 +5,26 @@ import (
 )
 
 var opNames = map[int]string{
-	OP_ADD: "+",
-	OP_MIN: "-",
-	OP_MUL: "*",
-	OP_DIV: "/",
-	OP_ASS: "=",
-	OP_GT:  ">",
-	OP_LT:  ">",
-	OP_AND: "and",
-	OP_OR:  "or",
-	OP_NOT: "not",
+	OP_ADD:  "+",
+	OP_MIN:  "-",
+	OP_MUL:  "*",
+	OP_DIV:  "/",
+	OP_MOD:  "%",
+	OP_ASS:  "=",
+	OP_EQL:  "==",
+	OP_GT:   ">",
+	OP_LT:   ">",
+	OP_GTE:  ">=",
+	OP_LTE:  "<=",
+	OP_AND:  "and",
+	OP_OR:   "or",
+	OP_NOT:  "not",
+	OP_BAND: "&",
+	OP_BOR:  "|",
+	OP_BXOR: "^",
+	OP_BNOT: "~",
+	OP_BSR:  ">>",
+	OP_BSL:  "<<",
 }
 
 // The Dumper can render an AST.

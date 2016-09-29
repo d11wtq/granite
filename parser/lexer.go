@@ -155,6 +155,29 @@ func (lexer *BijouLex) Lex(lval *BijouSymType) int {
 		case '>':
 			lexer.read()
 			token = DOUBLE_ARROW
+		case '=':
+			lexer.read()
+			token = EQL
+		}
+	case (c == '>'):
+		token = int(lexer.read())
+		switch lexer.peek() {
+		case '>':
+			lexer.read()
+			token = BSR
+		case '=':
+			lexer.read()
+			token = GTE
+		}
+	case (c == '<'):
+		token = int(lexer.read())
+		switch lexer.peek() {
+		case '<':
+			lexer.read()
+			token = BSL
+		case '=':
+			lexer.read()
+			token = LTE
 		}
 	case (c == '"'):
 		token = lexer.scanDoubleString(lval)

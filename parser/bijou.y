@@ -64,12 +64,17 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %right	'.'
 %right	'='
 %right	DOUBLE_ARROW
+%right	EQL
+%right	GTE LTE
 %right	'<' '>'
-%right	'!'
+%right	'&' '|' '^'
+%right	'!' '~'
 
 %left	AND  OR
 %left	'+' '-'
 %left	'*' '/'
+%left	'%'
+%left	BSR BSL
 
 %right	UNARY
 
@@ -153,9 +158,19 @@ ident: /* Identifiers */
 |	'(' '-' ')' { $$ = ast.NewIdentifier("-") }
 |	'(' '*' ')' { $$ = ast.NewIdentifier("*") }
 |	'(' '/' ')' { $$ = ast.NewIdentifier("/") }
+|	'(' '%' ')' { $$ = ast.NewIdentifier("%") }
 |	'(' '>' ')' { $$ = ast.NewIdentifier(">") }
 |	'(' '<' ')' { $$ = ast.NewIdentifier("<") }
 |	'(' '!' ')' { $$ = ast.NewIdentifier("!") }
+|	'(' '&' ')' { $$ = ast.NewIdentifier("&") }
+|	'(' '|' ')' { $$ = ast.NewIdentifier("|") }
+|	'(' '^' ')' { $$ = ast.NewIdentifier("^") }
+|	'(' '~' ')' { $$ = ast.NewIdentifier("~") }
+|	'(' EQL ')' { $$ = ast.NewIdentifier("==") }
+|	'(' GTE ')' { $$ = ast.NewIdentifier(">=") }
+|	'(' LTE ')' { $$ = ast.NewIdentifier("<=") }
+|	'(' BSR ')' { $$ = ast.NewIdentifier(">>") }
+|	'(' BSL ')' { $$ = ast.NewIdentifier("<<") }
 
 expression_lines: /* expr END expr END */
 	expression END {
@@ -193,8 +208,14 @@ binary_expression: /* a + b, y > z, x = y */
 |	expression '/' expression {
 		$$ = ast.NewBinaryExpression(ast.OP_DIV, $1, $3)
 	}
+|	expression '%' expression {
+		$$ = ast.NewBinaryExpression(ast.OP_MOD, $1, $3)
+	}
 |	expression '=' expression {
 		$$ = ast.NewBinaryExpression(ast.OP_ASS, $1, $3)
+	}
+|	expression EQL expression {
+		$$ = ast.NewBinaryExpression(ast.OP_EQL, $1, $3)
 	}
 |	expression '>' expression {
 		$$ = ast.NewBinaryExpression(ast.OP_GT, $1, $3)
@@ -202,11 +223,32 @@ binary_expression: /* a + b, y > z, x = y */
 |	expression '<' expression {
 		$$ = ast.NewBinaryExpression(ast.OP_LT, $1, $3)
 	}
+|	expression GTE expression {
+		$$ = ast.NewBinaryExpression(ast.OP_GTE, $1, $3)
+	}
+|	expression LTE expression {
+		$$ = ast.NewBinaryExpression(ast.OP_LTE, $1, $3)
+	}
 |	expression AND expression {
 		$$ = ast.NewBinaryExpression(ast.OP_AND, $1, $3)
 	}
 |	expression OR expression {
 		$$ = ast.NewBinaryExpression(ast.OP_OR, $1, $3)
+	}
+|	expression '&' expression {
+		$$ = ast.NewBinaryExpression(ast.OP_BAND, $1, $3)
+	}
+|	expression '|' expression {
+		$$ = ast.NewBinaryExpression(ast.OP_BOR, $1, $3)
+	}
+|	expression '^' expression {
+		$$ = ast.NewBinaryExpression(ast.OP_BXOR, $1, $3)
+	}
+|	expression BSR expression {
+		$$ = ast.NewBinaryExpression(ast.OP_BSR, $1, $3)
+	}
+|	expression BSL expression {
+		$$ = ast.NewBinaryExpression(ast.OP_BSL, $1, $3)
 	}
 
 unary_expression: /* -42, !ok */
@@ -218,6 +260,9 @@ unary_expression: /* -42, !ok */
 	}
 |	'!' expression %prec UNARY {
 		$$ = ast.NewUnaryExpression(ast.OP_NOT, $2)
+	}
+|	'~' expression %prec UNARY {
+		$$ = ast.NewUnaryExpression(ast.OP_BNOT, $2)
 	}
 
 

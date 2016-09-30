@@ -16,7 +16,7 @@ func main() {
 
 	file, err := os.Open(os.Args[1])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		return
 	}
 
@@ -26,7 +26,7 @@ func main() {
 	)
 
 	if err != nil {
-		fmt.Println("Parse error", err)
+		fmt.Fprintln(os.Stderr, err)
 		return
 	}
 

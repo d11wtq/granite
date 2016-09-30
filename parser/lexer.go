@@ -10,6 +10,8 @@ import (
 
 func init() {
 	tokenNames := map[string]string{
+		"$unk":         "unknown-token",
+		"$end":         "end-of-input",
 		"END":          "end-of-expression",
 		"EQL":          "'=='",
 		"GTE":          "'>='",

@@ -10,7 +10,7 @@ import (
 
 func init() {
 	tokenNames := map[string]string{
-		"$unk":         "unknown-token",
+		"$unk":         "token",
 		"$end":         "end-of-input",
 		"END":          "end-of-expression",
 		"EQL":          "'=='",
@@ -623,6 +623,10 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 		tok = AND
 	case "or":
 		tok = OR
+	case "throw":
+		tok = KW_THROW
+	case "catch":
+		tok = KW_CATCH
 	case "true":
 		tok = TRUE
 		lval.node = ast.TrueNode

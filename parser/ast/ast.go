@@ -25,4 +25,6 @@ type ASTVisitor interface {
 	VisitKeyAccess(node *KeyAccessNode)
 	VisitIfThenElse(node *IfThenElseNode)
 	VisitCaseExpression(node *CaseExpressionNode)
+	VisitCatchExpression(node *CatchExpressionNode)
+	VisitThrow(node *ThrowNode)
 }

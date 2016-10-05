@@ -44,7 +44,9 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %token	END
 
 %token	KW_DO
+%token	KW_THROW
 %token	KW_CASE
+%token	KW_CATCH
 %token	KW_IF
 %token	KW_OF
 %right	KW_THEN
@@ -116,6 +118,8 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 %type	<node> case_then_line
 %type	<node> case_then_lines
 %type	<node> case_lines
+%type	<node> catch_expression
+%type	<node> throw_expression
 
 %start start
 
@@ -150,6 +154,8 @@ expression: /* Abribtrary expressions */
 |	do_expression
 |	if_expression
 |	case_expression
+|	catch_expression
+|	throw_expression
 
 applicable_expression: /* Expressions that can be invoked as functions */
 	SYMBOL
@@ -450,4 +456,24 @@ case_then_lines: /* x then y END a then b */
 	}
 |	case_then_lines case_then_line {
 		$1.(*ast.MapNode).Append($2.(*ast.PairNode))
+	}
+
+
+/**
+ * Catch expressions.
+ */
+
+catch_expression: /* catch x of y then z */
+	KW_CATCH expression KW_OF case_lines END {
+		$$ = ast.NewCatchExpression($2, $4.(*ast.MapNode).Elements...)
+	}
+
+
+/**
+ * Throw expressions.
+ */
+
+throw_expression: /* throw e */
+	KW_THROW expression %prec UNARY {
+		$$ = ast.NewThrow($2)
 	}

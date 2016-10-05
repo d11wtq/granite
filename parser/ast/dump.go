@@ -136,6 +136,14 @@ func (d *Dumper) VisitCaseExpression(node *CaseExpressionNode) {
 	d.render("case of", node.Expression, NewMap(node.Cases...))
 }
 
+func (d *Dumper) VisitCatchExpression(node *CatchExpressionNode) {
+	d.render("catch of", node.Expression, NewMap(node.Cases...))
+}
+
+func (d *Dumper) VisitThrow(node *ThrowNode) {
+	d.render("throw", node.Expression)
+}
+
 func (d *Dumper) render(name string, children ...ASTNode) {
 	lastNode := len(children) - 1
 	fmt.Println(name)

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"./compiler"
 	"./parser"
 	"./parser/ast"
+	"./vm"
 	"bufio"
 	"fmt"
 	"os"
@@ -31,4 +33,8 @@ func main() {
 	}
 
 	ast.Dump(result)
+
+	cmp := compiler.NewCompiler()
+	result.Accept(cmp)
+	vm.NewVM(cmp.GetCode()).Run()
 }

@@ -10,6 +10,9 @@ const (
 	OP_RETURN = iota
 	OP_LOADK
 	OP_ADD
+	OP_SUB
+	OP_MUL
+	OP_DIV
 	OP_PRINT
 	OP_SLEEP
 )
@@ -100,12 +103,24 @@ func (vm *VM) loop() {
 		op = uint8(vm.Instructions[vm.IP]>>26) & 0x3F
 		switch op {
 		case OP_LOADK:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
+			decodeAxBx(vm.Instructions[vm.IP], &ax, &bx)
 			vm.Registers[ax] = vm.Constants[bx]
 			vm.IP++
 		case OP_ADD:
 			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
 			vm.Registers[ax] = vm.Registers[bx].Add(vm.Registers[cx])
+			vm.IP++
+		case OP_SUB:
+			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Sub(vm.Registers[cx])
+			vm.IP++
+		case OP_MUL:
+			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Mul(vm.Registers[cx])
+			vm.IP++
+		case OP_DIV:
+			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Div(vm.Registers[cx])
 			vm.IP++
 		case OP_PRINT:
 			decodeAx(vm.Instructions[vm.IP], &ax)

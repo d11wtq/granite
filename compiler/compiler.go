@@ -9,14 +9,21 @@ import (
 
 // Bytecode compiler for Bijou code
 type Compiler struct {
-	Constants   []vm.Value
-	ConstantMap map[vm.Value]int
+	Constants    []vm.Value
+	ConstantMap  map[vm.Value]uint32
+	Instructions []uint32
+	LocalMap     map[string]uint8
+	RegIdx       uint32
 }
 
+// Create a new bytecode compiler.
 func NewCompiler() *Compiler {
 	return &Compiler{
-		Constants:   make([]vm.Value, 0),
-		ConstantMap: make(map[vm.Value]int),
+		Constants:    make([]vm.Value, 0),
+		ConstantMap:  make(map[vm.Value]uint32),
+		Instructions: make([]uint32, 0),
+		LocalMap:     make(map[string]uint8),
+		RegIdx:       0,
 	}
 }
 
@@ -26,6 +33,42 @@ func (c *Compiler) GetCode() []byte {
 	c.encodeConstants(b)
 	c.encodeInstructions(b)
 	return b.Bytes()
+}
+
+// Encode a three operand instruction.
+func encodeAxBxCx(op, ax, bx, cx uint32) uint32 {
+	// 00000000 00000000 00000000 00111111 // op
+	// 11111100 00000000 00000000 00000000 // op << 26
+
+	// 00000000 00000000 00000001 11111111 // ax
+	// 00000011 11111110 00000000 00000000 // ax << 17
+
+	// 00000000 00000000 00000001 11111111 // bx
+	// 00000000 00000001 11111111 00000000 // bx << 8
+
+	// 00000000 00000000 00000000 11111111 // cx
+	return (op << 26) | (ax << 17) | (bx << 8) | cx
+}
+
+// Encode a two operand instruction.
+func encodeAxBx(op, ax, bx uint32) uint32 {
+	// 00000000 00000000 00000000 00111111 // op
+	// 11111100 00000000 00000000 00000000 // op << 26
+
+	// 00000000 00000000 00111111 11111111 // ax
+	// 00000011 11111111 11100000 00000000 // ax << 13
+
+	// 00000000 00000000 00011111 11111111 // bx
+	return (op << 26) | (ax << 13) | bx
+}
+
+// Encode a one operand instruction.
+func encodeAx(op, ax uint32) uint32 {
+	// 00000000 00000000 00000000 00111111 // op
+	// 11111100 00000000 00000000 00000000 // op << 26
+
+	// 00000011 11111111 11111111 11111111 // ax
+	return (op << 26) | ax
 }
 
 func (c *Compiler) encodeConstants(b *bytes.Buffer) {
@@ -44,89 +87,37 @@ func (c *Compiler) encodeConstants(b *bytes.Buffer) {
 }
 
 func (c *Compiler) encodeInstructions(b *bytes.Buffer) {
-	binary.Write(b, vm.ByteOrder, uint64(5)) // number of instructions
+	// number of instructions
+	binary.Write(b, vm.ByteOrder, uint64(len(c.Instructions)+2))
 
-	var op, ax, bx, cx uint32
+	for _, inst := range c.Instructions {
+		binary.Write(b, vm.ByteOrder, inst)
+	}
 
-	op = vm.OP_LOADK
-	ax = 0
-	bx = 1
-	binary.Write(
-		b,
-		vm.ByteOrder,
-		// 00000000 00000000 00000000 00111111
-		// 11111100 00000000 00000000 00000000 // op << 26
-
-		// 00000000 00000000 00000001 11111111
-		// 00000011 11111110 00000000 00000000 // ax << 17
-
-		// 00000000 00000000 00000001 11111111
-		// 00000000 00000001 11111111 00000000 // bx << 8
-
-		// 00000000 00000000 00000000 11111111 // cx
-		uint32((op<<26)|(ax<<17)|(bx<<8)|cx),
-	)
-
-	op = vm.OP_LOADK
-	ax = 1
-	bx = 0
-	binary.Write(
-		b,
-		vm.ByteOrder,
-		uint32((op<<26)|(ax<<17)|(bx<<8)|cx),
-	)
-
-	op = vm.OP_ADD
-	ax = 0
-	bx = 0
-	cx = 1
-	binary.Write(
-		b,
-		vm.ByteOrder,
-		uint32((op<<26)|(ax<<17)|(bx<<8)|cx),
-	)
-
-	op = vm.OP_PRINT
-	ax = 0
-	binary.Write(
-		b,
-		vm.ByteOrder,
-		uint32((op<<26)|ax),
-	)
-
-	op = vm.OP_RETURN
-	binary.Write(b, vm.ByteOrder, uint32(op<<26))
-
-	/*
-		binary.Write(
-			b,
-			vm.ByteOrder,
-			uint32((op<<26)|(ax<<13)|bx),
-		)
-
-		op = 5
-		ax = 896764
-
-		binary.Write(
-			b,
-			vm.ByteOrder,
-			uint32((op<<26)|ax),
-		)
-	*/
+	binary.Write(b, vm.ByteOrder, encodeAx(vm.OP_PRINT, 0))
+	binary.Write(b, vm.ByteOrder, encodeAx(vm.OP_RETURN, 0))
 }
 
-func (c *Compiler) addConstant(v vm.Value) {
+func (c *Compiler) addConstant(v vm.Value) uint32 {
 	if _, ok := c.ConstantMap[v]; ok == false {
-		c.ConstantMap[v] = len(c.Constants)
+		c.ConstantMap[v] = uint32(len(c.Constants))
 		c.Constants = append(c.Constants, v)
 	}
+
+	return c.ConstantMap[v]
+}
+
+func (c *Compiler) addInstruction(inst uint32) {
+	c.Instructions = append(c.Instructions, inst)
 }
 
 func (c *Compiler) VisitNil(node *ast.NilNode) {
 }
 
 func (c *Compiler) VisitInteger(node *ast.IntegerNode) {
-	c.addConstant(vm.Integer(node.Value))
+	cIdx := c.addConstant(vm.Integer(node.Value))
+	c.addInstruction(encodeAxBx(vm.OP_LOADK, c.RegIdx, cIdx))
+	c.RegIdx++
 }
 
 func (c *Compiler) VisitBoolean(node *ast.BooleanNode) {
@@ -136,7 +127,9 @@ func (c *Compiler) VisitFloat(node *ast.FloatNode) {
 }
 
 func (c *Compiler) VisitString(node *ast.StringNode) {
-	c.addConstant(vm.String(node.String))
+	cIdx := c.addConstant(vm.String(node.String))
+	c.addInstruction(encodeAxBx(vm.OP_LOADK, c.RegIdx, cIdx))
+	c.RegIdx++
 }
 
 func (c *Compiler) VisitSymbol(node *ast.SymbolNode) {
@@ -148,10 +141,25 @@ func (c *Compiler) VisitIdentifier(node *ast.IdentifierNode) {
 func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 	for _, e := range node.Elements {
 		e.Accept(c)
+		c.RegIdx = uint32(len(c.LocalMap))
 	}
 }
 
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
+	regIdx := c.RegIdx
+	node.Left.Accept(c)
+	node.Right.Accept(c)
+	switch node.Op {
+	case ast.OP_ADD:
+		c.addInstruction(encodeAxBxCx(vm.OP_ADD, regIdx, regIdx, regIdx+1))
+	case ast.OP_MIN:
+		c.addInstruction(encodeAxBxCx(vm.OP_SUB, regIdx, regIdx, regIdx+1))
+	case ast.OP_MUL:
+		c.addInstruction(encodeAxBxCx(vm.OP_MUL, regIdx, regIdx, regIdx+1))
+	case ast.OP_DIV:
+		c.addInstruction(encodeAxBxCx(vm.OP_DIV, regIdx, regIdx, regIdx+1))
+	}
+	c.RegIdx--
 }
 
 func (c *Compiler) VisitUnaryExpression(node *ast.UnaryExpressionNode) {

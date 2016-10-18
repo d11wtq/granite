@@ -32,7 +32,9 @@ func main() {
 		return
 	}
 
-	ast.Dump(result)
+	if os.Getenv("DEBUG") != "" {
+		ast.Dump(result)
+	}
 
 	cmp := compiler.NewCompiler()
 	result.Accept(cmp)

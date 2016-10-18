@@ -9,4 +9,7 @@ const (
 type Value interface {
 	Type() uint8
 	Add(Value) Value
+	Sub(Value) Value
+	Mul(Value) Value
+	Div(Value) Value
 }

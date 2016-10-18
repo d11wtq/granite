@@ -14,3 +14,30 @@ func (a Integer) Add(b Value) Value {
 		return nil
 	}
 }
+
+func (a Integer) Sub(b Value) Value {
+	switch t := b.(type) {
+	case Integer:
+		return a - t
+	default:
+		return nil
+	}
+}
+
+func (a Integer) Mul(b Value) Value {
+	switch t := b.(type) {
+	case Integer:
+		return a * t
+	default:
+		return nil
+	}
+}
+
+func (a Integer) Div(b Value) Value {
+	switch t := b.(type) {
+	case Integer:
+		return a / t
+	default:
+		return nil
+	}
+}

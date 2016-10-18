@@ -9,3 +9,15 @@ func (String) Type() uint8 {
 func (a String) Add(b Value) Value {
 	return nil
 }
+
+func (a String) Sub(b Value) Value {
+	return nil
+}
+
+func (a String) Mul(b Value) Value {
+	return nil
+}
+
+func (a String) Div(b Value) Value {
+	return nil
+}

@@ -14,7 +14,6 @@ const (
 	OP_MUL
 	OP_DIV
 	OP_PRINT
-	OP_SLEEP
 )
 
 // Endianness of the virtual machine.
@@ -36,20 +35,25 @@ type VM struct {
 
 //Create a new instance of the virtual machine.
 func NewVM(code []byte) *VM {
-	return &VM{
+	vm := &VM{
 		Code:         bytes.NewBuffer(code),
 		Constants:    make([]Value, 0, 256),
 		Registers:    make([]Value, 256),
 		Instructions: make([]uint32, 0, 1024),
 		IP:           0,
 	}
+	vm.load()
+	return vm
 }
 
 // Execute the loaded bytecode.
 func (vm *VM) Run() {
+	vm.loop()
+}
+
+func (vm *VM) load() {
 	vm.loadConstants()
 	vm.loadInstructions()
-	vm.loop()
 }
 
 func (vm *VM) loadConstants() {

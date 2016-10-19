@@ -32,11 +32,17 @@ func main() {
 		return
 	}
 
-	if os.Getenv("DEBUG") != "" {
+	if os.Getenv("DUMPAST") != "" {
 		ast.Dump(result)
 	}
 
 	cmp := compiler.NewCompiler()
 	result.Accept(cmp)
-	vm.NewVM(cmp.GetCode()).Run()
+	vmx := vm.NewVM(cmp.GetCode())
+
+	if os.Getenv("DUMPASM") != "" {
+		vm.Dump(vmx)
+	}
+
+	vmx.Run()
 }

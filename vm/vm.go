@@ -13,6 +13,9 @@ const (
 	OP_SUB
 	OP_MUL
 	OP_DIV
+	OP_LT
+	OP_LTE
+	OP_EQ
 	OP_PRINT
 )
 
@@ -62,6 +65,7 @@ func (vm *VM) loadConstants() {
 		valueType uint8
 		intValue  int64
 		strLength uint32
+		boolValue uint8
 	)
 
 	binary.Read(vm.Code, ByteOrder, &numConsts)
@@ -71,6 +75,9 @@ func (vm *VM) loadConstants() {
 		case V_INT:
 			binary.Read(vm.Code, ByteOrder, &intValue)
 			vm.Constants = append(vm.Constants, Integer(intValue))
+		case V_BLN:
+			binary.Read(vm.Code, ByteOrder, &boolValue)
+			vm.Constants = append(vm.Constants, Boolean(boolValue != 0))
 		case V_STR:
 			binary.Read(vm.Code, ByteOrder, &strLength)
 			b := make([]byte, strLength)
@@ -125,6 +132,18 @@ func (vm *VM) loop() {
 		case OP_DIV:
 			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
 			vm.Registers[ax] = vm.Registers[bx].Div(vm.Registers[cx])
+			vm.IP++
+		case OP_EQ:
+			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
+			vm.Registers[ax] = Boolean(vm.Registers[bx].Eq(vm.Registers[cx]))
+			vm.IP++
+		case OP_LT:
+			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
+			vm.Registers[ax] = Boolean(vm.Registers[bx].Lt(vm.Registers[cx]))
+			vm.IP++
+		case OP_LTE:
+			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
+			vm.Registers[ax] = Boolean(vm.Registers[bx].Lte(vm.Registers[cx]))
 			vm.IP++
 		case OP_PRINT:
 			decodeAx(vm.Instructions[vm.IP], &ax)

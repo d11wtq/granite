@@ -49,3 +49,23 @@ func (a Integer) Div(b Value) Value {
 		return nil
 	}
 }
+
+func (a Integer) Eq(b Value) bool {
+	return (a == b)
+}
+
+func (a Integer) Lt(b Value) bool {
+	if b.Type() == V_INT {
+		return a < b.(Integer)
+	}
+
+	return a.Type() < b.Type()
+}
+
+func (a Integer) Lte(b Value) bool {
+	if b.Type() == V_INT {
+		return a <= b.(Integer)
+	}
+
+	return a.Type() < b.Type()
+}

@@ -47,6 +47,15 @@ func Dump(vm *VM) {
 		case OP_DIV:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			fmt.Println("DIV", ax, bx, cx)
+		case OP_EQ:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("EQ", ax, bx, cx)
+		case OP_LT:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("LT", ax, bx, cx)
+		case OP_LTE:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("LTE", ax, bx, cx)
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println("PRINT", ax)

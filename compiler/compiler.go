@@ -5,7 +5,17 @@ import (
 	"../vm"
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
+
+// Convert boolean v to a uint8.
+func Btoi(v bool) uint8 {
+	if v {
+		return 1
+	}
+
+	return 0
+}
 
 // Bytecode compiler for Bijou code
 type Compiler struct {
@@ -78,6 +88,8 @@ func (c *Compiler) encodeConstants(b *bytes.Buffer) {
 		switch t := v.(type) {
 		case vm.Integer:
 			binary.Write(b, vm.ByteOrder, v)
+		case vm.Boolean:
+			binary.Write(b, vm.ByteOrder, Btoi(bool(t)))
 		case vm.String:
 			s := []byte(string(t))
 			binary.Write(b, vm.ByteOrder, uint32(len(s)))
@@ -87,7 +99,6 @@ func (c *Compiler) encodeConstants(b *bytes.Buffer) {
 }
 
 func (c *Compiler) encodeInstructions(b *bytes.Buffer) {
-	// number of instructions
 	binary.Write(b, vm.ByteOrder, uint64(len(c.Instructions)+2))
 
 	for _, inst := range c.Instructions {
@@ -121,6 +132,9 @@ func (c *Compiler) VisitInteger(node *ast.IntegerNode) {
 }
 
 func (c *Compiler) VisitBoolean(node *ast.BooleanNode) {
+	cIdx := c.addConstant(vm.Boolean(node.Value))
+	c.addInstruction(encodeAxBx(vm.OP_LOADK, c.RegIdx, cIdx))
+	c.RegIdx++
 }
 
 func (c *Compiler) VisitFloat(node *ast.FloatNode) {
@@ -158,6 +172,18 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 		c.addInstruction(encodeAxBxCx(vm.OP_MUL, regIdx, regIdx, regIdx+1))
 	case ast.OP_DIV:
 		c.addInstruction(encodeAxBxCx(vm.OP_DIV, regIdx, regIdx, regIdx+1))
+	case ast.OP_EQL:
+		c.addInstruction(encodeAxBxCx(vm.OP_EQ, regIdx, regIdx, regIdx+1))
+	case ast.OP_LT:
+		c.addInstruction(encodeAxBxCx(vm.OP_LT, regIdx, regIdx, regIdx+1))
+	case ast.OP_GT:
+		c.addInstruction(encodeAxBxCx(vm.OP_LT, regIdx, regIdx+1, regIdx))
+	case ast.OP_LTE:
+		c.addInstruction(encodeAxBxCx(vm.OP_LTE, regIdx, regIdx, regIdx+1))
+	case ast.OP_GTE:
+		c.addInstruction(encodeAxBxCx(vm.OP_LTE, regIdx, regIdx+1, regIdx))
+	default:
+		panic(fmt.Sprintf("Unhandled binary operator: 0x%x", node.Op))
 	}
 	c.RegIdx--
 }

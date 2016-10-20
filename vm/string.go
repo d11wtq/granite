@@ -29,3 +29,23 @@ func (a String) Mul(b Value) Value {
 func (a String) Div(b Value) Value {
 	return nil
 }
+
+func (a String) Eq(b Value) bool {
+	return (a == b)
+}
+
+func (a String) Lt(b Value) bool {
+	if b.Type() == V_STR {
+		return string(a) < string(b.(String))
+	}
+
+	return a.Type() < b.Type()
+}
+
+func (a String) Lte(b Value) bool {
+	if b.Type() == V_STR {
+		return string(a) <= string(b.(String))
+	}
+
+	return a.Type() < b.Type()
+}

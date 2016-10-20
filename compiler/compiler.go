@@ -109,13 +109,13 @@ func (c *Compiler) encodeInstructions(b *bytes.Buffer) {
 	binary.Write(b, vm.ByteOrder, encodeAx(vm.OP_RETURN, 0))
 }
 
-func (c *Compiler) addConstant(v vm.Value) uint32 {
+func (c *Compiler) addConstant(v vm.Value) {
 	if _, ok := c.ConstantMap[v]; ok == false {
 		c.ConstantMap[v] = uint32(len(c.Constants))
 		c.Constants = append(c.Constants, v)
 	}
 
-	return c.ConstantMap[v]
+	c.addInstruction(encodeAxBx(vm.OP_LOADK, c.RegIdx, c.ConstantMap[v]))
 }
 
 func (c *Compiler) addInstruction(inst uint32) {
@@ -126,24 +126,18 @@ func (c *Compiler) VisitNil(node *ast.NilNode) {
 }
 
 func (c *Compiler) VisitInteger(node *ast.IntegerNode) {
-	cIdx := c.addConstant(vm.Integer(node.Value))
-	c.addInstruction(encodeAxBx(vm.OP_LOADK, c.RegIdx, cIdx))
-	c.RegIdx++
+	c.addConstant(vm.Integer(node.Value))
 }
 
 func (c *Compiler) VisitBoolean(node *ast.BooleanNode) {
-	cIdx := c.addConstant(vm.Boolean(node.Value))
-	c.addInstruction(encodeAxBx(vm.OP_LOADK, c.RegIdx, cIdx))
-	c.RegIdx++
+	c.addConstant(vm.Boolean(node.Value))
 }
 
 func (c *Compiler) VisitFloat(node *ast.FloatNode) {
 }
 
 func (c *Compiler) VisitString(node *ast.StringNode) {
-	cIdx := c.addConstant(vm.String(node.String))
-	c.addInstruction(encodeAxBx(vm.OP_LOADK, c.RegIdx, cIdx))
-	c.RegIdx++
+	c.addConstant(vm.String(node.String))
 }
 
 func (c *Compiler) VisitSymbol(node *ast.SymbolNode) {
@@ -162,6 +156,7 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 	regIdx := c.RegIdx
 	node.Left.Accept(c)
+	c.RegIdx++
 	node.Right.Accept(c)
 	switch node.Op {
 	case ast.OP_ADD:
@@ -185,7 +180,6 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 	default:
 		panic(fmt.Sprintf("Unhandled binary operator: 0x%x", node.Op))
 	}
-	c.RegIdx--
 }
 
 func (c *Compiler) VisitUnaryExpression(node *ast.UnaryExpressionNode) {

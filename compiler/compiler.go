@@ -156,7 +156,7 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 	regIdx := c.RegIdx
 	node.Left.Accept(c)
-	c.RegIdx++
+	c.RegIdx = regIdx + 1
 	node.Right.Accept(c)
 	switch node.Op {
 	case ast.OP_ADD:

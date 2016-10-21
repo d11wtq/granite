@@ -20,7 +20,7 @@ type VM struct {
 	// Executable code instructions
 	Instructions []uint32
 	// Current instruction pointer
-	IP uint64
+	IP int64
 }
 
 //Create a new instance of the virtual machine.
@@ -59,6 +59,8 @@ func (vm *VM) loadConstants() {
 	for numConsts > 0 {
 		binary.Read(vm.Code, ByteOrder, &valueType)
 		switch valueType {
+		case V_NIL:
+			vm.Constants = append(vm.Constants, Nil)
 		case V_INT:
 			binary.Read(vm.Code, ByteOrder, &intValue)
 			vm.Constants = append(vm.Constants, Integer(intValue))
@@ -91,56 +93,60 @@ func (vm *VM) loadInstructions() {
 
 func (vm *VM) loop() {
 	var (
-		op uint8
-		ax uint32
-		bx uint16
-		cx uint8
+		inst uint32
+		ax   uint32
+		bx   uint16
+		cx   uint8
 	)
 
 	for {
-		op = uint8(vm.Instructions[vm.IP]>>26) & 0x3F
-		switch op {
-		case OP_LOADK:
-			decodeAxBx(vm.Instructions[vm.IP], &ax, &bx)
-			vm.Registers[ax] = vm.Constants[bx]
-			vm.IP++
-		case OP_ADD:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Add(vm.Registers[cx])
-			vm.IP++
-		case OP_SUB:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Sub(vm.Registers[cx])
-			vm.IP++
-		case OP_MUL:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Mul(vm.Registers[cx])
-			vm.IP++
-		case OP_DIV:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Div(vm.Registers[cx])
-			vm.IP++
-		case OP_EQ:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
-			vm.Registers[ax] = Boolean(vm.Registers[bx].Eq(vm.Registers[cx]))
-			vm.IP++
-		case OP_LT:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
-			vm.Registers[ax] = Boolean(vm.Registers[bx].Lt(vm.Registers[cx]))
-			vm.IP++
-		case OP_LTE:
-			decodeAxBxCx(vm.Instructions[vm.IP], &ax, &bx, &cx)
-			vm.Registers[ax] = Boolean(vm.Registers[bx].Lte(vm.Registers[cx]))
-			vm.IP++
-		case OP_PRINT:
-			decodeAx(vm.Instructions[vm.IP], &ax)
-			fmt.Println(vm.Registers[ax])
-			vm.IP++
+		inst = vm.Instructions[vm.IP]
+
+		switch (inst >> 26) & 0x3F {
 		case OP_RETURN:
 			return
+		case OP_JMP:
+			decodeAx(inst, &ax)
+			vm.IP += int64(ax)
+		case OP_JMPIF:
+			decodeAxBx(inst, &ax, &bx)
+			switch vm.Registers[ax] {
+			case Nil, Boolean(false):
+				vm.IP += 0 // noop
+			default:
+				vm.IP += int64(bx)
+			}
+		case OP_LOADK:
+			decodeAxBx(inst, &ax, &bx)
+			vm.Registers[ax] = vm.Constants[bx]
+		case OP_ADD:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Add(vm.Registers[cx])
+		case OP_SUB:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Sub(vm.Registers[cx])
+		case OP_MUL:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Mul(vm.Registers[cx])
+		case OP_DIV:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Div(vm.Registers[cx])
+		case OP_EQ:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = Boolean(vm.Registers[bx].Eq(vm.Registers[cx]))
+		case OP_LT:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = Boolean(vm.Registers[bx].Lt(vm.Registers[cx]))
+		case OP_LTE:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = Boolean(vm.Registers[bx].Lte(vm.Registers[cx]))
+		case OP_PRINT:
+			decodeAx(inst, &ax)
+			fmt.Println(vm.Registers[ax])
 		default:
-			panic(fmt.Sprintf("Unhandled opcode: 0x%x", op))
+			panic(fmt.Sprintf("Unhandled opcode: 0x%x", (inst>>26)&0x3F))
 		}
+		vm.IP++
 	}
 
 	return

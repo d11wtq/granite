@@ -32,9 +32,10 @@ func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
 }
 
 %token	<node> IDENT
-%token	<node> INTEGER
+%token	<node> NIL
 %token	<node> TRUE
 %token	<node> FALSE
+%token	<node> INTEGER
 %token	<node> FLOAT
 %token	<node> SYMBOL
 %token	<node> STRING
@@ -144,7 +145,8 @@ program: /* Entire program (top) */
 |	program END /* ignore too many END */
 
 expression: /* Abribtrary expressions */
-	TRUE
+	NIL
+|	TRUE
 |	FALSE
 |	STRING
 |	FLOAT

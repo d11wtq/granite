@@ -86,6 +86,8 @@ func (c *Compiler) encodeConstants(b *bytes.Buffer) {
 	for _, v := range c.Constants {
 		binary.Write(b, vm.ByteOrder, v.Type())
 		switch t := v.(type) {
+		case *vm.NilType:
+			// noop
 		case vm.Integer:
 			binary.Write(b, vm.ByteOrder, v)
 		case vm.Boolean:
@@ -122,7 +124,22 @@ func (c *Compiler) addInstruction(inst uint32) {
 	c.Instructions = append(c.Instructions, inst)
 }
 
+func (c *Compiler) reserveInstruction(int) int {
+	idx := len(c.Instructions)
+	c.addInstruction(0)
+	return idx
+}
+
+func (c *Compiler) setInstruction(idx int, inst uint32) {
+	c.Instructions[idx] = inst
+}
+
+func (c *Compiler) resetRegIdx() {
+	c.RegIdx = uint32(len(c.LocalMap))
+}
+
 func (c *Compiler) VisitNil(node *ast.NilNode) {
+	c.addConstant(vm.Nil)
 }
 
 func (c *Compiler) VisitInteger(node *ast.IntegerNode) {
@@ -149,7 +166,7 @@ func (c *Compiler) VisitIdentifier(node *ast.IdentifierNode) {
 func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 	for _, e := range node.Elements {
 		e.Accept(c)
-		c.RegIdx = uint32(len(c.LocalMap))
+		c.resetRegIdx()
 	}
 }
 
@@ -204,6 +221,30 @@ func (c *Compiler) VisitKeyAccess(node *ast.KeyAccessNode) {
 }
 
 func (c *Compiler) VisitIfThenElse(node *ast.IfThenElseNode) {
+	var (
+		regIdx         = c.RegIdx
+		jmpIf, endElse int
+	)
+
+	node.Expression.Accept(c)
+
+	c.resetRegIdx()
+	jmpIf = c.reserveInstruction(vm.OP_JMPIF)
+	node.Else.Accept(c)
+	endElse = c.reserveInstruction(vm.OP_JMP)
+
+	c.resetRegIdx()
+	node.Then.Accept(c)
+
+	c.setInstruction(
+		jmpIf,
+		encodeAxBx(vm.OP_JMPIF, regIdx, uint32(endElse-jmpIf)),
+	)
+
+	c.setInstruction(
+		endElse,
+		encodeAx(vm.OP_JMP, uint32(len(c.Instructions)-1-endElse)),
+	)
 }
 
 func (c *Compiler) VisitCaseExpression(node *ast.CaseExpressionNode) {

@@ -13,7 +13,7 @@ var opNames = map[int]string{
 	OP_ASS:     "=",
 	OP_EQL:     "==",
 	OP_GT:      ">",
-	OP_LT:      ">",
+	OP_LT:      "<",
 	OP_GTE:     ">=",
 	OP_LTE:     "<=",
 	OP_AND:     "and",

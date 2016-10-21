@@ -627,6 +627,9 @@ func (lexer *BijouLex) scanWord(lval *BijouSymType) int {
 		tok = KW_THROW
 	case "catch":
 		tok = KW_CATCH
+	case "nil":
+		tok = NIL
+		lval.node = ast.Nil
 	case "true":
 		tok = TRUE
 		lval.node = ast.TrueNode

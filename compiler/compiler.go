@@ -19,11 +19,16 @@ func Btoi(v bool) uint8 {
 
 // Bytecode compiler for Bijou code
 type Compiler struct {
-	Constants    []vm.Value
-	ConstantMap  map[vm.Value]uint32
+	// Program constant pool
+	Constants []vm.Value
+	// Locations of constants in the pool (duplicates removed)
+	ConstantMap map[vm.Value]uint32
+	// List of executable instructions
 	Instructions []uint32
-	LocalMap     map[string]uint8
-	RegIdx       uint32
+	// Location of local variables in registers
+	LocalMap map[string]uint8
+	// The current register to store results in
+	RegIdx uint32
 }
 
 // Create a new bytecode compiler.
@@ -47,37 +52,37 @@ func (c *Compiler) GetCode() []byte {
 
 // Encode a three operand instruction.
 func encodeAxBxCx(op, ax, bx, cx uint32) uint32 {
-	// 00000000 00000000 00000000 00111111 // op
+	// 00000000 00000000 00000000 00111111 // op (0x3F)
 	// 11111100 00000000 00000000 00000000 // op << 26
 
-	// 00000000 00000000 00000001 11111111 // ax
+	// 00000000 00000000 00000001 11111111 // ax (0x1FF)
 	// 00000011 11111110 00000000 00000000 // ax << 17
 
-	// 00000000 00000000 00000001 11111111 // bx
+	// 00000000 00000000 00000001 11111111 // bx (0x1FF)
 	// 00000000 00000001 11111111 00000000 // bx << 8
 
-	// 00000000 00000000 00000000 11111111 // cx
+	// 00000000 00000000 00000000 11111111 // cx (0xFF)
 	return (op << 26) | (ax << 17) | (bx << 8) | cx
 }
 
 // Encode a two operand instruction.
 func encodeAxBx(op, ax, bx uint32) uint32 {
-	// 00000000 00000000 00000000 00111111 // op
+	// 00000000 00000000 00000000 00111111 // op (0x3F)
 	// 11111100 00000000 00000000 00000000 // op << 26
 
-	// 00000000 00000000 00111111 11111111 // ax
+	// 00000000 00000000 00111111 11111111 // ax (0x1FFF)
 	// 00000011 11111111 11100000 00000000 // ax << 13
 
-	// 00000000 00000000 00011111 11111111 // bx
+	// 00000000 00000000 00011111 11111111 // bx (0x1FFF)
 	return (op << 26) | (ax << 13) | bx
 }
 
 // Encode a one operand instruction.
 func encodeAx(op, ax uint32) uint32 {
-	// 00000000 00000000 00000000 00111111 // op
+	// 00000000 00000000 00000000 00111111 // op (0x3F)
 	// 11111100 00000000 00000000 00000000 // op << 26
 
-	// 00000011 11111111 11111111 11111111 // ax
+	// 00000011 11111111 11111111 11111111 // ax (0xFFFFF)
 	return (op << 26) | ax
 }
 

@@ -19,7 +19,7 @@ func (a Integer) Add(b Value) Value {
 	case Integer:
 		return a + t
 	default:
-		return nil
+		return Nil
 	}
 }
 
@@ -28,7 +28,7 @@ func (a Integer) Sub(b Value) Value {
 	case Integer:
 		return a - t
 	default:
-		return nil
+		return Nil
 	}
 }
 
@@ -37,7 +37,7 @@ func (a Integer) Mul(b Value) Value {
 	case Integer:
 		return a * t
 	default:
-		return nil
+		return Nil
 	}
 }
 
@@ -46,7 +46,7 @@ func (a Integer) Div(b Value) Value {
 	case Integer:
 		return a / t
 	default:
-		return nil
+		return Nil
 	}
 }
 

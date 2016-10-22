@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./compiler"
 	"./parser"
 	"./parser/ast"
 	"./vm"
@@ -36,9 +35,13 @@ func main() {
 		ast.Dump(result)
 	}
 
-	cmp := compiler.NewCompiler()
-	result.Accept(cmp)
-	vmx := vm.NewVM(cmp.GetCode())
+	code, err := vm.Compile(result)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+
+	vmx := vm.NewVM(code)
 
 	if os.Getenv("DUMPASM") != "" {
 		vm.Dump(vmx)

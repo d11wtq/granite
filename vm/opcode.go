@@ -2,8 +2,10 @@ package vm
 
 const (
 	OP_RETURN = iota
+	OP_ERR
 	OP_JMP
 	OP_JMPIF
+	OP_MOVE
 	OP_LOADK
 	OP_ADD
 	OP_SUB

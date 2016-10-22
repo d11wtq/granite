@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"os"
 )
 
 // Endianness of the virtual machine.
@@ -11,6 +12,8 @@ var ByteOrder = binary.LittleEndian
 
 // An instance of the virtual machine.
 type VM struct {
+	// Number of bytes loaded
+	BinSize int
 	// Raw bytecode to process
 	Code *bytes.Buffer
 	// Constants defined in the program
@@ -27,6 +30,7 @@ type VM struct {
 func NewVM(code []byte) *VM {
 	vm := &VM{
 		Code:         bytes.NewBuffer(code),
+		BinSize:      len(code),
 		Constants:    make([]Value, 0, 256),
 		Registers:    make([]Value, 256),
 		Instructions: make([]uint32, 0, 1024),
@@ -91,6 +95,13 @@ func (vm *VM) loadInstructions() {
 	}
 }
 
+func (vm *VM) handleError(reason uint32, bx uint16, cx uint8) {
+	switch reason {
+	case E_BADMATCH:
+		fmt.Fprintln(os.Stderr, &BadMatch{vm.Registers[bx], vm.Registers[cx]})
+	}
+}
+
 func (vm *VM) loop() {
 	var (
 		inst uint32
@@ -105,6 +116,10 @@ func (vm *VM) loop() {
 		switch (inst >> 26) & 0x3F {
 		case OP_RETURN:
 			return
+		case OP_ERR:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.handleError(ax, bx, cx)
+			return
 		case OP_JMP:
 			decodeAx(inst, &ax)
 			vm.IP += int64(ax)
@@ -116,6 +131,9 @@ func (vm *VM) loop() {
 			default:
 				vm.IP += int64(bx)
 			}
+		case OP_MOVE:
+			decodeAxBx(inst, &ax, &bx)
+			vm.Registers[ax] = vm.Registers[bx]
 		case OP_LOADK:
 			decodeAxBx(inst, &ax, &bx)
 			vm.Registers[ax] = vm.Constants[bx]

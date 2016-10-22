@@ -15,7 +15,8 @@ func Dump(vm *VM) {
 
 	fmt.Println(
 		fmt.Sprintf(
-			"; <main :: %d constants, %d instructions>",
+			"; <main :: size %dB, %d constants, %d instructions>",
+			vm.BinSize,
 			len(vm.Constants),
 			len(vm.Instructions),
 		),
@@ -30,12 +31,18 @@ func Dump(vm *VM) {
 		switch (inst >> 26) & 0x3F {
 		case OP_RETURN:
 			fmt.Println("  RETURN")
+		case OP_ERR:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("  ERR", ax, bx, cx)
 		case OP_JMP:
 			decodeAx(inst, &ax)
 			fmt.Println("  JMP", ax)
 		case OP_JMPIF:
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  JMPIF", ax, bx)
+		case OP_MOVE:
+			decodeAxBx(inst, &ax, &bx)
+			fmt.Println("  MOVE", ax, bx)
 		case OP_LOADK:
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  LOADK", ax, bx)

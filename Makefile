@@ -1,3 +1,6 @@
+export GOPATH = $(PWD)
+export GOBIN  = $(PWD)/bin
+
 EXE = bijou
 
 all: parser bin
@@ -15,3 +18,6 @@ bin: bin/$(EXE)
 
 bin/$(EXE): parser
 	go build -o bin/$(EXE)
+
+get:
+	go get

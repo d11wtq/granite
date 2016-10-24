@@ -25,7 +25,7 @@ type BadMatch struct {
 
 func (e *BadMatch) Error() string {
 	return fmt.Sprintf(
-		"*** BadMatch: no match for right hand side: %s = %s",
+		"*** BadMatch: no match for `%s = %s'",
 		e.Left.String(),
 		e.Right.String(),
 	)

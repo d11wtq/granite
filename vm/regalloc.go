@@ -11,12 +11,12 @@ type RegisterPool struct {
 // Create a new register pool of size.
 func NewRegisterPool(size uint32) *RegisterPool {
 	pool := &RegisterPool{
-		Available: make([]uint32, size),
+		Available: make([]uint32, 0, size),
 		Live:      make(map[uint32]bool),
 	}
 	for size > 0 {
 		size--
-		pool.Available[size] = size
+		pool.Available = append(pool.Available, size)
 		pool.Live[size] = false
 	}
 	return pool
@@ -29,8 +29,8 @@ func (p *RegisterPool) Reserve() uint32 {
 		panic("out of registers")
 	}
 
-	regIdx := p.Available[0]
-	p.Available = p.Available[1:]
+	regIdx := p.Available[len(p.Available)-1]
+	p.Available = p.Available[:len(p.Available)-1]
 	p.Live[regIdx] = true
 
 	return regIdx
@@ -43,5 +43,5 @@ func (p *RegisterPool) Release(regIdx uint32) {
 	}
 
 	p.Live[regIdx] = false
-	p.Available = append([]uint32{regIdx}, p.Available...)
+	p.Available = append(p.Available, regIdx)
 }

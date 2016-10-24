@@ -92,16 +92,18 @@ func (c *Compiler) VisitIdentifier(node *ast.IdentifierNode) {
 
 func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 	regIdx := c.RegIdx
-	for _, e := range node.Elements {
+	tailIdx := len(node.Elements) - 1
+
+	for i, e := range node.Elements {
 		e.Accept(c)
 		if c.Error != nil {
 			return
 		}
 
-		if c.RegIdx != regIdx {
+		if c.RegIdx != regIdx && i == tailIdx {
 			c.Assembler.AddInstruction(encodeAxBx(OP_MOVE, regIdx, c.RegIdx))
-			c.RegIdx = regIdx
 		}
+		c.RegIdx = regIdx
 	}
 }
 
@@ -171,6 +173,20 @@ func (c *Compiler) VisitUnaryExpression(node *ast.UnaryExpressionNode) {
 }
 
 func (c *Compiler) VisitVector(node *ast.VectorNode) {
+	regA := c.RegIdx
+	c.loadConstant(EmptyVector)
+
+	regB := c.RegPool.Reserve()
+	for _, e := range node.Elements {
+		c.RegIdx = regB
+		e.Accept(c)
+		c.Assembler.AddInstruction(
+			encodeAxBxCx(OP_APPEND, regA, regA, c.RegIdx),
+		)
+	}
+
+	c.RegPool.Release(regB)
+	c.RegIdx = regA
 }
 
 func (c *Compiler) VisitMap(node *ast.MapNode) {

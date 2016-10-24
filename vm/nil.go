@@ -40,3 +40,7 @@ func (*NilType) Lt(b Value) bool {
 func (*NilType) Lte(Value) bool {
 	return true
 }
+
+func (*NilType) Append(Value) Value {
+	return Nil
+}

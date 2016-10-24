@@ -67,6 +67,9 @@ func Dump(vm *VM) {
 		case OP_LTE:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			fmt.Println("  LTE", ax, bx, cx)
+		case OP_APPEND:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("  APPEND", ax, bx, cx)
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println("  PRINT", ax)

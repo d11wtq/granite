@@ -74,7 +74,7 @@ func (a *Assembler) encodeConstants(b *bytes.Buffer) {
 	for _, v := range a.Constants {
 		binary.Write(b, ByteOrder, v.Type())
 		switch t := v.(type) {
-		case *NilType:
+		case *NilType, *Vector:
 			// noop
 		case Integer:
 			binary.Write(b, ByteOrder, v)

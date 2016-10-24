@@ -69,3 +69,7 @@ func (a Integer) Lte(b Value) bool {
 
 	return a.Type() < b.Type()
 }
+
+func (Integer) Append(Value) Value {
+	return Nil
+}

@@ -14,5 +14,6 @@ const (
 	OP_LT
 	OP_LTE
 	OP_EQ
+	OP_APPEND
 	OP_PRINT
 )

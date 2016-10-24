@@ -49,3 +49,7 @@ func (a Boolean) Lte(b Value) bool {
 
 	return a.Type() < b.Type()
 }
+
+func (Boolean) Append(Value) Value {
+	return Nil
+}

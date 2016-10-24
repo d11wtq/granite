@@ -5,6 +5,7 @@ const (
 	V_BLN
 	V_INT
 	V_STR
+	V_VEC
 )
 
 type Value interface {
@@ -17,4 +18,5 @@ type Value interface {
 	Eq(Value) bool
 	Lt(Value) bool
 	Lte(Value) bool
+	Append(Value) Value
 }

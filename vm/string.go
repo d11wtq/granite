@@ -15,19 +15,19 @@ func (a String) String() string {
 }
 
 func (a String) Add(b Value) Value {
-	return nil
+	return Nil
 }
 
 func (a String) Sub(b Value) Value {
-	return nil
+	return Nil
 }
 
 func (a String) Mul(b Value) Value {
-	return nil
+	return Nil
 }
 
 func (a String) Div(b Value) Value {
-	return nil
+	return Nil
 }
 
 func (a String) Eq(b Value) bool {
@@ -48,4 +48,8 @@ func (a String) Lte(b Value) bool {
 	}
 
 	return a.Type() < b.Type()
+}
+
+func (String) Append(Value) Value {
+	return Nil
 }

@@ -76,6 +76,8 @@ func (vm *VM) loadConstants() {
 			b := make([]byte, strLength)
 			vm.Code.Read(b)
 			vm.Constants = append(vm.Constants, String(b))
+		case V_VEC:
+			vm.Constants = append(vm.Constants, EmptyVector)
 		}
 		numConsts--
 	}
@@ -158,6 +160,9 @@ func (vm *VM) loop() {
 		case OP_LTE:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			vm.Registers[ax] = Boolean(vm.Registers[bx].Lte(vm.Registers[cx]))
+		case OP_APPEND:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Append(vm.Registers[cx])
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println(vm.Registers[ax])

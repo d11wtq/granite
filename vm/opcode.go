@@ -7,6 +7,7 @@ const (
 	OP_JMPIF
 	OP_MOVE
 	OP_LOADK
+	OP_ISA
 	OP_ADD
 	OP_SUB
 	OP_MUL
@@ -14,6 +15,8 @@ const (
 	OP_LT
 	OP_LTE
 	OP_EQ
+	OP_LEN
 	OP_APPEND
+	OP_GET
 	OP_PRINT
 )

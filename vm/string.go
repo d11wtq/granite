@@ -50,6 +50,14 @@ func (a String) Lte(b Value) bool {
 	return a.Type() < b.Type()
 }
 
+func (a String) Len() uint64 {
+	return uint64(len(string(a)))
+}
+
 func (String) Append(Value) Value {
+	return Nil
+}
+
+func (String) Get(Value) Value {
 	return Nil
 }

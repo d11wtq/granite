@@ -70,6 +70,14 @@ func (a Integer) Lte(b Value) bool {
 	return a.Type() < b.Type()
 }
 
+func (Integer) Len() uint64 {
+	return 0
+}
+
 func (Integer) Append(Value) Value {
+	return Nil
+}
+
+func (Integer) Get(Value) Value {
 	return Nil
 }

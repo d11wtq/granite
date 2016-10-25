@@ -97,10 +97,10 @@ func (vm *VM) loadInstructions() {
 	}
 }
 
-func (vm *VM) handleError(reason uint32, bx uint16, cx uint8) {
+func (vm *VM) handleError(reason uint32, bx uint16) {
 	switch reason {
 	case E_BADMATCH:
-		fmt.Fprintln(os.Stderr, &BadMatch{vm.Registers[bx], vm.Registers[cx]})
+		fmt.Fprintln(os.Stderr, &BadMatch{vm.Registers[bx]})
 	}
 }
 
@@ -119,8 +119,8 @@ func (vm *VM) loop() {
 		case OP_RETURN:
 			return
 		case OP_ERR:
-			decodeAxBxCx(inst, &ax, &bx, &cx)
-			vm.handleError(ax, bx, cx)
+			decodeAxBx(inst, &ax, &bx)
+			vm.handleError(ax, bx)
 			return
 		case OP_JMP:
 			decodeAx(inst, &ax)
@@ -139,6 +139,9 @@ func (vm *VM) loop() {
 		case OP_LOADK:
 			decodeAxBx(inst, &ax, &bx)
 			vm.Registers[ax] = vm.Constants[bx]
+		case OP_ISA:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = Boolean(vm.Registers[bx].Type() == cx)
 		case OP_ADD:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			vm.Registers[ax] = vm.Registers[bx].Add(vm.Registers[cx])
@@ -160,9 +163,15 @@ func (vm *VM) loop() {
 		case OP_LTE:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			vm.Registers[ax] = Boolean(vm.Registers[bx].Lte(vm.Registers[cx]))
+		case OP_LEN:
+			decodeAxBx(inst, &ax, &bx)
+			vm.Registers[ax] = Integer(vm.Registers[bx].Len())
 		case OP_APPEND:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			vm.Registers[ax] = vm.Registers[bx].Append(vm.Registers[cx])
+		case OP_GET:
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			vm.Registers[ax] = vm.Registers[bx].Get(vm.Registers[cx])
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println(vm.Registers[ax])

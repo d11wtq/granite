@@ -18,5 +18,7 @@ type Value interface {
 	Eq(Value) bool
 	Lt(Value) bool
 	Lte(Value) bool
+	Len() uint64
 	Append(Value) Value
+	Get(Value) Value
 }

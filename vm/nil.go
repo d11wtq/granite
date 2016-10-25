@@ -41,6 +41,14 @@ func (*NilType) Lte(Value) bool {
 	return true
 }
 
+func (*NilType) Len() uint64 {
+	return 0
+}
+
 func (*NilType) Append(Value) Value {
+	return Nil
+}
+
+func (*NilType) Get(Value) Value {
 	return Nil
 }

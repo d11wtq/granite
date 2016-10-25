@@ -27,12 +27,9 @@ func (a *Vector) String() string {
 		return "[]"
 	}
 
-	var v vector.Value
-
-	elems := make([]string, a.cast().Count())
-	for i := uint32(0); i < a.cast().Count(); i++ {
-		v, _ = a.cast().Get(i)
-		elems[i] = v.(Value).String()
+	elems := make([]string, a.Len())
+	for i := uint64(0); i < a.Len(); i++ {
+		elems[i] = a.Get(Integer(i)).String()
 	}
 
 	return fmt.Sprintf("[ %s ]", strings.Join(elems, ", "))
@@ -66,6 +63,23 @@ func (*Vector) Lte(Value) bool {
 	return true
 }
 
+func (a *Vector) Len() uint64 {
+	return uint64(a.cast().Count())
+}
+
 func (a *Vector) Append(b Value) Value {
-	return (*Vector)((*vector.Vector)(a).Append(b))
+	return (*Vector)(a.cast().Append(b))
+}
+
+func (a *Vector) Get(b Value) Value {
+	switch t := b.(type) {
+	case Integer:
+		v, err := a.cast().Get(uint32(t))
+		if err != nil {
+			return Nil
+		}
+		return v.(Value)
+	default:
+		return Nil
+	}
 }

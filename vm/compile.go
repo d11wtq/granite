@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// FIXME: Ditch this and replace with AST -> CFG -> Code conversion.
+
 // Compile the given AST into bytecode.
 func Compile(prog ast.ASTNode) ([]byte, error) {
 	compiler := NewCompiler()
@@ -28,15 +30,14 @@ type Compiler struct {
 
 // Create a new bytecode compiler.
 func NewCompiler() *Compiler {
-	cmp := &Compiler{
+	regPool := NewRegisterPool(256)
+
+	return &Compiler{
 		Assembler: NewAssembler(),
 		LocalMap:  make(map[string]uint32),
-		RegPool:   NewRegisterPool(256),
+		RegPool:   regPool,
+		RegIdx:    regPool.Reserve(),
 	}
-
-	cmp.RegIdx = cmp.RegPool.Reserve()
-
-	return cmp
 }
 
 // Produce bytecode for the processed AST
@@ -108,24 +109,10 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 }
 
 func (c *Compiler) visitAssignment(node *ast.BinaryExpressionNode) {
-	id := node.Left.(*ast.IdentifierNode)
-	regX, ok := c.LocalMap[id.Name]
-	if ok == false {
-		c.LocalMap[id.Name] = c.RegPool.Reserve()
-		node.Right.Accept(c)
-		c.Assembler.AddInstruction(encodeAxBx(OP_MOVE, c.LocalMap[id.Name], c.RegIdx))
-	} else {
-		regA := c.RegIdx
-		regB := c.RegPool.Reserve()
-		c.RegIdx = regB
-		node.Right.Accept(c)
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_EQ, regA, regX, c.RegIdx))
-		c.Assembler.AddInstruction(encodeAxBx(OP_JMPIF, regA, 1))
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_ERR, E_BADMATCH, regX, c.RegIdx))
-		c.Assembler.AddInstruction(encodeAxBx(OP_MOVE, regA, c.RegIdx))
-		c.RegIdx = regA
-		c.RegPool.Release(regB)
-	}
+	node.Right.Accept(c)
+	regIdx := c.RegIdx
+	node.Left.Accept(NewMatchCompiler(c))
+	c.RegIdx = regIdx
 }
 
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
@@ -183,6 +170,10 @@ func (c *Compiler) VisitVector(node *ast.VectorNode) {
 		c.Assembler.AddInstruction(
 			encodeAxBxCx(OP_APPEND, regA, regA, c.RegIdx),
 		)
+
+		if c.Error != nil {
+			break
+		}
 	}
 
 	c.RegPool.Release(regB)

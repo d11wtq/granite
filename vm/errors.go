@@ -19,14 +19,12 @@ func (e NameError) Error() string {
 }
 
 type BadMatch struct {
-	Left  Value
 	Right Value
 }
 
 func (e *BadMatch) Error() string {
 	return fmt.Sprintf(
-		"*** BadMatch: no match for `%s = %s'",
-		e.Left.String(),
+		"*** BadMatch: no match for right-hand-side of expression `%s'",
 		e.Right.String(),
 	)
 }

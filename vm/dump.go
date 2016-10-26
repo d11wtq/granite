@@ -9,7 +9,7 @@ import (
 func Dump(vm *VM) {
 	var (
 		ax uint32
-		bx uint16
+		bx uint32
 		cx uint8
 	)
 

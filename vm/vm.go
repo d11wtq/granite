@@ -14,8 +14,6 @@ var ByteOrder = binary.LittleEndian
 type VM struct {
 	// Number of bytes loaded
 	BinSize int
-	// Raw bytecode to process
-	Code *bytes.Buffer
 	// Constants defined in the program
 	Constants []Value
 	// Virtual machine registers
@@ -29,14 +27,13 @@ type VM struct {
 //Create a new instance of the virtual machine.
 func NewVM(code []byte) *VM {
 	vm := &VM{
-		Code:         bytes.NewBuffer(code),
 		BinSize:      len(code),
 		Constants:    make([]Value, 0, 256),
 		Registers:    make([]Value, 256),
 		Instructions: make([]uint32, 0, 1024),
 		IP:           0,
 	}
-	vm.load()
+	vm.load(bytes.NewBuffer(code))
 	return vm
 }
 
@@ -45,12 +42,12 @@ func (vm *VM) Run() {
 	vm.loop()
 }
 
-func (vm *VM) load() {
-	vm.loadConstants()
-	vm.loadInstructions()
+func (vm *VM) load(b *bytes.Buffer) {
+	vm.loadConstants(b)
+	vm.loadInstructions(b)
 }
 
-func (vm *VM) loadConstants() {
+func (vm *VM) loadConstants(b *bytes.Buffer) {
 	var (
 		numConsts uint32
 		valueType uint8
@@ -59,23 +56,23 @@ func (vm *VM) loadConstants() {
 		boolValue uint8
 	)
 
-	binary.Read(vm.Code, ByteOrder, &numConsts)
+	binary.Read(b, ByteOrder, &numConsts)
 	for numConsts > 0 {
-		binary.Read(vm.Code, ByteOrder, &valueType)
+		binary.Read(b, ByteOrder, &valueType)
 		switch valueType {
 		case V_NIL:
 			vm.Constants = append(vm.Constants, Nil)
 		case V_INT:
-			binary.Read(vm.Code, ByteOrder, &intValue)
+			binary.Read(b, ByteOrder, &intValue)
 			vm.Constants = append(vm.Constants, Integer(intValue))
 		case V_BLN:
-			binary.Read(vm.Code, ByteOrder, &boolValue)
+			binary.Read(b, ByteOrder, &boolValue)
 			vm.Constants = append(vm.Constants, Boolean(boolValue != 0))
 		case V_STR:
-			binary.Read(vm.Code, ByteOrder, &strLength)
-			b := make([]byte, strLength)
-			vm.Code.Read(b)
-			vm.Constants = append(vm.Constants, String(b))
+			binary.Read(b, ByteOrder, &strLength)
+			s := make([]byte, strLength)
+			b.Read(s)
+			vm.Constants = append(vm.Constants, String(s))
 		case V_VEC:
 			vm.Constants = append(vm.Constants, EmptyVector)
 		}
@@ -83,21 +80,21 @@ func (vm *VM) loadConstants() {
 	}
 }
 
-func (vm *VM) loadInstructions() {
+func (vm *VM) loadInstructions(b *bytes.Buffer) {
 	var (
 		numInsts uint64
 		inst     uint32
 	)
 
-	binary.Read(vm.Code, ByteOrder, &numInsts)
+	binary.Read(b, ByteOrder, &numInsts)
 	for numInsts > 0 {
-		binary.Read(vm.Code, ByteOrder, &inst)
+		binary.Read(b, ByteOrder, &inst)
 		vm.Instructions = append(vm.Instructions, inst)
 		numInsts--
 	}
 }
 
-func (vm *VM) handleError(reason uint32, bx uint16) {
+func (vm *VM) handleError(reason uint32, bx uint32) {
 	switch reason {
 	case E_BADMATCH:
 		fmt.Fprintln(os.Stderr, &BadMatch{vm.Registers[bx]})
@@ -108,7 +105,7 @@ func (vm *VM) loop() {
 	var (
 		inst uint32
 		ax   uint32
-		bx   uint16
+		bx   uint32
 		cx   uint8
 	)
 

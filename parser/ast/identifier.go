@@ -1,13 +1,14 @@
 package ast
 
-//Variable names
+// Variable names
 type IdentifierNode struct {
-	Name string
+	Name     string
+	Register uint8
 }
 
 // Return a new identifier with name
 func NewIdentifier(name string) *IdentifierNode {
-	return &IdentifierNode{name}
+	return &IdentifierNode{name, 0}
 }
 
 func (node *IdentifierNode) Accept(visitor ASTVisitor) {
@@ -15,4 +16,4 @@ func (node *IdentifierNode) Accept(visitor ASTVisitor) {
 }
 
 // The special "blank" value
-var Underscore = &IdentifierNode{"_"}
+var Underscore = &IdentifierNode{"_", 0}

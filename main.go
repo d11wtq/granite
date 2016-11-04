@@ -21,7 +21,7 @@ func main() {
 		return
 	}
 
-	err, result := parser.Parse(
+	result, err := parser.Parse(
 		bufio.NewReader(file),
 		os.Args[1],
 	)

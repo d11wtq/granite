@@ -46,7 +46,7 @@ func (o Jmp) Resolve(a *ASM, i uint64) uint32 {
 	if ok == false {
 		panic(fmt.Sprintf("invalid JMP label `%s'", string(o)))
 	}
-	return uint32(j - i)
+	return uint32(j - i) // could wrap, and that's fine
 }
 
 // The location of a constant in the constants pool.

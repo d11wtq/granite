@@ -12,15 +12,15 @@ import (
 
 // Parse source and return the AST, or nil on error.
 // Errors indicate the problem line and column in the source.
-func Parse(source io.RuneScanner, filename string) (error, ast.ASTNode) {
+func Parse(source io.RuneScanner, filename string) (ast.ASTNode, error) {
 	lexer := BijouNewLexer(source, filename)
 
 	BijouErrorVerbose = true
 	if BijouParse(lexer) > 0 {
-		return &BijouParseError{lexer}, nil
+		return nil, &BijouParseError{lexer}
 	}
 
-	return nil, lexer.Result()
+	return lexer.Result(), nil
 }
 
 %}

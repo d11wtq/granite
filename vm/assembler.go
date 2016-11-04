@@ -3,6 +3,7 @@ package vm
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 // Convert boolean v to a uint8.
@@ -14,64 +15,131 @@ func btoi(v bool) uint8 {
 	return 0
 }
 
-// Bytecode assember for Bijou code
-type Assembler struct {
-	// Program constant pool
-	Constants []Value
-	// List of executable instructions
-	Instructions []uint32
-	// Locations of constants in the constant pool
-	ConstantMap map[Value]uint32
+// Operand of the three address instruction.
+// Resolution of the actual register value is defered to code gen time.
+type Operand interface {
+	// Resolve this operand to a specific register value.
+	// The arguments are the assember and the IP of this instruction.
+	Resolve(*ASM, uint64) uint32
 }
 
-// Create a new bytecode assembler.
-func NewAssembler() *Assembler {
-	return &Assembler{
-		Constants:    make([]Value, 0),
-		Instructions: make([]uint32, 0),
-		ConstantMap:  make(map[Value]uint32),
+// 32-bit instruction.
+// Resolution of the actual register values is defered to code gen time.
+type Instruction interface {
+	// Resolve the operands in this instruction to compute its final value.
+	// The arguments are the assember and the IP of this instruction.
+	Resolve(*ASM, uint64) uint32
+}
+
+// A fixed operand with a value known ahead of time.
+type Reg uint32
+
+func (o Reg) Resolve(*ASM, uint64) uint32 {
+	return uint32(o)
+}
+
+// A jmp offset to a label, not known until code gen time.
+type Jmp string
+
+func (o Jmp) Resolve(a *ASM, i uint64) uint32 {
+	j, ok := a.Labels[string(o)]
+	if ok == false {
+		panic(fmt.Sprintf("invalid JMP label `%s'", string(o)))
+	}
+	return uint32(j - i)
+}
+
+// The location of a constant in the constants pool.
+type Constant struct {
+	v Value
+}
+
+func (o *Constant) Resolve(a *ASM, i uint64) uint32 {
+	return a.DefConst(o.v)
+}
+
+// A three-operand instruction.
+type AxBxCx struct {
+	op      uint32
+	a, b, c Operand
+}
+
+func (o *AxBxCx) Resolve(a *ASM, i uint64) uint32 {
+	return encodeAxBxCx(
+		o.op,
+		o.a.Resolve(a, i),
+		o.b.Resolve(a, i),
+		o.c.Resolve(a, i),
+	)
+}
+
+// A two-operand instruction.
+type AxBx struct {
+	op   uint32
+	a, b Operand
+}
+
+func (o *AxBx) Resolve(a *ASM, i uint64) uint32 {
+	return encodeAxBx(
+		o.op,
+		o.a.Resolve(a, i),
+		o.b.Resolve(a, i),
+	)
+}
+
+// A single operand instruction.
+type Ax struct {
+	op uint32
+	a  Operand
+}
+
+func (o *Ax) Resolve(a *ASM, i uint64) uint32 {
+	return encodeAx(
+		o.op,
+		o.a.Resolve(a, i),
+	)
+}
+
+// An assembler for producing register machine byte code.
+// The interface closely maps to what the textual ASM form would look like.
+type ASM struct {
+	Constants    []Value
+	Instructions []Instruction
+	Labels       map[string]uint64
+	constMap     map[Value]uint32
+	labelNum     uint32
+}
+
+// Create a new assembler.
+func NewASM() *ASM {
+	return &ASM{
+		make([]Value, 0, 256),
+		make([]Instruction, 0, 1024),
+		make(map[string]uint64),
+		make(map[Value]uint32),
+		0,
 	}
 }
 
-// Produce bytecode from the built ASM.
-func (a *Assembler) GetCode() []byte {
+// Generate a unique name for a label within this ASM.
+func (asm *ASM) GenLabel() string {
+	asm.labelNum++
+	return fmt.Sprintf("label%d", asm.labelNum)
+}
+
+// Generate byte-code for the assembled program.
+// All instructions defined are resolved and converted to a []byte.
+func (asm *ASM) GetCode() []byte {
 	b := new(bytes.Buffer)
-	a.encodeConstants(b)
-	a.encodeInstructions(b)
-	return b.Bytes()
-}
 
-// Add a constant for use with LOADK.
-// The index of the constant in the pool is returned.
-func (a *Assembler) AddConstant(v Value) uint32 {
-	if _, ok := a.ConstantMap[v]; ok == false {
-		a.ConstantMap[v] = uint32(len(a.Constants))
-		a.Constants = append(a.Constants, v)
+	binary.Write(b, ByteOrder, uint64(len(asm.Instructions)))
+
+	for x, i := range asm.Instructions {
+		binary.Write(b, ByteOrder, i.Resolve(asm, uint64(x)))
 	}
 
-	return a.ConstantMap[v]
-}
-
-// Append an instruction to the list of instructions.
-func (a *Assembler) AddInstruction(inst uint32) {
-	a.Instructions = append(a.Instructions, inst)
-}
-
-// Append a placeholder instruction and return its location.
-func (a *Assembler) ReserveInstruction(op uint32) int {
-	idx := len(a.Instructions)
-	a.AddInstruction(encodeAx(op, 0))
-	return idx
-}
-
-// Replace an existing instruction with another.
-func (a *Assembler) SetInstruction(idx int, inst uint32) {
-	a.Instructions[idx] = inst
-}
-
-func (a *Assembler) encodeConstants(b *bytes.Buffer) {
-	binary.Write(b, ByteOrder, uint32(len(a.Constants)))
-	for _, v := range a.Constants {
+	binary.Write(b, ByteOrder, uint32(len(asm.Constants)))
+	for _, v := range asm.Constants {
 		binary.Write(b, ByteOrder, v.Type())
 		switch t := v.(type) {
 		case *NilType, *Vector:
@@ -86,15 +154,118 @@ func (a *Assembler) encodeConstants(b *bytes.Buffer) {
 			b.Write(s)
 		}
 	}
+
+	return b.Bytes()
 }
 
-func (a *Assembler) encodeInstructions(b *bytes.Buffer) {
-	binary.Write(b, ByteOrder, uint64(len(a.Instructions)+2))
-
-	for _, inst := range a.Instructions {
-		binary.Write(b, ByteOrder, inst)
+// Define a constant value in the constant pool and return its index.
+// Constants are never duplicated.
+func (asm *ASM) DefConst(v Value) uint32 {
+	if _, ok := asm.constMap[v]; ok == false {
+		asm.constMap[v] = uint32(len(asm.Constants))
+		asm.Constants = append(asm.Constants, v)
 	}
 
-	binary.Write(b, ByteOrder, encodeAx(OP_PRINT, 0))
-	binary.Write(b, ByteOrder, encodeAx(OP_RETURN, 0))
+	return asm.constMap[v]
+}
+
+// Define a label at the current position in the program.
+// Jmp's can refer to this label to cleanly compute offsets at code gen time.
+func (asm *ASM) SetLabel(label string) {
+	asm.Labels[label] = uint64(len(asm.Instructions))
+}
+
+// Return from the current procedure.
+// In the main procedure (global scope), this causes the VM to exit.
+func (asm *ASM) Return() {
+	asm.addInstruction(&Ax{OP_RETURN, Reg(0)})
+}
+
+// Halt the VM with an error of errType and arg.
+func (asm *ASM) Err(errType, arg Operand) {
+	asm.addInstruction(&AxBx{OP_ERR, errType, arg})
+}
+
+// Adjust the instruction pointer by offset.
+func (asm *ASM) Jmp(offset Operand) {
+	asm.addInstruction(&Ax{OP_JMP, offset})
+}
+
+// Adjust the instruction pointer by offset if the value in test is truthy,
+func (asm *ASM) JmpIf(test, offset Operand) {
+	asm.addInstruction(&AxBx{OP_JMPIF, test, offset})
+}
+
+// Copy the value in register a to register b.
+func (asm *ASM) Move(a, b Operand) {
+	asm.addInstruction(&AxBx{OP_MOVE, a, b})
+}
+
+// Load the constant idx from the constant pool to register dst.
+func (asm *ASM) LoadK(dst, idx Operand) {
+	asm.addInstruction(&AxBx{OP_LOADK, dst, idx})
+}
+
+// Test if the value in register test is of type t, placing the result in dst.
+func (asm *ASM) IsA(dst, test, t Operand) {
+	asm.addInstruction(&AxBxCx{OP_ISA, dst, test, t})
+}
+
+// Add the values in registers a and b, putting the result in dst.
+func (asm *ASM) Add(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_ADD, dst, a, b})
+}
+
+// Subtract the values in registers a and b, putting the result in dst.
+func (asm *ASM) Sub(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_SUB, dst, a, b})
+}
+
+// Multiply the values in registers a and b, putting the result in dst.
+func (asm *ASM) Mul(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_MUL, dst, a, b})
+}
+
+// Divide the values in registers a and b, putting the result in dst.
+func (asm *ASM) Div(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_DIV, dst, a, b})
+}
+
+// Compare the values in registers a and b, putting the result in dst.
+func (asm *ASM) Eq(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_EQ, dst, a, b})
+}
+
+// Compare the values in registers a and b, putting the result in dst.
+func (asm *ASM) Lt(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_LT, dst, a, b})
+}
+
+// Compare the values in registers a and b, putting the result in dst.
+func (asm *ASM) Lte(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_LTE, dst, a, b})
+}
+
+// Get the length of the value in register test and place the result in dst.
+func (asm *ASM) Len(dst, test Operand) {
+	asm.addInstruction(&AxBx{OP_LEN, dst, test})
+}
+
+// Append the value in register b to the vector in register a, putting the result in dst.
+func (asm *ASM) Append(dst, a, b Operand) {
+	asm.addInstruction(&AxBxCx{OP_APPEND, dst, a, b})
+}
+
+// Get the element looked up by the value in register k from the map or vector in register a.
+func (asm *ASM) Get(dst, a, k Operand) {
+	asm.addInstruction(&AxBxCx{OP_GET, dst, a, k})
+}
+
+// Dump the value in register a to stdout (debug use).
+func (asm *ASM) Print(a Operand) {
+	asm.addInstruction(&Ax{OP_PRINT, a})
+}
+
+func (asm *ASM) addInstruction(i Instruction) {
+	asm.Instructions = append(asm.Instructions, i)
 }

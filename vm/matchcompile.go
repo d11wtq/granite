@@ -19,23 +19,24 @@ func NewMatchCompiler(c *Compiler) *MatchCompiler {
 
 func (c *MatchCompiler) assignLocalVariable(node *ast.IdentifierNode) {
 	c.Compiler.LocalMap[node.Name] = c.Compiler.RegPool.Reserve()
-	c.Compiler.Assembler.AddInstruction(
-		encodeAxBx(OP_MOVE, c.Compiler.LocalMap[node.Name], c.RegIdx),
-	)
+	c.Compiler.Assembler.Move(Reg(c.Compiler.LocalMap[node.Name]), Reg(c.RegIdx))
 }
 
 func (c *MatchCompiler) assertEq(node ast.ASTNode) {
-	regA := c.Compiler.RegIdx
-	regB := c.Compiler.RegPool.Reserve()
-	regC := c.Compiler.RegPool.Reserve()
+	var (
+		regA = c.Compiler.RegIdx
+		regB = c.Compiler.RegPool.Reserve()
+		regC = c.Compiler.RegPool.Reserve()
+		isEq = c.Compiler.Assembler.GenLabel()
+	)
+
 	c.Compiler.RegIdx = regB
 	node.Accept(c.Compiler)
 
-	c.Compiler.Assembler.AddInstruction(
-		encodeAxBxCx(OP_EQ, regC, c.Compiler.RegIdx, c.RegIdx),
-	)
-	c.Compiler.Assembler.AddInstruction(encodeAxBx(OP_JMPIF, regC, 1))
+	c.Compiler.Assembler.Eq(Reg(regC), Reg(c.Compiler.RegIdx), Reg(c.RegIdx))
+	c.Compiler.Assembler.JmpIf(Reg(regC), Jmp(isEq))
 	c.errorBadMatch()
+	c.Compiler.Assembler.SetLabel(isEq)
 
 	c.Compiler.RegPool.Release(regB)
 	c.Compiler.RegPool.Release(regC)
@@ -43,9 +44,7 @@ func (c *MatchCompiler) assertEq(node ast.ASTNode) {
 }
 
 func (c *MatchCompiler) errorBadMatch() {
-	c.Compiler.Assembler.AddInstruction(
-		encodeAxBx(OP_ERR, E_BADMATCH, c.RegIdx),
-	)
+	c.Compiler.Assembler.Err(Reg(E_BADMATCH), Reg(c.RegIdx))
 }
 
 func (c *MatchCompiler) VisitNil(node *ast.NilNode) {
@@ -95,24 +94,28 @@ func (c *MatchCompiler) VisitUnaryExpression(node *ast.UnaryExpressionNode) {
 }
 
 func (c *MatchCompiler) VisitVector(node *ast.VectorNode) {
-	regX := c.Compiler.RegIdx
-	regA := c.Compiler.RegPool.Reserve()
-	regB := c.Compiler.RegPool.Reserve()
+	var (
+		regX   = c.Compiler.RegIdx
+		regA   = c.Compiler.RegPool.Reserve()
+		regB   = c.Compiler.RegPool.Reserve()
+		typeOk = c.Compiler.Assembler.GenLabel()
+		lenOk  = c.Compiler.Assembler.GenLabel()
+	)
 
 	// Make sure RHS is a Vector too
-	c.Compiler.Assembler.AddInstruction(
-		encodeAxBxCx(OP_ISA, regA, c.RegIdx, uint32(V_VEC)),
-	)
-	c.Compiler.Assembler.AddInstruction(encodeAxBx(OP_JMPIF, regA, 1))
+	c.Compiler.Assembler.IsA(Reg(regA), Reg(c.RegIdx), Reg(V_VEC))
+	c.Compiler.Assembler.JmpIf(Reg(regA), Jmp(typeOk))
 	c.errorBadMatch()
+	c.Compiler.Assembler.SetLabel(typeOk)
 
 	// Make sure RHS is the same length
-	c.Compiler.Assembler.AddInstruction(encodeAxBx(OP_LEN, regA, c.RegIdx))
+	c.Compiler.Assembler.Len(Reg(regA), Reg(c.RegIdx))
 	c.Compiler.RegIdx = regB
 	c.Compiler.loadConstant(Integer(len(node.Elements)))
-	c.Compiler.Assembler.AddInstruction(encodeAxBxCx(OP_EQ, regA, regA, regB))
-	c.Compiler.Assembler.AddInstruction(encodeAxBx(OP_JMPIF, regA, 1))
+	c.Compiler.Assembler.Eq(Reg(regA), Reg(regA), Reg(regB))
+	c.Compiler.Assembler.JmpIf(Reg(regA), Jmp(lenOk))
 	c.errorBadMatch()
+	c.Compiler.Assembler.SetLabel(lenOk)
 
 	c.Compiler.RegPool.Release(regB)
 
@@ -120,8 +123,10 @@ func (c *MatchCompiler) VisitVector(node *ast.VectorNode) {
 	for i, e := range node.Elements {
 		c.Compiler.RegIdx = regA
 		c.Compiler.loadConstant(Integer(i))
-		c.Compiler.Assembler.AddInstruction(
-			encodeAxBxCx(OP_GET, regA, c.RegIdx, c.Compiler.RegIdx),
+		c.Compiler.Assembler.Get(
+			Reg(regA),
+			Reg(c.RegIdx),
+			Reg(c.Compiler.RegIdx),
 		)
 		e.Accept(NewMatchCompiler(c.Compiler))
 	}

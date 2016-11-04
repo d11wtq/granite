@@ -43,8 +43,8 @@ func (vm *VM) Run() {
 }
 
 func (vm *VM) load(b *bytes.Buffer) {
-	vm.loadConstants(b)
 	vm.loadInstructions(b)
+	vm.loadConstants(b)
 }
 
 func (vm *VM) loadConstants(b *bytes.Buffer) {
@@ -109,6 +109,7 @@ func (vm *VM) loop() {
 		cx   uint8
 	)
 
+Loop:
 	for {
 		inst = vm.Instructions[vm.IP]
 
@@ -122,13 +123,14 @@ func (vm *VM) loop() {
 		case OP_JMP:
 			decodeAx(inst, &ax)
 			vm.IP += int64(ax)
+			continue Loop
 		case OP_JMPIF:
 			decodeAxBx(inst, &ax, &bx)
 			switch vm.Registers[ax] {
 			case Nil, Boolean(false):
-				vm.IP += 0 // noop
 			default:
 				vm.IP += int64(bx)
+				continue Loop
 			}
 		case OP_MOVE:
 			decodeAxBx(inst, &ax, &bx)

@@ -17,7 +17,7 @@ func Compile(prog ast.ASTNode) ([]byte, error) {
 // Bytecode compiler for Bijou code
 type Compiler struct {
 	// Bytecode assembler
-	Assembler *Assembler
+	Assembler *ASM
 	// Location of local variables in registers
 	LocalMap map[string]uint32
 	// Register where result should be kept
@@ -33,7 +33,7 @@ func NewCompiler() *Compiler {
 	regPool := NewRegisterPool(256)
 
 	return &Compiler{
-		Assembler: NewAssembler(),
+		Assembler: NewASM(),
 		LocalMap:  make(map[string]uint32),
 		RegPool:   regPool,
 		RegIdx:    regPool.Reserve(),
@@ -46,18 +46,19 @@ func (c *Compiler) GetCode() ([]byte, error) {
 		return nil, c.Error
 	}
 
+	c.Assembler.Print(Reg(0))
+	c.Assembler.Return()
+
 	return c.Assembler.GetCode(), nil
 }
 
 func (c *Compiler) loadConstant(v Value) {
-	c.Assembler.AddInstruction(
-		encodeAxBx(OP_LOADK, c.RegIdx, c.Assembler.AddConstant(v)),
-	)
+	c.Assembler.LoadK(Reg(c.RegIdx), &Constant{v})
 }
 
 func (c *Compiler) returnError(err error) {
 	c.Error = err
-	c.Assembler.AddInstruction(encodeAx(OP_RETURN, 0)) // safeguard-only
+	c.Assembler.Return()
 }
 
 func (c *Compiler) VisitNil(node *ast.NilNode) {
@@ -102,7 +103,7 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 		}
 
 		if c.RegIdx != regIdx && i == tailIdx {
-			c.Assembler.AddInstruction(encodeAxBx(OP_MOVE, regIdx, c.RegIdx))
+			c.Assembler.Move(Reg(regIdx), Reg(c.RegIdx))
 		}
 		c.RegIdx = regIdx
 	}
@@ -132,23 +133,23 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 
 	switch node.Op {
 	case ast.OP_ADD:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_ADD, regA, regB, c.RegIdx))
+		c.Assembler.Add(Reg(regA), Reg(regB), Reg(c.RegIdx))
 	case ast.OP_MIN:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_SUB, regA, regB, c.RegIdx))
+		c.Assembler.Sub(Reg(regA), Reg(regB), Reg(c.RegIdx))
 	case ast.OP_MUL:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_MUL, regA, regB, c.RegIdx))
+		c.Assembler.Mul(Reg(regA), Reg(regB), Reg(c.RegIdx))
 	case ast.OP_DIV:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_DIV, regA, regB, c.RegIdx))
+		c.Assembler.Div(Reg(regA), Reg(regB), Reg(c.RegIdx))
 	case ast.OP_EQL:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_EQ, regA, regB, c.RegIdx))
+		c.Assembler.Eq(Reg(regA), Reg(regB), Reg(c.RegIdx))
 	case ast.OP_LT:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_LT, regA, regB, c.RegIdx))
+		c.Assembler.Lt(Reg(regA), Reg(regB), Reg(c.RegIdx))
 	case ast.OP_GT:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_LT, regA, c.RegIdx, regB))
+		c.Assembler.Lt(Reg(regA), Reg(c.RegIdx), Reg(regB))
 	case ast.OP_LTE:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_LTE, regA, regB, c.RegIdx))
+		c.Assembler.Lte(Reg(regA), Reg(regB), Reg(c.RegIdx))
 	case ast.OP_GTE:
-		c.Assembler.AddInstruction(encodeAxBxCx(OP_LTE, regA, c.RegIdx, regB))
+		c.Assembler.Lte(Reg(regA), Reg(c.RegIdx), Reg(regB))
 	default:
 		panic(fmt.Sprintf("Unhandled binary operator: 0x%x", node.Op))
 	}
@@ -167,9 +168,7 @@ func (c *Compiler) VisitVector(node *ast.VectorNode) {
 	for _, e := range node.Elements {
 		c.RegIdx = regB
 		e.Accept(c)
-		c.Assembler.AddInstruction(
-			encodeAxBxCx(OP_APPEND, regA, regA, c.RegIdx),
-		)
+		c.Assembler.Append(Reg(regA), Reg(regA), Reg(c.RegIdx))
 
 		if c.Error != nil {
 			break
@@ -197,26 +196,19 @@ func (c *Compiler) VisitKeyAccess(node *ast.KeyAccessNode) {
 
 func (c *Compiler) VisitIfThenElse(node *ast.IfThenElseNode) {
 	var (
-		regIdx         = c.RegIdx
-		jmpIf, endElse int
+		regIdx = c.RegIdx
+		thenL  = c.Assembler.GenLabel()
+		doneL  = c.Assembler.GenLabel()
 	)
 
 	node.Expression.Accept(c)
 
-	jmpIf = c.Assembler.ReserveInstruction(OP_JMPIF)
+	c.Assembler.JmpIf(Reg(regIdx), Jmp(thenL))
 	node.Else.Accept(c)
-	endElse = c.Assembler.ReserveInstruction(OP_JMP)
+	c.Assembler.Jmp(Jmp(doneL))
+	c.Assembler.SetLabel(thenL)
 	node.Then.Accept(c)
-
-	c.Assembler.SetInstruction(
-		jmpIf,
-		encodeAxBx(OP_JMPIF, regIdx, uint32(endElse-jmpIf)),
-	)
-
-	c.Assembler.SetInstruction(
-		endElse,
-		encodeAx(OP_JMP, uint32(len(c.Assembler.Instructions)-1-endElse)),
-	)
+	c.Assembler.SetLabel(doneL)
 }
 
 func (c *Compiler) VisitCaseExpression(node *ast.CaseExpressionNode) {

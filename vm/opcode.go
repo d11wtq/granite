@@ -12,9 +12,9 @@ const (
 	OP_SUB
 	OP_MUL
 	OP_DIV
+	OP_EQ
 	OP_LT
 	OP_LTE
-	OP_EQ
 	OP_LEN
 	OP_APPEND
 	OP_GET

@@ -16,13 +16,18 @@ type Compiler struct {
 	Assembler *ASM
 	// Location of the result
 	Result Operand
+	// Map of local vars to registers
+	Locals map[string]Operand
 	// Compile error
 	Error error
 }
 
 // Create a new bytecode compiler.
 func NewCompiler() *Compiler {
-	return &Compiler{Assembler: NewASM()}
+	return &Compiler{
+		Assembler: NewASM(),
+		Locals:    make(map[string]Operand),
+	}
 }
 
 func (c *Compiler) Visit(node ast.ASTNode) *Compiler {
@@ -56,6 +61,21 @@ func (c *Compiler) returnError(err error) {
 	c.Assembler.Return()
 }
 
+func (c *Compiler) visitAssign(node *ast.BinaryExpressionNode) {
+	c.setLocal(
+		node.Left.(*ast.IdentifierNode).Name,
+		c.Visit(node.Right).Result,
+	)
+}
+
+func (c *Compiler) setLocal(name string, reg Operand) {
+	c.Locals[name] = reg
+}
+
+func (c *Compiler) getLocal(name string) Operand {
+	return c.Locals[name]
+}
+
 func (c *Compiler) VisitNil(node *ast.NilNode) {
 	c.loadConstant(Nil)
 }
@@ -79,7 +99,7 @@ func (c *Compiler) VisitSymbol(node *ast.SymbolNode) {
 }
 
 func (c *Compiler) VisitIdentifier(node *ast.IdentifierNode) {
-	c.Result = Var(node.Name)
+	c.Result = c.getLocal(node.Name)
 }
 
 func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
@@ -91,6 +111,11 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 }
 
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
+	if node.Op == ast.OP_ASS {
+		c.visitAssign(node)
+		return
+	}
+
 	var (
 		a = c.Visit(node.Left).Result
 		b = c.Visit(node.Right).Result

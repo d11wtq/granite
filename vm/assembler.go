@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"sort"
 )
 
 // Convert boolean v to a uint8.
@@ -29,6 +30,10 @@ type Instruction interface {
 	// Resolve the operands in this instruction to compute its final value.
 	// The arguments are the assember and the IP of this instruction.
 	Resolve(*ASM, uint64) uint32
+	// If the target operand is a Var, return it
+	DefinedVar() Var
+	// Return the operands that are Vars
+	ActiveVars() []Var
 }
 
 // A fixed operand with a value known ahead of time.
@@ -47,6 +52,13 @@ func (o Jmp) Resolve(a *ASM, i uint64) uint32 {
 		panic(fmt.Sprintf("invalid JMP label `%s'", string(o)))
 	}
 	return uint32(j - i) // could wrap, and that's fine
+}
+
+// Reference to a variable, resolved to a register at code gen time.
+type Var string
+
+func (o Var) Resolve(a *ASM, i uint64) uint32 {
+	return a.Locals[o]
 }
 
 // The location of a constant in the constants pool.
@@ -73,6 +85,32 @@ func (o *AxBxCx) Resolve(a *ASM, i uint64) uint32 {
 	)
 }
 
+func (o *AxBxCx) DefinedVar() Var {
+	if v, ok := o.a.(Var); ok == true {
+		return v
+	}
+
+	return Var("")
+}
+
+func (o *AxBxCx) ActiveVars() []Var {
+	b, bok := o.b.(Var)
+	c, cok := o.c.(Var)
+
+	if bok || cok {
+		v := make([]Var, 0, 2)
+		if bok {
+			v = append(v, b)
+		}
+		if cok {
+			v = append(v, c)
+		}
+		return v
+	}
+
+	return []Var(nil)
+}
+
 // A two-operand instruction.
 type AxBx struct {
 	op   uint32
@@ -85,6 +123,24 @@ func (o *AxBx) Resolve(a *ASM, i uint64) uint32 {
 		o.a.Resolve(a, i),
 		o.b.Resolve(a, i),
 	)
+}
+
+func (o *AxBx) DefinedVar() Var {
+	if v, ok := o.a.(Var); ok == true {
+		return v
+	}
+
+	return Var("")
+}
+
+func (o *AxBx) ActiveVars() []Var {
+	b, bok := o.b.(Var)
+
+	if bok {
+		return []Var{b}
+	}
+
+	return []Var(nil)
 }
 
 // A single operand instruction.
@@ -100,12 +156,27 @@ func (o *Ax) Resolve(a *ASM, i uint64) uint32 {
 	)
 }
 
+func (o *Ax) DefinedVar() Var {
+	return Var("")
+}
+
+func (o *Ax) ActiveVars() []Var {
+	a, aok := o.a.(Var)
+
+	if aok {
+		return []Var{a}
+	}
+
+	return []Var(nil)
+}
+
 // An assembler for producing register machine byte code.
 // The interface closely maps to what the textual ASM form would look like.
 type ASM struct {
 	Constants    []Value
 	Instructions []Instruction
 	Labels       map[string]uint64
+	Locals       map[Var]uint32
 	constMap     map[Value]uint32
 	labelNum     uint32
 }
@@ -116,6 +187,7 @@ func NewASM() *ASM {
 		make([]Value, 0, 256),
 		make([]Instruction, 0, 1024),
 		make(map[string]uint64),
+		make(map[Var]uint32),
 		make(map[Value]uint32),
 		0,
 	}
@@ -124,20 +196,24 @@ func NewASM() *ASM {
 // Generate a unique name for a label within this ASM.
 func (asm *ASM) GenLabel() string {
 	asm.labelNum++
-	return fmt.Sprintf("label%d", asm.labelNum)
+	return fmt.Sprintf(".label%d", asm.labelNum)
 }
 
 // Generate byte-code for the assembled program.
 // All instructions defined are resolved and converted to a []byte.
 func (asm *ASM) GetCode() []byte {
+	asm.allocateLocals()
+
 	b := new(bytes.Buffer)
 
+	// Write instructions
 	binary.Write(b, ByteOrder, uint64(len(asm.Instructions)))
 
 	for x, i := range asm.Instructions {
 		binary.Write(b, ByteOrder, i.Resolve(asm, uint64(x)))
 	}
 
+	// Write constants
 	binary.Write(b, ByteOrder, uint32(len(asm.Constants)))
 	for _, v := range asm.Constants {
 		binary.Write(b, ByteOrder, v.Type())
@@ -268,4 +344,66 @@ func (asm *ASM) Print(a Operand) {
 
 func (asm *ASM) addInstruction(i Instruction) {
 	asm.Instructions = append(asm.Instructions, i)
+}
+
+// Live Interval for a variable
+type interval struct {
+	beg, end int
+	register uint32
+}
+
+// Sorting algorithm representation
+type byEnd []*interval
+
+func (a byEnd) Len() int {
+	return len(a)
+}
+
+func (a byEnd) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a byEnd) Less(i, j int) bool {
+	return a[j].end < a[i].end
+}
+
+func (asm *ASM) allocateLocals() {
+	// http://web.cs.ucla.edu/~palsberg/course/cs132/linearscan.pdf
+
+	var (
+		liveIntervals = make([]*interval, 0, 256)
+		active        = make([]*interval, 0, 256)
+		localMap      = make(map[Var]int)
+		pool          = NewRegisterPool(256)
+	)
+
+	for k, i := range asm.Instructions {
+		if x := i.DefinedVar(); x != Var("") {
+			localMap[x] = len(liveIntervals)
+			liveIntervals = append(liveIntervals, &interval{k, k, 0})
+		}
+
+		for _, x := range i.ActiveVars() {
+			liveIntervals[localMap[x]].end = k
+		}
+	}
+
+	for _, i := range liveIntervals {
+		for _, j := range active {
+			if j.end >= i.beg {
+				break
+			}
+
+			active = active[1:]
+			pool.Release(j.register)
+		}
+
+		i.register = pool.Reserve()
+		active = append(active, i)
+		sort.Sort(byEnd(active))
+	}
+
+	for x, k := range localMap {
+		asm.Locals[x] = liveIntervals[k].register
+	}
 }

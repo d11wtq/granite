@@ -364,7 +364,7 @@ func (a byEnd) Swap(i, j int) {
 }
 
 func (a byEnd) Less(i, j int) bool {
-	return a[j].end < a[i].end
+	return a[i].end < a[j].end
 }
 
 func (asm *ASM) allocateLocals() {

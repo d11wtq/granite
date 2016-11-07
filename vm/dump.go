@@ -34,6 +34,9 @@ func Dump(vm *VM) {
 		case OP_ERR:
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  ERR", ax, bx)
+		case OP_ASSERT:
+			decodeAxBx(inst, &ax, &bx)
+			fmt.Println("  ASSERT", ax, bx)
 		case OP_JMP:
 			decodeAx(inst, &ax)
 			fmt.Println("  JMP", ax)

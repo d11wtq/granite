@@ -120,6 +120,12 @@ Loop:
 			decodeAxBx(inst, &ax, &bx)
 			vm.handleError(ax, bx)
 			return
+		case OP_ASSERT:
+			decodeAxBx(inst, &ax, &bx)
+			if !vm.Registers[ax].Eq(vm.Registers[bx]) {
+				fmt.Fprintln(os.Stderr, &BadMatch{vm.Registers[bx]})
+				return
+			}
 		case OP_JMP:
 			decodeAx(inst, &ax)
 			vm.IP += int64(ax)

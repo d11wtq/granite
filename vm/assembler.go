@@ -262,6 +262,11 @@ func (asm *ASM) Err(errType, arg Operand) {
 	asm.addInstruction(&AxBx{OP_ERR, errType, arg})
 }
 
+// Assert two registers are equal, halt with a BadMatch if not
+func (asm *ASM) Assert(a, b Operand) {
+	asm.addInstruction(&AxBx{OP_ASSERT, a, b})
+}
+
 // Adjust the instruction pointer by offset.
 func (asm *ASM) Jmp(offset Operand) {
 	asm.addInstruction(&Ax{OP_JMP, offset})

@@ -2,7 +2,6 @@ package vm
 
 import (
 	"../parser/ast"
-	"fmt"
 )
 
 // Compile the given AST into bytecode.
@@ -13,7 +12,7 @@ func Compile(prog ast.ASTNode) ([]byte, error) {
 // Bytecode compiler for Bijou code
 type Compiler struct {
 	// Bytecode assembler
-	Assembler *ASM
+	ASM *ASM
 	// Location of the result
 	Result Operand
 	// Map of local vars to registers
@@ -25,11 +24,14 @@ type Compiler struct {
 // Create a new bytecode compiler.
 func NewCompiler() *Compiler {
 	return &Compiler{
-		Assembler: NewASM(),
-		Locals:    make(map[string]Operand),
+		ASM:    NewASM(),
+		Locals: make(map[string]Operand),
 	}
 }
 
+// Compile the given AST node and return the compiler object.
+// The result register will be left in Result.
+// If a compile error occurs, it is found in Error.
 func (c *Compiler) Visit(node ast.ASTNode) *Compiler {
 	node.Accept(c)
 	return c
@@ -41,39 +43,33 @@ func (c *Compiler) GetCode() ([]byte, error) {
 		return nil, c.Error
 	}
 
-	c.Assembler.Print(c.Result)
-	c.Assembler.Return()
+	c.ASM.Print(c.Result)
+	c.ASM.Return()
 
-	return c.Assembler.GetCode(), nil
+	return c.ASM.GetCode(), nil
 }
 
 func (c *Compiler) tempVar() Operand {
-	return Var(c.Assembler.GenLabel())
+	return Var(c.ASM.GenLabel())
 }
 
 func (c *Compiler) loadConstant(v Value) {
 	c.Result = c.tempVar()
-	c.Assembler.LoadK(c.Result, &Constant{v})
+	c.ASM.LoadK(c.Result, &Constant{v})
 }
 
 func (c *Compiler) returnError(err error) {
 	c.Error = err
-	c.Assembler.Return()
-}
-
-func (c *Compiler) visitAssign(node *ast.BinaryExpressionNode) {
-	c.setLocal(
-		node.Left.(*ast.IdentifierNode).Name,
-		c.Visit(node.Right).Result,
-	)
+	c.ASM.Return()
 }
 
 func (c *Compiler) setLocal(name string, reg Operand) {
 	c.Locals[name] = reg
 }
 
-func (c *Compiler) getLocal(name string) Operand {
-	return c.Locals[name]
+func (c *Compiler) getLocal(name string) (Operand, bool) {
+	v, exists := c.Locals[name]
+	return v, exists
 }
 
 func (c *Compiler) VisitNil(node *ast.NilNode) {
@@ -99,7 +95,11 @@ func (c *Compiler) VisitSymbol(node *ast.SymbolNode) {
 }
 
 func (c *Compiler) VisitIdentifier(node *ast.IdentifierNode) {
-	c.Result = c.getLocal(node.Name)
+	var exists bool
+	c.Result, exists = c.getLocal(node.Name)
+	if !exists {
+		c.Error = NameError(node.Name)
+	}
 }
 
 func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
@@ -112,7 +112,11 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 	if node.Op == ast.OP_ASS {
-		c.visitAssign(node)
+		compilePattern(
+			c,
+			node.Left,
+			c.Visit(node.Right).Result,
+		)
 		return
 	}
 
@@ -121,29 +125,31 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 		b = c.Visit(node.Right).Result
 	)
 
+	if c.Error != nil {
+		return
+	}
+
 	c.Result = c.tempVar()
 
 	switch node.Op {
 	case ast.OP_ADD:
-		c.Assembler.Add(c.Result, a, b)
+		c.ASM.Add(c.Result, a, b)
 	case ast.OP_MIN:
-		c.Assembler.Sub(c.Result, a, b)
+		c.ASM.Sub(c.Result, a, b)
 	case ast.OP_MUL:
-		c.Assembler.Mul(c.Result, a, b)
+		c.ASM.Mul(c.Result, a, b)
 	case ast.OP_DIV:
-		c.Assembler.Div(c.Result, a, b)
+		c.ASM.Div(c.Result, a, b)
 	case ast.OP_EQL:
-		c.Assembler.Eq(c.Result, a, b)
+		c.ASM.Eq(c.Result, a, b)
 	case ast.OP_LT:
-		c.Assembler.Lt(c.Result, a, b)
+		c.ASM.Lt(c.Result, a, b)
 	case ast.OP_GT:
-		c.Assembler.Lt(c.Result, b, a)
+		c.ASM.Lt(c.Result, b, a)
 	case ast.OP_LTE:
-		c.Assembler.Lte(c.Result, a, b)
+		c.ASM.Lte(c.Result, a, b)
 	case ast.OP_GTE:
-		c.Assembler.Lte(c.Result, b, a)
-	default:
-		panic(fmt.Sprintf("Unhandled binary operator: 0x%x", node.Op))
+		c.ASM.Lte(c.Result, b, a)
 	}
 }
 

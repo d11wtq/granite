@@ -3,6 +3,7 @@ package vm
 const (
 	OP_RETURN = iota
 	OP_ERR
+	OP_ASSERT
 	OP_JMP
 	OP_JMPIF
 	OP_MOVE

@@ -8,6 +8,7 @@ all: parser bin
 clean:
 	rm -f bin/$(EXE)
 	rm -f parser/$(EXE).go
+	rm -rf pkg
 
 parser: parser/$(EXE).go
 

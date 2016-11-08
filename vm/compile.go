@@ -175,6 +175,25 @@ func (c *Compiler) VisitKeyAccess(node *ast.KeyAccessNode) {
 }
 
 func (c *Compiler) VisitIfThenElse(node *ast.IfThenElseNode) {
+	var (
+		a    = c.Visit(node.Expression).Result
+		r    = c.tempVar()
+		then = c.ASM.GenLabel()
+		done = c.ASM.GenLabel()
+	)
+
+	if c.Error != nil {
+		return
+	}
+
+	c.ASM.JmpIf(a, Jmp(then))
+	c.ASM.Move(r, c.Visit(node.Else).Result)
+	c.ASM.Jmp(Jmp(done))
+	c.ASM.SetLabel(then)
+	c.ASM.Move(r, c.Visit(node.Then).Result)
+	c.ASM.SetLabel(done)
+
+	c.Result = r
 }
 
 func (c *Compiler) VisitCaseExpression(node *ast.CaseExpressionNode) {

@@ -52,12 +52,12 @@ func (p *patternCompiler) VisitSymbol(node *ast.SymbolNode) {
 }
 
 func (p *patternCompiler) VisitIdentifier(node *ast.IdentifierNode) {
-	if v, exists := p.compiler.getLocal(node.Name); exists {
+	if v, exists := p.compiler.Symbols.Get(node.Name); exists {
 		p.assertMatch(v)
 		return
 	}
 
-	p.compiler.setLocal(node.Name, p.value)
+	p.compiler.Symbols.Set(node.Name, p.value)
 }
 
 func (p *patternCompiler) VisitExpressionList(node *ast.ExpressionList) {

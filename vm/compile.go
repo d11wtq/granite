@@ -15,8 +15,8 @@ type Compiler struct {
 	ASM *ASM
 	// Location of the result
 	Result Operand
-	// Map of local vars to registers
-	Locals map[string]Operand
+	// Table of local vars to registers
+	Symbols *SymbolTable
 	// Compile error
 	Error error
 }
@@ -24,8 +24,8 @@ type Compiler struct {
 // Create a new bytecode compiler.
 func NewCompiler() *Compiler {
 	return &Compiler{
-		ASM:    NewASM(),
-		Locals: make(map[string]Operand),
+		ASM:     NewASM(),
+		Symbols: NewSymbolTable(),
 	}
 }
 
@@ -63,15 +63,6 @@ func (c *Compiler) returnError(err error) {
 	c.ASM.Return()
 }
 
-func (c *Compiler) setLocal(name string, reg Operand) {
-	c.Locals[name] = reg
-}
-
-func (c *Compiler) getLocal(name string) (Operand, bool) {
-	v, exists := c.Locals[name]
-	return v, exists
-}
-
 func (c *Compiler) VisitNil(node *ast.NilNode) {
 	c.loadConstant(Nil)
 }
@@ -96,7 +87,7 @@ func (c *Compiler) VisitSymbol(node *ast.SymbolNode) {
 
 func (c *Compiler) VisitIdentifier(node *ast.IdentifierNode) {
 	var exists bool
-	c.Result, exists = c.getLocal(node.Name)
+	c.Result, exists = c.Symbols.Get(node.Name)
 	if !exists {
 		c.Error = NameError(node.Name)
 	}
@@ -175,6 +166,9 @@ func (c *Compiler) VisitKeyAccess(node *ast.KeyAccessNode) {
 }
 
 func (c *Compiler) VisitIfThenElse(node *ast.IfThenElseNode) {
+	c.Symbols.BeginScope()
+	defer c.Symbols.EndScope()
+
 	var (
 		a    = c.Visit(node.Expression).Result
 		r    = c.tempVar()

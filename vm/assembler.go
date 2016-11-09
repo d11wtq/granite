@@ -30,8 +30,6 @@ type Instruction interface {
 	// Resolve the operands in this instruction to compute its final value.
 	// The arguments are the assember and the IP of this instruction.
 	Resolve(*ASM, uint64) uint32
-	// If the target operand is a Var, return it
-	DefinedVar() Var
 	// Return the operands that are Vars
 	ActiveVars() []Var
 }
@@ -85,20 +83,16 @@ func (o *AxBxCx) Resolve(a *ASM, i uint64) uint32 {
 	)
 }
 
-func (o *AxBxCx) DefinedVar() Var {
-	if v, ok := o.a.(Var); ok == true {
-		return v
-	}
-
-	return Var("")
-}
-
 func (o *AxBxCx) ActiveVars() []Var {
+	a, aok := o.a.(Var)
 	b, bok := o.b.(Var)
 	c, cok := o.c.(Var)
 
-	if bok || cok {
-		v := make([]Var, 0, 2)
+	if aok || bok || cok {
+		v := make([]Var, 0, 3)
+		if aok {
+			v = append(v, a)
+		}
 		if bok {
 			v = append(v, b)
 		}
@@ -125,19 +119,19 @@ func (o *AxBx) Resolve(a *ASM, i uint64) uint32 {
 	)
 }
 
-func (o *AxBx) DefinedVar() Var {
-	if v, ok := o.a.(Var); ok == true {
-		return v
-	}
-
-	return Var("")
-}
-
 func (o *AxBx) ActiveVars() []Var {
+	a, aok := o.a.(Var)
 	b, bok := o.b.(Var)
 
-	if bok {
-		return []Var{b}
+	if aok || bok {
+		v := make([]Var, 0, 2)
+		if aok {
+			v = append(v, a)
+		}
+		if bok {
+			v = append(v, b)
+		}
+		return v
 	}
 
 	return []Var(nil)
@@ -154,10 +148,6 @@ func (o *Ax) Resolve(a *ASM, i uint64) uint32 {
 		o.op,
 		o.a.Resolve(a, i),
 	)
-}
-
-func (o *Ax) DefinedVar() Var {
-	return Var("")
 }
 
 func (o *Ax) ActiveVars() []Var {
@@ -378,21 +368,25 @@ func (asm *ASM) allocateLocals() {
 	var (
 		liveIntervals = make([]*interval, 0, 256)
 		active        = make([]*interval, 0, 256)
-		localMap      = make(map[Var]int)
+		seenVars      = make(map[Var]int)
 		pool          = NewRegisterPool(256)
 	)
 
+	// assign live intervals
 	for k, i := range asm.Instructions {
-		if x := i.DefinedVar(); x != Var("") {
-			localMap[x] = len(liveIntervals)
-			liveIntervals = append(liveIntervals, &interval{k, k, 0})
-		}
-
 		for _, x := range i.ActiveVars() {
-			liveIntervals[localMap[x]].end = k
+			idx, exists := seenVars[x]
+
+			if exists {
+				liveIntervals[idx].end = k
+			} else {
+				seenVars[x] = len(liveIntervals)
+				liveIntervals = append(liveIntervals, &interval{k, k, 0})
+			}
 		}
 	}
 
+	// allocate registers
 	for _, i := range liveIntervals {
 		for _, j := range active {
 			if j.end >= i.beg {
@@ -408,7 +402,8 @@ func (asm *ASM) allocateLocals() {
 		sort.Sort(byEnd(active))
 	}
 
-	for x, k := range localMap {
+	// associate with local vars
+	for x, k := range seenVars {
 		asm.Locals[x] = liveIntervals[k].register
 	}
 }

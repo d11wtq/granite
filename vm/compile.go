@@ -111,6 +111,16 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 		return
 	}
 
+	if node.Op == ast.OP_AND || node.Op == ast.OP_OR {
+		compileShortCircuit(
+			c,
+			node.Op == ast.OP_AND,
+			c.Visit(node.Left).Result,
+			node.Right,
+		)
+		return
+	}
+
 	var (
 		a = c.Visit(node.Left).Result
 		b = c.Visit(node.Right).Result

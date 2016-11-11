@@ -366,10 +366,11 @@ func (asm *ASM) allocateLocals() {
 	// http://web.cs.ucla.edu/~palsberg/course/cs132/linearscan.pdf
 
 	var (
-		liveIntervals = make([]*interval, 0, 256)
-		active        = make([]*interval, 0, 256)
+		numRegisters  = uint32(256)
+		liveIntervals = make([]*interval, 0, numRegisters)
+		active        = make([]*interval, 0, numRegisters)
 		seenVars      = make(map[Var]int)
-		pool          = NewRegisterPool(256)
+		pool          = NewRegisterPool(numRegisters)
 	)
 
 	// assign live intervals

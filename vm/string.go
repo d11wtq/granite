@@ -15,7 +15,12 @@ func (a String) String() string {
 }
 
 func (a String) Add(b Value) Value {
-	return Nil
+	switch t := b.(type) {
+	case String:
+		return a + t
+	default:
+		return Nil
+	}
 }
 
 func (a String) Sub(b Value) Value {
@@ -23,7 +28,17 @@ func (a String) Sub(b Value) Value {
 }
 
 func (a String) Mul(b Value) Value {
-	return Nil
+	switch t := b.(type) {
+	case Integer:
+		var r String
+		for t > 0 {
+			r += a
+			t--
+		}
+		return r
+	default:
+		return Nil
+	}
 }
 
 func (a String) Div(b Value) Value {

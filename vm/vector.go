@@ -27,28 +27,17 @@ func (a *Vector) String() string {
 		return "[]"
 	}
 
-	elems := make([]string, a.Len())
-	for i := uint64(0); i < a.Len(); i++ {
-		elems[i] = a.Get(Integer(i)).String()
+	var (
+		elems = make([]string, a.cast().Count())
+		v     Value
+	)
+
+	for i := uint32(0); i < a.cast().Count(); i++ {
+		v, _ = a.Get(Integer(i))
+		elems[i] = v.String()
 	}
 
 	return fmt.Sprintf("[ %s ]", strings.Join(elems, ", "))
-}
-
-func (*Vector) Add(Value) Value {
-	return Nil
-}
-
-func (*Vector) Sub(Value) Value {
-	return Nil
-}
-
-func (*Vector) Mul(Value) Value {
-	return Nil
-}
-
-func (*Vector) Div(Value) Value {
-	return Nil
 }
 
 func (*Vector) Eq(b Value) bool {
@@ -63,23 +52,39 @@ func (*Vector) Lte(Value) bool {
 	return true
 }
 
-func (a *Vector) Len() uint64 {
-	return uint64(a.cast().Count())
+func (a *Vector) Add(b Value) (Value, error) {
+	return nil, NewOpError("+", a, b)
 }
 
-func (a *Vector) Append(b Value) Value {
-	return (*Vector)(a.cast().Append(b))
+func (a *Vector) Sub(b Value) (Value, error) {
+	return nil, NewOpError("-", a, b)
 }
 
-func (a *Vector) Get(b Value) Value {
+func (a *Vector) Mul(b Value) (Value, error) {
+	return nil, NewOpError("*", a, b)
+}
+
+func (a *Vector) Div(b Value) (Value, error) {
+	return nil, NewOpError("/", a, b)
+}
+
+func (a *Vector) Len() (Value, error) {
+	return Integer(a.cast().Count()), nil
+}
+
+func (a *Vector) Append(b Value) (Value, error) {
+	return (*Vector)(a.cast().Append(b)), nil
+}
+
+func (a *Vector) Get(b Value) (Value, error) {
 	switch t := b.(type) {
 	case Integer:
 		v, err := a.cast().Get(uint32(t))
 		if err != nil {
-			return Nil
+			return Nil, nil // FIXME: What type of error to return
 		}
-		return v.(Value)
+		return v.(Value), nil
 	default:
-		return Nil
+		return Nil, nil // FIXME: What type of error to return
 	}
 }

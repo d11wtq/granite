@@ -20,24 +20,24 @@ type Value interface {
 	Type() uint8
 	// The string representation of the value.
 	String() string
-	// Implementation for the ADD opcode.
-	Add(Value) Value
-	// Implementation for the SUB opcode.
-	Sub(Value) Value
-	// Implementation for the MUL opcode.
-	Mul(Value) Value
-	// Implementation for the DIV opcode.
-	Div(Value) Value
 	// Implementation for the EQ opcode.
 	Eq(Value) bool
 	// Implementation for the LT opcode.
 	Lt(Value) bool
 	// Implementation for the LTE opcode.
 	Lte(Value) bool
+	// Implementation for the ADD opcode.
+	Add(Value) (Value, error)
+	// Implementation for the SUB opcode.
+	Sub(Value) (Value, error)
+	// Implementation for the MUL opcode.
+	Mul(Value) (Value, error)
+	// Implementation for the DIV opcode.
+	Div(Value) (Value, error)
 	// Implementation for the LEN opcode.
-	Len() uint64
+	Len() (Value, error)
 	// Implementation for the APPEND opcode.
-	Append(Value) Value
+	Append(Value) (Value, error)
 	// Implementation for the GET opcode.
-	Get(Value) Value
+	Get(Value) (Value, error)
 }

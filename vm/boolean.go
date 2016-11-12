@@ -14,22 +14,6 @@ func (a Boolean) String() string {
 	return "false"
 }
 
-func (a Boolean) Add(b Value) Value {
-	return nil
-}
-
-func (a Boolean) Sub(b Value) Value {
-	return nil
-}
-
-func (a Boolean) Mul(b Value) Value {
-	return nil
-}
-
-func (a Boolean) Div(b Value) Value {
-	return nil
-}
-
 func (a Boolean) Eq(b Value) bool {
 	return (a == b)
 }
@@ -50,14 +34,30 @@ func (a Boolean) Lte(b Value) bool {
 	return a.Type() < b.Type()
 }
 
-func (Boolean) Len() uint64 {
-	return 0
+func (a Boolean) Add(b Value) (Value, error) {
+	return nil, NewOpError("+", a, b)
 }
 
-func (Boolean) Append(Value) Value {
-	return Nil
+func (a Boolean) Sub(b Value) (Value, error) {
+	return nil, NewOpError("-", a, b)
 }
 
-func (Boolean) Get(Value) Value {
-	return Nil
+func (a Boolean) Mul(b Value) (Value, error) {
+	return nil, NewOpError("*", a, b)
+}
+
+func (a Boolean) Div(b Value) (Value, error) {
+	return nil, NewOpError("/", a, b)
+}
+
+func (a Boolean) Len() (Value, error) {
+	return nil, NewOpError("len", a)
+}
+
+func (a Boolean) Append(b Value) (Value, error) {
+	return nil, NewOpError("append", a, b)
+}
+
+func (a Boolean) Get(b Value) (Value, error) {
+	return nil, NewOpError("get", a, b)
 }

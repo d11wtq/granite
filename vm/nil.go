@@ -1,7 +1,7 @@
 package vm
 
-type NilType struct {
-}
+// The singular nil value
+type NilType struct{}
 
 var Nil = (*NilType)(nil)
 
@@ -11,22 +11,6 @@ func (*NilType) Type() uint8 {
 
 func (*NilType) String() string {
 	return "nil"
-}
-
-func (*NilType) Add(Value) Value {
-	return Nil
-}
-
-func (*NilType) Sub(Value) Value {
-	return Nil
-}
-
-func (*NilType) Mul(Value) Value {
-	return Nil
-}
-
-func (*NilType) Div(Value) Value {
-	return Nil
 }
 
 func (*NilType) Eq(b Value) bool {
@@ -41,14 +25,30 @@ func (*NilType) Lte(Value) bool {
 	return true
 }
 
-func (*NilType) Len() uint64 {
-	return 0
+func (*NilType) Add(Value) (Value, error) {
+	return Nil, nil
 }
 
-func (*NilType) Append(Value) Value {
-	return Nil
+func (*NilType) Sub(Value) (Value, error) {
+	return Nil, nil
 }
 
-func (*NilType) Get(Value) Value {
-	return Nil
+func (*NilType) Mul(Value) (Value, error) {
+	return Nil, nil
+}
+
+func (*NilType) Div(Value) (Value, error) {
+	return Nil, nil
+}
+
+func (*NilType) Len() (Value, error) {
+	return Nil, nil
+}
+
+func (*NilType) Append(Value) (Value, error) {
+	return Nil, nil
+}
+
+func (*NilType) Get(Value) (Value, error) {
+	return Nil, nil
 }

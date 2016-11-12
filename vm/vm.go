@@ -107,6 +107,7 @@ func (vm *VM) loop() {
 		ax   uint32
 		bx   uint32
 		cx   uint8
+		e    error
 	)
 
 Loop:
@@ -123,8 +124,7 @@ Loop:
 		case OP_ASSERT:
 			decodeAxBx(inst, &ax, &bx)
 			if !vm.Registers[ax].Eq(vm.Registers[bx]) {
-				fmt.Fprintln(os.Stderr, &BadMatch{vm.Registers[bx]})
-				return
+				e = &BadMatch{vm.Registers[bx]}
 			}
 		case OP_JMP:
 			decodeAx(inst, &ax)
@@ -149,16 +149,16 @@ Loop:
 			vm.Registers[ax] = Boolean(vm.Registers[bx].Type() == cx)
 		case OP_ADD:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Add(vm.Registers[cx])
+			vm.Registers[ax], e = vm.Registers[bx].Add(vm.Registers[cx])
 		case OP_SUB:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Sub(vm.Registers[cx])
+			vm.Registers[ax], e = vm.Registers[bx].Sub(vm.Registers[cx])
 		case OP_MUL:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Mul(vm.Registers[cx])
+			vm.Registers[ax], e = vm.Registers[bx].Mul(vm.Registers[cx])
 		case OP_DIV:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Div(vm.Registers[cx])
+			vm.Registers[ax], e = vm.Registers[bx].Div(vm.Registers[cx])
 		case OP_EQ:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			vm.Registers[ax] = Boolean(vm.Registers[bx].Eq(vm.Registers[cx]))
@@ -170,19 +170,25 @@ Loop:
 			vm.Registers[ax] = Boolean(vm.Registers[bx].Lte(vm.Registers[cx]))
 		case OP_LEN:
 			decodeAxBx(inst, &ax, &bx)
-			vm.Registers[ax] = Integer(vm.Registers[bx].Len())
+			vm.Registers[ax], e = vm.Registers[bx].Len()
 		case OP_APPEND:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Append(vm.Registers[cx])
+			vm.Registers[ax], e = vm.Registers[bx].Append(vm.Registers[cx])
 		case OP_GET:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
-			vm.Registers[ax] = vm.Registers[bx].Get(vm.Registers[cx])
+			vm.Registers[ax], e = vm.Registers[bx].Get(vm.Registers[cx])
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println(vm.Registers[ax])
 		default:
 			panic(fmt.Sprintf("Unhandled opcode: 0x%x", (inst>>26)&0x3F))
 		}
+
+		if e != nil {
+			fmt.Fprintln(os.Stderr, e)
+			return
+		}
+
 		vm.IP++
 	}
 

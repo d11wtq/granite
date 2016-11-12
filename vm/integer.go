@@ -14,42 +14,6 @@ func (a Integer) String() string {
 	return fmt.Sprintf("%d", a)
 }
 
-func (a Integer) Add(b Value) Value {
-	switch t := b.(type) {
-	case Integer:
-		return a + t
-	default:
-		return Nil
-	}
-}
-
-func (a Integer) Sub(b Value) Value {
-	switch t := b.(type) {
-	case Integer:
-		return a - t
-	default:
-		return Nil
-	}
-}
-
-func (a Integer) Mul(b Value) Value {
-	switch t := b.(type) {
-	case Integer:
-		return a * t
-	default:
-		return Nil
-	}
-}
-
-func (a Integer) Div(b Value) Value {
-	switch t := b.(type) {
-	case Integer:
-		return a / t
-	default:
-		return Nil
-	}
-}
-
 func (a Integer) Eq(b Value) bool {
 	return (a == b)
 }
@@ -70,14 +34,50 @@ func (a Integer) Lte(b Value) bool {
 	return a.Type() < b.Type()
 }
 
-func (Integer) Len() uint64 {
-	return 0
+func (a Integer) Add(b Value) (Value, error) {
+	switch t := b.(type) {
+	case Integer:
+		return a + t, nil
+	default:
+		return nil, NewOpError("+", a, b)
+	}
 }
 
-func (Integer) Append(Value) Value {
-	return Nil
+func (a Integer) Sub(b Value) (Value, error) {
+	switch t := b.(type) {
+	case Integer:
+		return a - t, nil
+	default:
+		return nil, NewOpError("-", a, b)
+	}
 }
 
-func (Integer) Get(Value) Value {
-	return Nil
+func (a Integer) Mul(b Value) (Value, error) {
+	switch t := b.(type) {
+	case Integer:
+		return a * t, nil
+	default:
+		return nil, NewOpError("*", a, b)
+	}
+}
+
+func (a Integer) Div(b Value) (Value, error) {
+	switch t := b.(type) {
+	case Integer:
+		return a / t, nil
+	default:
+		return nil, NewOpError("/", a, b)
+	}
+}
+
+func (a Integer) Len() (Value, error) {
+	return nil, NewOpError("len", a)
+}
+
+func (a Integer) Append(b Value) (Value, error) {
+	return nil, NewOpError("append", a, b)
+}
+
+func (a Integer) Get(b Value) (Value, error) {
+	return nil, NewOpError("get", a, b)
 }

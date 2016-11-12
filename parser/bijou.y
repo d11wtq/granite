@@ -109,7 +109,7 @@ func Parse(source io.RuneScanner, filename string) (ast.ASTNode, error) {
 %type	<node> vector_literal
 %type	<node> map_literal
 %type	<node> record_literal
-%type	<node> function_application
+%type	<node> function_call
 %type	<node> key_access
 %type	<node> if_expression
 %type	<node> if_guard
@@ -166,7 +166,7 @@ applicable_expression: /* Expressions that can be invoked as functions */
 |	vector_literal
 |	map_literal
 |	record_literal
-|	function_application
+|	function_call
 |	key_access
 |	'(' expression ')' { $$ = $2 }
 
@@ -374,9 +374,9 @@ record_literal: /* { Name, a => b } */
  * Function calls.
  */
 
-function_application: /* example(1, 2) */
+function_call: /* example(1, 2) */
 	applicable_expression '(' application_arguments ')' {
-		$$ = ast.NewFunctionApplication($1, $3)
+		$$ = ast.NewCall($1, $3)
 	}
 
 application_arguments: /* a, b, c */

@@ -120,8 +120,8 @@ func (d *Dumper) VisitPair(node *PairNode) {
 	d.render("pair of", node.Key, node.Value)
 }
 
-func (d *Dumper) VisitFunctionApplication(node *FunctionApplicationNode) {
-	d.render("function application", node.Target, node.Arguments)
+func (d *Dumper) VisitCall(node *CallNode) {
+	d.render("function call", node.Target, node.Arguments)
 }
 
 func (d *Dumper) VisitKeyAccess(node *KeyAccessNode) {

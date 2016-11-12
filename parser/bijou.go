@@ -1091,7 +1091,7 @@ Bijoudefault:
 		BijouDollar = BijouS[Bijoupt-4 : Bijoupt+1]
 		//line bijou.y:378
 		{
-			BijouVAL.node = ast.NewFunctionApplication(BijouDollar[1].node, BijouDollar[3].node)
+			BijouVAL.node = ast.NewCall(BijouDollar[1].node, BijouDollar[3].node)
 		}
 	case 89:
 		BijouDollar = BijouS[Bijoupt-0 : Bijoupt+1]

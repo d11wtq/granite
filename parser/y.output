@@ -37,7 +37,7 @@ state 0
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -95,7 +95,7 @@ state 3
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -190,7 +190,7 @@ state 11
 
 state 12
 	expression:  applicable_expression.    (12)
-	function_application:  applicable_expression.'(' application_arguments ')' 
+	function_call:  applicable_expression.'(' application_arguments ')' 
 	key_access:  applicable_expression.'.' ident 
 	key_access:  applicable_expression.'[' expression ']' 
 
@@ -264,7 +264,7 @@ state 18
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -306,7 +306,7 @@ state 19
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -348,7 +348,7 @@ state 20
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -390,7 +390,7 @@ state 21
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -435,7 +435,7 @@ state 27
 
 
 state 28
-	applicable_expression:  function_application.    (24)
+	applicable_expression:  function_call.    (24)
 
 	.  reduce 24 (src line 169)
 
@@ -510,7 +510,7 @@ state 30
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -553,7 +553,7 @@ state 31
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -606,7 +606,7 @@ state 33
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -648,7 +648,7 @@ state 34
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -690,7 +690,7 @@ state 35
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -744,7 +744,7 @@ state 37
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -795,7 +795,7 @@ state 38
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -837,7 +837,7 @@ state 39
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -934,7 +934,7 @@ state 43
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -976,7 +976,7 @@ state 44
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1018,7 +1018,7 @@ state 45
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1060,7 +1060,7 @@ state 46
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1102,7 +1102,7 @@ state 47
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1144,7 +1144,7 @@ state 48
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1186,7 +1186,7 @@ state 49
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1228,7 +1228,7 @@ state 50
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1270,7 +1270,7 @@ state 51
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1312,7 +1312,7 @@ state 52
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1354,7 +1354,7 @@ state 53
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1396,7 +1396,7 @@ state 54
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1438,7 +1438,7 @@ state 55
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1480,7 +1480,7 @@ state 56
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1522,7 +1522,7 @@ state 57
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1564,7 +1564,7 @@ state 58
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1606,7 +1606,7 @@ state 59
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1648,7 +1648,7 @@ state 60
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1657,7 +1657,7 @@ state 60
 	throw_expression  goto 17
 
 state 61
-	function_application:  applicable_expression '('.application_arguments ')' 
+	function_call:  applicable_expression '('.application_arguments ')' 
 	application_arguments: .    (89)
 
 	IDENT  shift 36
@@ -1696,7 +1696,7 @@ state 61
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1747,7 +1747,7 @@ state 63
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1930,7 +1930,7 @@ state 69
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -1974,7 +1974,7 @@ state 70
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -2053,7 +2053,7 @@ state 76
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -2118,7 +2118,7 @@ state 80
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -2197,7 +2197,7 @@ state 86
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -2248,7 +2248,7 @@ state 88
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -2333,7 +2333,7 @@ state 90
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -2515,7 +2515,7 @@ state 98
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3241,7 +3241,7 @@ state 124
 
 
 state 125
-	function_application:  applicable_expression '(' application_arguments.')' 
+	function_call:  applicable_expression '(' application_arguments.')' 
 
 	')'  shift 167
 	.  error
@@ -3497,7 +3497,7 @@ state 150
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3581,7 +3581,7 @@ state 152
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3636,7 +3636,7 @@ state 154
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3729,7 +3729,7 @@ state 157
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3777,7 +3777,7 @@ state 158
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3877,7 +3877,7 @@ state 162
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3919,7 +3919,7 @@ state 163
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3972,7 +3972,7 @@ state 165
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32
@@ -3987,7 +3987,7 @@ state 166
 
 
 state 167
-	function_application:  applicable_expression '(' application_arguments ')'.    (87)
+	function_call:  applicable_expression '(' application_arguments ')'.    (87)
 
 	.  reduce 87 (src line 377)
 
@@ -4128,7 +4128,7 @@ state 178
 	vector_literal  goto 25
 	map_literal  goto 26
 	record_literal  goto 27
-	function_application  goto 28
+	function_call  goto 28
 	key_access  goto 29
 	if_expression  goto 14
 	if_guard  goto 32

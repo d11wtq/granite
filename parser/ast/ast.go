@@ -21,7 +21,7 @@ type ASTVisitor interface {
 	VisitMap(node *MapNode)
 	VisitRecord(node *RecordNode)
 	VisitPair(node *PairNode)
-	VisitFunctionApplication(node *FunctionApplicationNode)
+	VisitCall(node *CallNode)
 	VisitKeyAccess(node *KeyAccessNode)
 	VisitIfThenElse(node *IfThenElseNode)
 	VisitCaseExpression(node *CaseExpressionNode)

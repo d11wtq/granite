@@ -169,7 +169,7 @@ func (c *Compiler) VisitRecord(node *ast.RecordNode) {
 func (c *Compiler) VisitPair(node *ast.PairNode) {
 }
 
-func (c *Compiler) VisitFunctionApplication(node *ast.FunctionApplicationNode) {
+func (c *Compiler) VisitCall(node *ast.CallNode) {
 }
 
 func (c *Compiler) VisitKeyAccess(node *ast.KeyAccessNode) {

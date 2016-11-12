@@ -88,7 +88,7 @@ func (p *patternCompiler) VisitPair(node *ast.PairNode) {
 	p.assertMatch(p.compiler.Visit(node).Result)
 }
 
-func (p *patternCompiler) VisitFunctionApplication(node *ast.FunctionApplicationNode) {
+func (p *patternCompiler) VisitCall(node *ast.CallNode) {
 	p.assertMatch(p.compiler.Visit(node).Result)
 }
 

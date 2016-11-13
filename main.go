@@ -47,5 +47,11 @@ func main() {
 		vm.Dump(vmx)
 	}
 
-	vmx.Run()
+	value, err := vmx.Run(vm.NewFrame(0))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+
+	fmt.Println(value)
 }

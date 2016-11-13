@@ -76,3 +76,7 @@ func (a String) Append(b Value) (Value, error) {
 func (a String) Get(b Value) (Value, error) {
 	return nil, NewOpError("get", a, b)
 }
+
+func (a String) Call(b Value) (Value, error) {
+	return nil, NewOpError("call", a, b)
+}

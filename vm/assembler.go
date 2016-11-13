@@ -241,15 +241,10 @@ func (asm *ASM) SetLabel(label string) {
 	asm.Labels[label] = uint64(len(asm.Instructions))
 }
 
-// Return from the current procedure.
-// In the main procedure (global scope), this causes the VM to exit.
-func (asm *ASM) Return() {
-	asm.addInstruction(&Ax{OP_RETURN, Reg(0)})
-}
-
-// Halt the VM with an error of errType and arg.
-func (asm *ASM) Err(errType, arg Operand) {
-	asm.addInstruction(&AxBx{OP_ERR, errType, arg})
+// Return a given register value from the current procedure.
+// This causes the current stack frame to exit.
+func (asm *ASM) Return(reg Operand) {
+	asm.addInstruction(&Ax{OP_RETURN, reg})
 }
 
 // Assert two registers are equal, halt with a BadMatch if not
@@ -330,6 +325,16 @@ func (asm *ASM) Append(dst, a, b Operand) {
 // Get the element looked up by the value in register k from the map or vector in register a.
 func (asm *ASM) Get(dst, a, k Operand) {
 	asm.addInstruction(&AxBxCx{OP_GET, dst, a, k})
+}
+
+// Create a closure of size length in register dst.
+func (asm *ASM) Fn(dst, length Operand) {
+	asm.addInstruction(&AxBx{OP_FN, dst, length})
+}
+
+// Call a function and return its result.
+func (asm *ASM) Call(dst, target Operand) {
+	asm.addInstruction(&AxBx{OP_CALL, dst, target})
 }
 
 // Dump the value in register a to stdout (debug use).

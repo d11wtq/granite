@@ -52,3 +52,7 @@ func (*NilType) Append(Value) (Value, error) {
 func (*NilType) Get(Value) (Value, error) {
 	return Nil, nil
 }
+
+func (*NilType) Call(Value) (Value, error) {
+	return Nil, nil
+}

@@ -11,6 +11,8 @@ const (
 	V_STR
 	// Vectors
 	V_VEC
+	// Closures
+	V_FUN
 )
 
 // Runtime values, stored in VM registers.
@@ -40,4 +42,6 @@ type Value interface {
 	Append(Value) (Value, error)
 	// Implementation for the GET opcode.
 	Get(Value) (Value, error)
+	// Implementation for the CALL opcode.
+	Call(Value) (Value, error)
 }

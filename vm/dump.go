@@ -30,10 +30,8 @@ func Dump(vm *VM) {
 	for _, inst := range vm.Instructions {
 		switch (inst >> 26) & 0x3F {
 		case OP_RETURN:
-			fmt.Println("  RETURN")
-		case OP_ERR:
-			decodeAxBx(inst, &ax, &bx)
-			fmt.Println("  ERR", ax, bx)
+			decodeAx(inst, &ax)
+			fmt.Println("  RETURN", ax)
 		case OP_ASSERT:
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  ASSERT", ax, bx)
@@ -82,6 +80,12 @@ func Dump(vm *VM) {
 		case OP_GET:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			fmt.Println("  GET", ax, bx, cx)
+		case OP_FN:
+			decodeAxBx(inst, &ax, &bx)
+			fmt.Println("  FN", ax, bx)
+		case OP_CALL:
+			decodeAxBx(inst, &ax, &bx)
+			fmt.Println("  CALL", ax, bx)
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println("  PRINT", ax)

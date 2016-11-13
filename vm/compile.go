@@ -43,8 +43,7 @@ func (c *Compiler) GetCode() ([]byte, error) {
 		return nil, c.Error
 	}
 
-	c.ASM.Print(c.Result)
-	c.ASM.Return()
+	c.ASM.Return(c.Result)
 
 	return c.ASM.GetCode(), nil
 }
@@ -56,11 +55,6 @@ func (c *Compiler) tempVar() Operand {
 func (c *Compiler) loadConstant(v Value) {
 	c.Result = c.tempVar()
 	c.ASM.LoadK(c.Result, &Constant{v})
-}
-
-func (c *Compiler) returnError(err error) {
-	c.Error = err
-	c.ASM.Return()
 }
 
 func (c *Compiler) VisitNil(node *ast.NilNode) {
@@ -103,6 +97,32 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 	if node.Op == ast.OP_ASS {
+		if call, ok := node.Left.(*ast.CallNode); ok {
+			if name, ok := call.Target.(*ast.IdentifierNode); ok {
+				if _, exists := c.Symbols.Get(name.Name); !exists {
+					// FIXME: Function cases must be collated.
+					// FIXME: Parameters are not handled
+					// FIXME: Closed value access
+					// FIXME: Hoisting
+					var (
+						r    = c.tempVar()
+						done = c.ASM.GenLabel()
+					)
+
+					c.Symbols.Set(name.Name, r)
+					c.ASM.Fn(r, Jmp(done))
+					c.Symbols.BeginScope()
+					c.Visit(node.Right)
+					c.ASM.SetLabel(done)
+					c.ASM.Return(c.Result)
+					c.Symbols.EndScope()
+
+					c.Result = r
+					return
+				}
+			}
+		}
+
 		compilePattern(
 			c,
 			node.Left,
@@ -170,6 +190,12 @@ func (c *Compiler) VisitPair(node *ast.PairNode) {
 }
 
 func (c *Compiler) VisitCall(node *ast.CallNode) {
+	var (
+		f = c.Visit(node.Target).Result
+	)
+
+	c.Result = c.tempVar()
+	c.ASM.Call(c.Result, f)
 }
 
 func (c *Compiler) VisitKeyAccess(node *ast.KeyAccessNode) {

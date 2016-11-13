@@ -61,3 +61,7 @@ func (a Boolean) Append(b Value) (Value, error) {
 func (a Boolean) Get(b Value) (Value, error) {
 	return nil, NewOpError("get", a, b)
 }
+
+func (a Boolean) Call(b Value) (Value, error) {
+	return nil, NewOpError("call", a, b)
+}

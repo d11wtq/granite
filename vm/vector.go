@@ -88,3 +88,7 @@ func (a *Vector) Get(b Value) (Value, error) {
 		return Nil, nil // FIXME: What type of error to return
 	}
 }
+
+func (a *Vector) Call(b Value) (Value, error) {
+	return nil, NewOpError("call", a, b)
+}

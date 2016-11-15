@@ -1,8 +1,14 @@
 package vm
 
+import (
+	"fmt"
+)
+
+// Function closures.
 type Closure struct {
-	VM *VM
-	IP int64
+	VM  *VM
+	Env [256]Value
+	IP  int64
 }
 
 func NewClosure(vm *VM, ip int64) *Closure {
@@ -16,8 +22,8 @@ func (*Closure) Type() uint8 {
 	return V_FUN
 }
 
-func (*Closure) String() string {
-	return "#<func>"
+func (a *Closure) String() string {
+	return fmt.Sprintf("<Closure %p:%08x>", a.VM, a.IP)
 }
 
 func (a *Closure) Eq(b Value) bool {
@@ -61,5 +67,7 @@ func (*Closure) Get(Value) (Value, error) {
 }
 
 func (a *Closure) Call(Value) (Value, error) {
-	return a.VM.Run(NewFrame(a.IP))
+	f := NewFrame(a.IP)
+	copy(f.Registers[:], a.Env[:])
+	return a.VM.Run(f)
 }

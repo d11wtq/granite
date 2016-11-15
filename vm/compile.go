@@ -102,7 +102,6 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 				if _, exists := c.Symbols.Get(name.Name); !exists {
 					// FIXME: Function cases must be collated.
 					// FIXME: Parameters are not handled
-					// FIXME: Closed value access
 					// FIXME: Hoisting
 					var (
 						r    = c.tempVar()

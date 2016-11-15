@@ -43,11 +43,12 @@ func NewVM(code []byte) *VM {
 // Execute the loaded bytecode.
 func (vm *VM) Run(f *Frame) (Value, error) {
 	var (
-		inst uint32
-		ax   uint32
-		bx   uint32
-		cx   uint8
-		err  error
+		inst    uint32
+		ax      uint32
+		bx      uint32
+		cx      uint8
+		closure *Closure
+		err     error
 	)
 
 Loop:
@@ -116,7 +117,9 @@ Loop:
 			f.Registers[ax], err = f.Registers[bx].Get(f.Registers[cx])
 		case OP_FN:
 			decodeAxBx(inst, &ax, &bx)
-			f.Registers[ax] = NewClosure(vm, f.IP+1)
+			closure = NewClosure(vm, f.IP+1)
+			f.Registers[ax] = closure
+			copy(closure.Env[:], f.Registers[:])
 			f.IP += int64(bx)
 		case OP_CALL:
 			decodeAxBx(inst, &ax, &bx)

@@ -40,8 +40,41 @@ func (a *Vector) String() string {
 	return fmt.Sprintf("[ %s ]", strings.Join(elems, ", "))
 }
 
-func (*Vector) Eq(b Value) bool {
-	return (b == Nil)
+func (a *Vector) Eq(b Value) bool {
+	var (
+		av, bv Value
+		idx    Integer
+	)
+
+	if b.Type() != V_VEC {
+		return false
+	}
+
+	av, _ = a.Len()
+	bv, _ = b.Len()
+
+	if av != bv {
+		return false
+	}
+
+	idx = av.(Integer) - 1
+
+	for {
+		av, _ = a.Get(idx)
+		bv, _ = b.Get(idx)
+
+		if !av.Eq(bv) {
+			return false
+		}
+
+		if idx == 0 {
+			break
+		}
+
+		idx--
+	}
+
+	return true
 }
 
 func (*Vector) Lt(b Value) bool {

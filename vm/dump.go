@@ -35,8 +35,8 @@ func Dump(vm *VM) {
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  ERR", ax, bx)
 		case OP_ASSERT:
-			decodeAxBx(inst, &ax, &bx)
-			fmt.Println("  ASSERT", ax, bx)
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("  ASSERT", ax, bx, cx)
 		case OP_JMP:
 			decodeAx(inst, &ax)
 			fmt.Println("  JMP", sAx(ax))
@@ -52,6 +52,9 @@ func Dump(vm *VM) {
 		case OP_ISA:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			fmt.Println("  ISA", ax, bx, cx)
+		case OP_TYPE:
+			decodeAxBx(inst, &ax, &bx)
+			fmt.Println("  TYPE", ax, bx)
 		case OP_ADD:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			fmt.Println("  ADD", ax, bx, cx)

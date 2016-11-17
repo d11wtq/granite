@@ -107,7 +107,22 @@ func (p *patternCompiler) VisitVector(node *ast.VectorNode) {
 	// PUSH 2
 	// JMP checkElement
 
-	p.assertMatch(p.compiler.Visit(node).Result)
+	var (
+		r = p.compiler.tempVar()
+	)
+
+	p.compiler.ASM.Type(r, p.value)
+	p.compiler.ASM.Assert(
+		p.compiler.loadConstant(Integer(V_VEC)).Result,
+		r,
+		p.value,
+	)
+	p.compiler.ASM.Len(r, p.value)
+	p.compiler.ASM.Assert(
+		p.compiler.loadConstant(Integer(len(node.Elements))).Result,
+		r,
+		p.value,
+	)
 }
 
 func (p *patternCompiler) VisitMap(node *ast.MapNode) {
@@ -151,5 +166,5 @@ func (p *patternCompiler) assertMatch(v Operand) {
 		return
 	}
 
-	p.compiler.ASM.Assert(p.value, v)
+	p.compiler.ASM.Assert(p.value, v, p.value)
 }

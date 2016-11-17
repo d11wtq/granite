@@ -122,9 +122,9 @@ Loop:
 			vm.handleError(ax, bx)
 			return
 		case OP_ASSERT:
-			decodeAxBx(inst, &ax, &bx)
+			decodeAxBxCx(inst, &ax, &bx, &cx)
 			if !vm.Registers[ax].Eq(vm.Registers[bx]) {
-				e = &BadMatch{vm.Registers[bx]}
+				e = &BadMatch{vm.Registers[cx]}
 			}
 		case OP_JMP:
 			decodeAx(inst, &ax)
@@ -147,6 +147,9 @@ Loop:
 		case OP_ISA:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			vm.Registers[ax] = Boolean(vm.Registers[bx].Type() == cx)
+		case OP_TYPE:
+			decodeAxBx(inst, &ax, &bx)
+			vm.Registers[ax] = Integer(vm.Registers[bx].Type())
 		case OP_ADD:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			vm.Registers[ax], e = vm.Registers[bx].Add(vm.Registers[cx])

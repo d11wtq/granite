@@ -28,19 +28,19 @@ func Dump(vm *VM) {
 
 	fmt.Println("; instructions")
 	for _, inst := range vm.Instructions {
-		switch (inst >> 26) & 0x3F {
+		switch inst & 0x3F {
 		case OP_RETURN:
 			decodeAx(inst, &ax)
 			fmt.Println("  RETURN", ax)
 		case OP_ASSERT:
-			decodeAxBx(inst, &ax, &bx)
-			fmt.Println("  ASSERT", ax, bx)
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("  ASSERT", ax, bx, cx)
 		case OP_JMP:
 			decodeAx(inst, &ax)
-			fmt.Println("  JMP", ax)
+			fmt.Println("  JMP", sAx(ax))
 		case OP_JMPIF:
 			decodeAxBx(inst, &ax, &bx)
-			fmt.Println("  JMPIF", ax, bx)
+			fmt.Println("  JMPIF", ax, sBx(bx))
 		case OP_MOVE:
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  MOVE", ax, bx)
@@ -50,6 +50,9 @@ func Dump(vm *VM) {
 		case OP_ISA:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			fmt.Println("  ISA", ax, bx, cx)
+		case OP_TYPE:
+			decodeAxBx(inst, &ax, &bx)
+			fmt.Println("  TYPE", ax, bx)
 		case OP_ADD:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			fmt.Println("  ADD", ax, bx, cx)
@@ -89,6 +92,8 @@ func Dump(vm *VM) {
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println("  PRINT", ax)
+		default:
+			fmt.Println(fmt.Sprintf("  ? (0x%02x)", inst))
 		}
 	}
 }

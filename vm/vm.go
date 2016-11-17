@@ -55,25 +55,25 @@ Loop:
 	for {
 		inst = vm.Instructions[f.IP]
 
-		switch (inst >> 26) & 0x3F {
+		switch inst & 0x3F {
 		case OP_RETURN:
 			decodeAx(inst, &ax)
 			return f.Registers[ax], nil
 		case OP_ASSERT:
-			decodeAxBx(inst, &ax, &bx)
+			decodeAxBxCx(inst, &ax, &bx, &cx)
 			if !f.Registers[ax].Eq(f.Registers[bx]) {
-				err = &BadMatch{f.Registers[bx]}
+				err = &BadMatch{f.Registers[cx]}
 			}
 		case OP_JMP:
 			decodeAx(inst, &ax)
-			f.IP += int64(ax)
+			f.IP += int64(sAx(ax))
 			continue Loop
 		case OP_JMPIF:
 			decodeAxBx(inst, &ax, &bx)
 			switch f.Registers[ax] {
 			case Nil, Boolean(false):
 			default:
-				f.IP += int64(bx)
+				f.IP += int64(sBx(bx))
 				continue Loop
 			}
 		case OP_MOVE:
@@ -85,6 +85,9 @@ Loop:
 		case OP_ISA:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			f.Registers[ax] = Boolean(f.Registers[bx].Type() == cx)
+		case OP_TYPE:
+			decodeAxBx(inst, &ax, &bx)
+			f.Registers[ax] = Integer(f.Registers[bx].Type())
 		case OP_ADD:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			f.Registers[ax], err = f.Registers[bx].Add(f.Registers[cx])
@@ -128,7 +131,7 @@ Loop:
 			decodeAx(inst, &ax)
 			fmt.Println(f.Registers[ax])
 		default:
-			panic(fmt.Sprintf("Unhandled opcode: 0x%x", (inst>>26)&0x3F))
+			panic(fmt.Sprintf("Unhandled opcode: 0x%x", inst&0x3F))
 		}
 
 		if err != nil {

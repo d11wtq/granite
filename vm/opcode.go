@@ -8,6 +8,7 @@ const (
 	OP_MOVE
 	OP_LOADK
 	OP_ISA
+	OP_TYPE
 	OP_ADD
 	OP_SUB
 	OP_MUL

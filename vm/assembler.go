@@ -49,7 +49,8 @@ func (o Jmp) Resolve(a *ASM, i uint64) uint32 {
 	if ok == false {
 		panic(fmt.Sprintf("invalid JMP label `%s'", string(o)))
 	}
-	return uint32(j - i) // could wrap, and that's fine
+	// 2's complement handled by sAx() and sBx() in bytecode.go.
+	return uint32(j - i)
 }
 
 // Reference to a variable, resolved to a register at code gen time.
@@ -247,9 +248,11 @@ func (asm *ASM) Return(reg Operand) {
 	asm.addInstruction(&Ax{OP_RETURN, reg})
 }
 
-// Assert two registers are equal, halt with a BadMatch if not
-func (asm *ASM) Assert(a, b Operand) {
-	asm.addInstruction(&AxBx{OP_ASSERT, a, b})
+// Assert two registers are equal, halt with a BadMatch if not.
+// A and b are the registers to compare.
+// Rhs is the actual right-hand-side of a pattern match being performed.
+func (asm *ASM) Assert(a, b, rhs Operand) {
+	asm.addInstruction(&AxBxCx{OP_ASSERT, a, b, rhs})
 }
 
 // Adjust the instruction pointer by offset.
@@ -275,6 +278,11 @@ func (asm *ASM) LoadK(dst, idx Operand) {
 // Test if the value in register test is of type t, placing the result in dst.
 func (asm *ASM) IsA(dst, test, t Operand) {
 	asm.addInstruction(&AxBxCx{OP_ISA, dst, test, t})
+}
+
+// Get the type of the given register into dst.
+func (asm *ASM) Type(dst, reg Operand) {
+	asm.addInstruction(&AxBx{OP_TYPE, dst, reg})
 }
 
 // Add the values in registers a and b, putting the result in dst.

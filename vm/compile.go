@@ -19,6 +19,8 @@ type Compiler struct {
 	Symbols *SymbolTable
 	// Compile error
 	Error error
+	// The compiler will try hard to only load constants once
+	Cache map[Value]Operand
 }
 
 // Create a new bytecode compiler.
@@ -26,6 +28,7 @@ func NewCompiler() *Compiler {
 	return &Compiler{
 		ASM:     NewASM(),
 		Symbols: NewSymbolTable(),
+		Cache:   make(map[Value]Operand),
 	}
 }
 
@@ -52,9 +55,16 @@ func (c *Compiler) tempVar() Operand {
 	return Var(c.ASM.GenLabel())
 }
 
-func (c *Compiler) loadConstant(v Value) {
+func (c *Compiler) loadConstant(v Value) *Compiler {
+	if r, exists := c.Cache[v]; exists {
+		c.Result = r
+		return c
+	}
+
 	c.Result = c.tempVar()
 	c.ASM.LoadK(c.Result, &Constant{v})
+	c.Cache[v] = c.Result
+	return c
 }
 
 func (c *Compiler) VisitNil(node *ast.NilNode) {
@@ -177,6 +187,24 @@ func (c *Compiler) VisitUnaryExpression(node *ast.UnaryExpressionNode) {
 }
 
 func (c *Compiler) VisitVector(node *ast.VectorNode) {
+	if len(node.Elements) == 0 {
+		c.loadConstant(EmptyVector)
+		return
+	}
+
+	var r = c.tempVar()
+
+	c.ASM.LoadK(r, &Constant{EmptyVector})
+
+	for _, e := range node.Elements {
+		c.ASM.Append(r, r, c.Visit(e).Result)
+
+		if c.Error != nil {
+			return
+		}
+	}
+
+	c.Result = r
 }
 
 func (c *Compiler) VisitMap(node *ast.MapNode) {

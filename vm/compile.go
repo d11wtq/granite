@@ -46,7 +46,12 @@ func (c *Compiler) GetCode() ([]byte, error) {
 		return nil, c.Error
 	}
 
+	loop := c.ASM.GenLabel()
+	c.ASM.SetLabel(loop)
 	c.ASM.Print(c.Result)
+	c.ASM.Print(c.Result)
+	c.ASM.Print(c.Result)
+	c.ASM.JmpIf(Reg(0), Jmp(loop))
 	c.ASM.Return()
 
 	return c.ASM.GetCode(), nil

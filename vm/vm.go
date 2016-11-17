@@ -114,7 +114,7 @@ Loop:
 	for {
 		inst = vm.Instructions[vm.IP]
 
-		switch (inst >> 26) & 0x3F {
+		switch inst & 0x3F {
 		case OP_RETURN:
 			return
 		case OP_ERR:
@@ -128,14 +128,14 @@ Loop:
 			}
 		case OP_JMP:
 			decodeAx(inst, &ax)
-			vm.IP += int64(ax)
+			vm.IP += int64(sAx(ax))
 			continue Loop
 		case OP_JMPIF:
 			decodeAxBx(inst, &ax, &bx)
 			switch vm.Registers[ax] {
 			case Nil, Boolean(false):
 			default:
-				vm.IP += int64(bx)
+				vm.IP += int64(sBx(bx))
 				continue Loop
 			}
 		case OP_MOVE:
@@ -181,7 +181,7 @@ Loop:
 			decodeAx(inst, &ax)
 			fmt.Println(vm.Registers[ax])
 		default:
-			panic(fmt.Sprintf("Unhandled opcode: 0x%x", (inst>>26)&0x3F))
+			panic(fmt.Sprintf("Unhandled opcode: 0x%x", inst&0x3F))
 		}
 
 		if e != nil {

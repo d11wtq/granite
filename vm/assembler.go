@@ -49,7 +49,8 @@ func (o Jmp) Resolve(a *ASM, i uint64) uint32 {
 	if ok == false {
 		panic(fmt.Sprintf("invalid JMP label `%s'", string(o)))
 	}
-	return uint32(j - i) // could wrap, and that's fine
+	// 2's complement handled by sAx() and sBx() in bytecode.go.
+	return uint32(j - i)
 }
 
 // Reference to a variable, resolved to a register at code gen time.

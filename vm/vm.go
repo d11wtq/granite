@@ -9,27 +9,6 @@ import (
 // Endianness of the virtual machine.
 var ByteOrder = binary.LittleEndian
 
-type Frame struct {
-	Registers [256]Value
-	// Stack of POP addresses to return to
-	LinkRegister []int64
-	IP           int64
-}
-
-// Create a new stack frame.
-func NewFrame(ip int64) *Frame {
-	return &Frame{IP: ip, LinkRegister: make([]int64, 0, 16)}
-}
-
-func (f *Frame) pushLink(offset int64) {
-	f.LinkRegister = append(f.LinkRegister, f.IP+offset)
-}
-
-func (f *Frame) popLink() {
-	f.IP = f.LinkRegister[len(f.LinkRegister)-1]
-	f.LinkRegister = f.LinkRegister[:len(f.LinkRegister)-1]
-}
-
 // An instance of the virtual machine.
 type VM struct {
 	// Number of bytes loaded

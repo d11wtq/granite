@@ -265,6 +265,16 @@ func (asm *ASM) JmpIf(test, offset Operand) {
 	asm.addInstruction(&AxBx{OP_JMPIF, test, offset})
 }
 
+// Push a jmp location onto the link register.
+func (asm *ASM) Push(offset Operand) {
+	asm.addInstruction(&Ax{OP_PUSH, offset})
+}
+
+// Pop a jmp location off the link register and jmp to it.
+func (asm *ASM) Pop() {
+	asm.addInstruction(&Ax{OP_POP, Reg(0)})
+}
+
 // Copy the value in register a to register b.
 func (asm *ASM) Move(a, b Operand) {
 	asm.addInstruction(&AxBx{OP_MOVE, a, b})

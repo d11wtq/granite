@@ -11,12 +11,23 @@ var ByteOrder = binary.LittleEndian
 
 type Frame struct {
 	Registers [256]Value
-	IP        int64
+	// Stack of POP addresses to return to
+	LinkRegister []int64
+	IP           int64
 }
 
 // Create a new stack frame.
 func NewFrame(ip int64) *Frame {
-	return &Frame{IP: ip}
+	return &Frame{IP: ip, LinkRegister: make([]int64, 0, 16)}
+}
+
+func (f *Frame) pushLink(offset int64) {
+	f.LinkRegister = append(f.LinkRegister, f.IP+offset)
+}
+
+func (f *Frame) popLink() {
+	f.IP = f.LinkRegister[len(f.LinkRegister)-1]
+	f.LinkRegister = f.LinkRegister[:len(f.LinkRegister)-1]
 }
 
 // An instance of the virtual machine.
@@ -76,6 +87,12 @@ Loop:
 				f.IP += int64(sBx(bx))
 				continue Loop
 			}
+		case OP_PUSH:
+			decodeAx(inst, &ax)
+			f.pushLink(int64(sAx(ax)))
+		case OP_POP:
+			f.popLink()
+			continue Loop
 		case OP_MOVE:
 			decodeAxBx(inst, &ax, &bx)
 			f.Registers[ax] = f.Registers[bx]

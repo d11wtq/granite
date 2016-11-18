@@ -41,6 +41,11 @@ func Dump(vm *VM) {
 		case OP_JMPIF:
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  JMPIF", ax, sBx(bx))
+		case OP_PUSH:
+			decodeAx(inst, &ax)
+			fmt.Println("  PUSH", sAx(ax))
+		case OP_POP:
+			fmt.Println("  POP")
 		case OP_MOVE:
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  MOVE", ax, bx)

@@ -20,6 +20,8 @@ type VM struct {
 	Registers []Value
 	// Executable code instructions
 	Instructions []uint32
+	// Stack of POP addresses to return to
+	LinkRegister []int64
 	// Current instruction pointer
 	IP int64
 }
@@ -31,6 +33,7 @@ func NewVM(code []byte) *VM {
 		Constants:    make([]Value, 0, 256),
 		Registers:    make([]Value, 256),
 		Instructions: make([]uint32, 0, 1024),
+		LinkRegister: make([]int64, 0, 32),
 		IP:           0,
 	}
 	vm.load(bytes.NewBuffer(code))
@@ -101,6 +104,14 @@ func (vm *VM) handleError(reason uint32, bx uint32) {
 	}
 }
 
+func (vm *VM) pushLink(offset int64) {
+	vm.LinkRegister = append(vm.LinkRegister, vm.IP+offset)
+}
+
+func (vm *VM) popLink() {
+	vm.IP, vm.LinkRegister = vm.LinkRegister[len(vm.LinkRegister)-1], vm.LinkRegister[:len(vm.LinkRegister)-1]
+}
+
 func (vm *VM) loop() {
 	var (
 		inst uint32
@@ -138,6 +149,12 @@ Loop:
 				vm.IP += int64(sBx(bx))
 				continue Loop
 			}
+		case OP_PUSH:
+			decodeAx(inst, &ax)
+			vm.pushLink(int64(sAx(ax)))
+		case OP_POP:
+			vm.popLink()
+			continue Loop
 		case OP_MOVE:
 			decodeAxBx(inst, &ax, &bx)
 			vm.Registers[ax] = vm.Registers[bx]

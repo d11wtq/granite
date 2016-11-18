@@ -109,7 +109,8 @@ func (vm *VM) pushLink(offset int64) {
 }
 
 func (vm *VM) popLink() {
-	vm.IP, vm.LinkRegister = vm.LinkRegister[len(vm.LinkRegister)-1], vm.LinkRegister[:len(vm.LinkRegister)-1]
+	vm.IP = vm.LinkRegister[len(vm.LinkRegister)-1]
+	vm.LinkRegister = vm.LinkRegister[:len(vm.LinkRegister)-1]
 }
 
 func (vm *VM) loop() {

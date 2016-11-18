@@ -73,56 +73,40 @@ func (p *patternCompiler) VisitUnaryExpression(node *ast.UnaryExpressionNode) {
 }
 
 func (p *patternCompiler) VisitVector(node *ast.VectorNode) {
-	// Proposed bytecode for:
-	//    [1, 2, a, 3] = [1, 2, 3, 4]
-	//
-	// New opcodes needed:
-	//   1. PUSH jmpTarget
-	//      - Calculate `IP' by adding `jmpTarget' to `IP' and push to stack
-	//   2. POP
-	//      - Pop the last `IP' from the stack and jump to it
-	//
-	// JMP startMatch
-	// .checkElement
-	//     GET r, x, i
-	//     ASSERT r, s
-	//     ADD i, i, 1
-	//     POP
-	// .startMatch
-	// TYPE r, x
-	// ASSERT r, V_VEC
-	// LEN r, x
-	// LOADK i, len(node.Elements)
-	// ASSERT r, i
-	// LOADK i, 0
-	// LOADK s, node.Elements[0] // c.Visit(node.Elements[0]).Result
-	// PUSH 2
-	// JMP checkElement
-	// LOADK s, node.Elements[1] // c.Visit(node.Elements[1]).Result
-	// PUSH 2
-	// JMP checkElement
-	// GET r2, x, i
-	// ADD i, i, 1
-	// LOADK s, node.Elements[3] // c.Visit(node.Elements[3]).Result
-	// PUSH 2
-	// JMP checkElement
-
 	var (
-		r = p.compiler.tempVar()
+		tmp = p.compiler.tempVar()
+		idx = p.compiler.tempVar()
 	)
 
-	p.compiler.ASM.Type(r, p.value)
+	p.compiler.ASM.Type(tmp, p.value)
 	p.compiler.ASM.Assert(
 		p.compiler.loadConstant(Integer(V_VEC)).Result,
-		r,
+		tmp,
 		p.value,
 	)
-	p.compiler.ASM.Len(r, p.value)
+	p.compiler.ASM.Len(tmp, p.value)
 	p.compiler.ASM.Assert(
 		p.compiler.loadConstant(Integer(len(node.Elements))).Result,
-		r,
+		tmp,
 		p.value,
 	)
+
+	for j, elem := range node.Elements {
+		tmp = p.compiler.tempVar()
+
+		if j == 0 {
+			p.compiler.ASM.LoadK(idx, &Constant{Integer(0)})
+		} else {
+			p.compiler.ASM.Add(
+				idx,
+				idx,
+				p.compiler.loadConstant(Integer(1)).Result,
+			)
+		}
+
+		p.compiler.ASM.Get(tmp, p.value, idx)
+		compilePattern(p.compiler, elem, tmp)
+	}
 }
 
 func (p *patternCompiler) VisitMap(node *ast.MapNode) {

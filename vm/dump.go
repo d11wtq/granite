@@ -92,8 +92,8 @@ func Dump(vm *VM) {
 			decodeAxBx(inst, &ax, &bx)
 			fmt.Println("  FN", ax, bx)
 		case OP_CALL:
-			decodeAxBx(inst, &ax, &bx)
-			fmt.Println("  CALL", ax, bx)
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			fmt.Println("  CALL", ax, bx, cx)
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println("  PRINT", ax)

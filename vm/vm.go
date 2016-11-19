@@ -9,6 +9,9 @@ import (
 // Endianness of the virtual machine.
 var ByteOrder = binary.LittleEndian
 
+// Arguments are always placed in the top register.
+const ArgumentRegister = Reg(255)
+
 // An instance of the virtual machine.
 type VM struct {
 	// Number of bytes loaded
@@ -33,12 +36,12 @@ func NewVM(code []byte) *VM {
 // Execute the loaded bytecode.
 func (vm *VM) Run(f *Frame) (Value, error) {
 	var (
-		inst    uint32
-		ax      uint32
-		bx      uint32
-		cx      uint8
-		closure *Closure
-		err     error
+		inst uint32
+		ax   uint32
+		bx   uint32
+		cx   uint8
+		fn   *Function
+		err  error
 	)
 
 Loop:
@@ -68,9 +71,9 @@ Loop:
 			}
 		case OP_PUSH:
 			decodeAx(inst, &ax)
-			f.pushLink(int64(sAx(ax)))
+			f.PushLink(int64(sAx(ax)))
 		case OP_POP:
-			f.popLink()
+			f.PopLink()
 			continue Loop
 		case OP_MOVE:
 			decodeAxBx(inst, &ax, &bx)
@@ -116,13 +119,13 @@ Loop:
 			f.Registers[ax], err = f.Registers[bx].Get(f.Registers[cx])
 		case OP_FN:
 			decodeAxBx(inst, &ax, &bx)
-			closure = NewClosure(vm, f.IP+1)
-			f.Registers[ax] = closure
-			copy(closure.Env[:], f.Registers[:])
+			fn = NewFunction(vm, f.IP+1)
+			f.Registers[ax] = fn
+			fn.Close(f.Registers)
 			f.IP += int64(bx)
 		case OP_CALL:
-			decodeAxBx(inst, &ax, &bx)
-			f.Registers[ax], err = f.Registers[bx].Call(Nil)
+			decodeAxBxCx(inst, &ax, &bx, &cx)
+			f.Registers[ax], err = f.Registers[bx].Call(f.Registers[cx])
 		case OP_PRINT:
 			decodeAx(inst, &ax)
 			fmt.Println(f.Registers[ax])

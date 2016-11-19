@@ -351,8 +351,8 @@ func (asm *ASM) Fn(dst, length Operand) {
 }
 
 // Call a function and return its result.
-func (asm *ASM) Call(dst, target Operand) {
-	asm.addInstruction(&AxBx{OP_CALL, dst, target})
+func (asm *ASM) Call(dst, target, args Operand) {
+	asm.addInstruction(&AxBxCx{OP_CALL, dst, target, args})
 }
 
 // Dump the value in register a to stdout (debug use).
@@ -389,7 +389,7 @@ func (asm *ASM) allocateLocals() {
 	// http://web.cs.ucla.edu/~palsberg/course/cs132/linearscan.pdf
 
 	var (
-		numRegisters  = uint32(256)
+		numRegisters  = uint32(255)
 		liveIntervals = make([]*interval, 0, numRegisters)
 		active        = make([]*interval, 0, numRegisters)
 		seenVars      = make(map[Var]int)

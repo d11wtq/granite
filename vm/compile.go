@@ -19,8 +19,6 @@ type Compiler struct {
 	Symbols *SymbolTable
 	// Compile error
 	Error error
-	// The compiler will try hard to only load constants once
-	Cache map[Value]Operand
 }
 
 // Create a new bytecode compiler.
@@ -28,7 +26,6 @@ func NewCompiler() *Compiler {
 	return &Compiler{
 		ASM:     NewASM(),
 		Symbols: NewSymbolTable(),
-		Cache:   make(map[Value]Operand),
 	}
 }
 
@@ -56,14 +53,14 @@ func (c *Compiler) tempVar() Operand {
 }
 
 func (c *Compiler) loadConstant(v Value) *Compiler {
-	if r, exists := c.Cache[v]; exists {
+	if r, exists := c.Symbols.GetConst(v); exists {
 		c.Result = r
 		return c
 	}
 
 	c.Result = c.tempVar()
 	c.ASM.LoadK(c.Result, &Constant{v})
-	c.Cache[v] = c.Result
+	c.Symbols.SetConst(v, c.Result)
 	return c
 }
 
@@ -109,18 +106,18 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 	if node.Op == ast.OP_ASS {
 		if call, ok := node.Left.(*ast.CallNode); ok {
 			if name, ok := call.Target.(*ast.IdentifierNode); ok {
-				if _, exists := c.Symbols.Get(name.Name); !exists {
+				if _, exists := c.Symbols.GetLocal(name.Name); !exists {
 					// FIXME: Function cases must be collated.
-					// FIXME: Parameters are not handled
 					// FIXME: Hoisting
 					var (
 						r    = c.tempVar()
 						done = c.ASM.GenLabel()
 					)
 
-					c.Symbols.Set(name.Name, r)
+					c.Symbols.SetLocal(name.Name, r)
 					c.ASM.Fn(r, Jmp(done))
 					c.Symbols.BeginScope()
+					compilePattern(c, call.Arguments, ArgumentRegister)
 					c.Visit(node.Right)
 					c.ASM.SetLabel(done)
 					c.ASM.Return(c.Result)
@@ -219,10 +216,11 @@ func (c *Compiler) VisitPair(node *ast.PairNode) {
 func (c *Compiler) VisitCall(node *ast.CallNode) {
 	var (
 		f = c.Visit(node.Target).Result
+		a = c.Visit(node.Arguments).Result
 	)
 
 	c.Result = c.tempVar()
-	c.ASM.Call(c.Result, f)
+	c.ASM.Call(c.Result, f, a)
 }
 
 func (c *Compiler) VisitKeyAccess(node *ast.KeyAccessNode) {

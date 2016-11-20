@@ -53,7 +53,6 @@ func (p *patternCompiler) VisitSymbol(node *ast.SymbolNode) {
 
 func (p *patternCompiler) VisitIdentifier(node *ast.IdentifierNode) {
 	if node.IsWilcard() {
-		// underscore names match anything, never stored
 		return
 	}
 
@@ -97,6 +96,10 @@ func (p *patternCompiler) VisitVector(node *ast.VectorNode) {
 	)
 
 	for j, elem := range node.Elements {
+		if p.compiler.Error != nil {
+			return
+		}
+
 		tmp = p.compiler.tempVar()
 
 		if j == 0 {

@@ -123,6 +123,7 @@ Loop:
 			f.Registers[ax] = fn
 			fn.Close(f.Registers)
 			f.IP += int64(bx)
+			continue Loop
 		case OP_CALL:
 			decodeAxBxCx(inst, &ax, &bx, &cx)
 			f.Registers[ax], err = f.Registers[bx].Call(f.Registers[cx])

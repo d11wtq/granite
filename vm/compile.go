@@ -104,29 +104,16 @@ func (c *Compiler) VisitExpressionList(node *ast.ExpressionList) {
 
 func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 	if node.Op == ast.OP_ASS {
+		// FIXME: This suggests grammar needs a production for function defs
 		if call, ok := node.Left.(*ast.CallNode); ok {
 			if name, ok := call.Target.(*ast.IdentifierNode); ok {
 				if _, exists := c.Symbols.GetLocal(name.Name); !exists {
-					// FIXME: Function cases must be collated.
-					// FIXME: Hoisting
-					var (
-						r    = c.tempVar()
-						done = c.ASM.GenLabel()
+					compileFunction(
+						c,
+						name,
+						call.Arguments,
+						node.Right,
 					)
-
-					if !name.IsWilcard() {
-						c.Symbols.SetLocal(name.Name, r)
-					}
-
-					c.ASM.Fn(r, Jmp(done))
-					c.Symbols.BeginScope()
-					compilePattern(c, call.Arguments, ArgumentRegister)
-					c.Visit(node.Right)
-					c.ASM.SetLabel(done)
-					c.ASM.Return(c.Result)
-					c.Symbols.EndScope()
-
-					c.Result = r
 					return
 				}
 			}
@@ -261,4 +248,28 @@ func (c *Compiler) VisitCatchExpression(node *ast.CatchExpressionNode) {
 }
 
 func (c *Compiler) VisitThrow(node *ast.ThrowNode) {
+}
+
+func compileFunction(c *Compiler, id *ast.IdentifierNode, params ast.ASTNode, body ast.ASTNode) {
+	var (
+		r           = c.tempVar()
+		endFunction = c.ASM.GenLabel()
+	)
+
+	if !id.IsWilcard() {
+		c.Symbols.SetLocal(id.Name, r)
+	}
+
+	c.ASM.Fn(r, Jmp(endFunction))
+	c.Symbols.BeginScope()
+
+	compilePattern(c, params, ArgumentRegister)
+
+	c.Visit(body)
+	c.ASM.Return(c.Result)
+
+	c.Symbols.EndScope()
+	c.ASM.SetLabel(endFunction)
+
+	c.Result = r
 }

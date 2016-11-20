@@ -114,7 +114,10 @@ func (c *Compiler) VisitBinaryExpression(node *ast.BinaryExpressionNode) {
 						done = c.ASM.GenLabel()
 					)
 
-					c.Symbols.SetLocal(name.Name, r)
+					if !name.IsWilcard() {
+						c.Symbols.SetLocal(name.Name, r)
+					}
+
 					c.ASM.Fn(r, Jmp(done))
 					c.Symbols.BeginScope()
 					compilePattern(c, call.Arguments, ArgumentRegister)

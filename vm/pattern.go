@@ -52,6 +52,11 @@ func (p *patternCompiler) VisitSymbol(node *ast.SymbolNode) {
 }
 
 func (p *patternCompiler) VisitIdentifier(node *ast.IdentifierNode) {
+	if node.IsWilcard() {
+		// underscore names match anything, never stored
+		return
+	}
+
 	if v, exists := p.compiler.Symbols.GetLocal(node.Name); exists {
 		p.assertMatch(v)
 		return

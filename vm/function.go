@@ -41,39 +41,49 @@ func (a *Function) Eq(b Value) bool {
 }
 
 func (a *Function) Lt(b Value) bool {
-	return false
+	switch b.(type) {
+	case *Function:
+		return false
+	default:
+		return a.Type() < b.Type()
+	}
 }
 
-func (*Function) Lte(Value) bool {
-	return false
+func (a *Function) Lte(b Value) bool {
+	switch b.(type) {
+	case *Function:
+		return false
+	default:
+		return a.Type() <= b.Type()
+	}
 }
 
-func (*Function) Add(Value) (Value, error) {
-	return Nil, nil
+func (a *Function) Add(b Value) (Value, error) {
+	return nil, NewOpError("+", a, b)
 }
 
-func (*Function) Sub(Value) (Value, error) {
-	return Nil, nil
+func (a *Function) Sub(b Value) (Value, error) {
+	return nil, NewOpError("-", a, b)
 }
 
-func (*Function) Mul(Value) (Value, error) {
-	return Nil, nil
+func (a *Function) Mul(b Value) (Value, error) {
+	return nil, NewOpError("*", a, b)
 }
 
-func (*Function) Div(Value) (Value, error) {
-	return Nil, nil
+func (a *Function) Div(b Value) (Value, error) {
+	return nil, NewOpError("/", a, b)
 }
 
-func (*Function) Len() (Value, error) {
-	return Nil, nil
+func (a *Function) Len() (Value, error) {
+	return nil, NewOpError("len", a)
 }
 
-func (*Function) Append(Value) (Value, error) {
-	return Nil, nil
+func (a *Function) Append(b Value) (Value, error) {
+	return nil, NewOpError("append", a, b)
 }
 
-func (*Function) Get(Value) (Value, error) {
-	return Nil, nil
+func (a *Function) Get(b Value) (Value, error) {
+	return nil, NewOpError("get", a, b)
 }
 
 func (a *Function) Call(args Value) (Value, error) {

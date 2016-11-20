@@ -13,11 +13,11 @@ import (
 // Parse source and return the AST, or nil on error.
 // Errors indicate the problem line and column in the source.
 func Parse(source io.RuneScanner, filename string) (ast.ASTNode, error) {
-	lexer := BijouNewLexer(source, filename)
+	lexer := GraniteNewLexer(source, filename)
 
-	BijouErrorVerbose = true
-	if BijouParse(lexer) > 0 {
-		return nil, &BijouParseError{lexer}
+	GraniteErrorVerbose = true
+	if GraniteParse(lexer) > 0 {
+		return nil, &GraniteParseError{lexer}
 	}
 
 	return lexer.Result(), nil
@@ -134,7 +134,7 @@ func Parse(source io.RuneScanner, filename string) (ast.ASTNode, error) {
 
 start: /* Initial rule */
 	program {
-		Bijoulex.(*BijouLex).SetResult($1)
+		Granitelex.(*GraniteLex).SetResult($1)
 	}
 
 program: /* Entire program (top) */

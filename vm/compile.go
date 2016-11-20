@@ -9,7 +9,7 @@ func Compile(prog ast.ASTNode) ([]byte, error) {
 	return NewCompiler().Visit(prog).GetCode()
 }
 
-// Bytecode compiler for Bijou code
+// Bytecode compiler for Granite code
 type Compiler struct {
 	// Bytecode assembler
 	ASM *ASM

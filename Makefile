@@ -1,7 +1,7 @@
 export GOPATH = $(PWD)
 export GOBIN  = $(PWD)/bin
 
-EXE = bijou
+EXE = granite
 
 all: parser bin
 

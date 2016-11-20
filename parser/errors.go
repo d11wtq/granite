@@ -5,12 +5,12 @@ import (
 )
 
 // Meaningful syntax error
-type BijouParseError struct {
+type GraniteParseError struct {
 	// The lexer at the time the error occurred
-	lexer *BijouLex
+	lexer *GraniteLex
 }
 
-func (e *BijouParseError) Error() string {
+func (e *GraniteParseError) Error() string {
 	return fmt.Sprintf(
 		"%s in %s line %d, column %d\n%s",
 		e.errorMessage(),
@@ -21,15 +21,15 @@ func (e *BijouParseError) Error() string {
 	)
 }
 
-func (e *BijouParseError) errorMessage() string {
+func (e *GraniteParseError) errorMessage() string {
 	return e.lexer.error
 }
 
-func (e *BijouParseError) currentFile() string {
+func (e *GraniteParseError) currentFile() string {
 	return e.lexer.filename
 }
 
-func (e *BijouParseError) currentLine() int {
+func (e *GraniteParseError) currentLine() int {
 	if e.lexer.columnNo == 0 && e.lexer.lineNo > 1 {
 		return e.lexer.lineNo - 1
 	}
@@ -37,7 +37,7 @@ func (e *BijouParseError) currentLine() int {
 	return e.lexer.lineNo
 }
 
-func (e *BijouParseError) currentColumn() int {
+func (e *GraniteParseError) currentColumn() int {
 	if e.lexer.columnNo == 0 {
 		return len(e.lexer.lineBuffer)
 	}
@@ -45,7 +45,7 @@ func (e *BijouParseError) currentColumn() int {
 	return e.lexer.columnNo
 }
 
-func (e *BijouParseError) locationMarker() string {
+func (e *GraniteParseError) locationMarker() string {
 	var before = e.lexer.lineBuffer
 	var after = make([]rune, 0)
 	var marker = make([]rune, 0, len(before))
